@@ -391,6 +391,51 @@ describe("runCook", () => {
     expect(result.reason).toBe("ranking_unavailable");
   });
 
+  it("returns cards when the ranking names only ids gate 2 never returned", async () => {
+    const { deps, calls } = harness({
+      rows: [ROW_A],
+      // The same fabrication as the case above, noticed a layer later: keepKnownIds
+      // collapses an all-invented ranking to `no_valid_ids`, so only a ranker that
+      // doesn't run it hands this over. Which layer noticed must not change the answer.
+      rankQueue: [ranking(["ghee-and-potato-bake", "Bright, herby and quick"])],
+    });
+
+    const result = await runCook({ kind: "query", query: "dinner" }, deps);
+
+    expect(result.kind).toBe("cards");
+    if (result.kind !== "cards") return;
+    expect(result.reason).toBe("ranking_unavailable");
+    // The rows cleared gates 1 and 2. A mislabelled shortlist is no reason to bin them.
+    expect(result.results.map((row) => row.id)).toEqual([ROW_A.id]);
+    expect(cookResponseSchema.parse(result)).toEqual(result);
+    // An invented id is not a gate 3 event — the rationale itself scanned clean.
+    expect(calls.violations).toEqual([]);
+  });
+
+  it("ranks the rows it recognises and drops only the invented ones", async () => {
+    const { deps } = harness({
+      rows: [ROW_A, ROW_B],
+      rankQueue: [
+        ranking(
+          ["butter-bean-stew", "A recipe gate 2 never returned"],
+          [ROW_B.id, "Uses the cauliflower"],
+          [ROW_A.id, "Also good"],
+        ),
+      ],
+    });
+
+    const result = await runCook({ kind: "query", query: "dinner" }, deps);
+
+    // A partial drop is still a shortlist: the surviving rows are real and ordered.
+    expect(result.kind).toBe("ranked");
+    if (result.kind !== "ranked") return;
+    expect(result.results.map((r) => r.recipe.id)).toEqual([ROW_B.id, ROW_A.id]);
+    expect(result.results.map((r) => r.rationale)).toEqual([
+      "Uses the cauliflower",
+      "Also good",
+    ]);
+  });
+
   it("sorts and caps unranked cards so the list is deterministic", async () => {
     const rows = [
       recipe("dddddddd-dddd-4ddd-8ddd-dddddddddddd", { minutes: null, title: "Nulls last" }),
