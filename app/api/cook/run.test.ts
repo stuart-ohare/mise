@@ -113,6 +113,7 @@ function harness(opts: {
 const ranking = (...entries: [string, string][]) => ({
   ok: true as const,
   ranking: entries.map(([id, rationale]) => ({ id, rationale })),
+  dropped: [],
 });
 
 describe("runCook", () => {
@@ -317,6 +318,30 @@ describe("runCook", () => {
     expect(result).toMatchObject({ kind: "cards", reason: "ranking_unavailable" });
   });
 
+  // @gate output
+  it("does not scan the ids call 3 dropped", async () => {
+    const { deps, calls } = harness({
+      extract: async () => ({ ok: true, constraints: constraints({ exclude: ["dairy"] }) }),
+      rows: [ROW_A],
+      rankQueue: [
+        {
+          ok: true,
+          ranking: [{ id: ROW_A.id, rationale: "Bright, herby and quick" }],
+          // An invented id shaped like a slug. It never renders — keepKnownIds already
+          // removed it — but scanning it would reject clean prose and write a violation
+          // whose matched_term appeared in no rationale.
+          dropped: ["ghee-and-potato-bake"],
+        },
+      ],
+    });
+
+    const result = await runCook({ kind: "query", query: "no dairy" }, deps);
+
+    expect(result).toMatchObject({ kind: "ranked", attempts: 1 });
+    expect(calls.rank).toHaveLength(1);
+    expect(calls.violations).toEqual([]);
+  });
+
   it("does not treat a recipe id as prose to scan", async () => {
     // "beef" is four hex characters, so a uuid segment can begin with it. scanProse
     // matches at a word start and treats "-" as a boundary, so scanning the ids would
@@ -354,7 +379,10 @@ describe("runCook", () => {
   });
 
   it("returns cards when call 3 invents every id", async () => {
-    const { deps } = harness({ rows: [ROW_A], rankQueue: [{ ok: false, reason: "no_valid_ids" }] });
+    const { deps } = harness({
+      rows: [ROW_A],
+      rankQueue: [{ ok: false, reason: "no_valid_ids", dropped: ["butter-bean-stew"] }],
+    });
 
     const result = await runCook({ kind: "query", query: "dinner" }, deps);
 
