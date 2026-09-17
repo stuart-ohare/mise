@@ -21,6 +21,7 @@ labels: status:spec
 ## Invariant / gates touched
 
 <!-- Gate 1 (resolution), 2 (query), 3 (output), or none — and why. Add the matching gate:* label.
-     A gate-labelled issue needs a test or eval fixture and a regenerated evals/latest.md to merge. -->
+     A gate-labelled issue needs a test or eval fixture declaring that gate to merge. A regenerated
+     evals/latest.md is required only when the diff touches a path pnpm eval reads. -->
 
 ## Out of scope

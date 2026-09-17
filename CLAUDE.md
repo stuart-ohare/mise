@@ -136,7 +136,9 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 - **Gate labels** — `gate:resolution`, `gate:query`, `gate:output` — are set at `/spec`.
   A gate-labelled issue doesn't pass `/verify` unless each labelled gate has an added or
   modified test or fixture that declares it (`// @gate query` in a Vitest file,
-  `"gates": ["query"]` in a JSON eval fixture), and `evals/latest.md` is regenerated.
+  `"gates": ["query"]` in a JSON eval fixture). A regenerated `evals/latest.md` is a
+  separate, path-based requirement — see §4.4 — so a gate label costs a test, never a
+  paid eval run.
 - **Git hooks** (`.githooks/`, installed by `pnpm i`) reject commits made on `main`, any
   push to `main`, and commit subjects over 72 chars or without `(#n)`. They're local and
   can be skipped by anyone with a shell. Branch protection is the guarantee (ADR 0003
@@ -177,8 +179,10 @@ A task is done when **all** of these are true:
 - [ ] `pnpm typecheck` passes with no `any` introduced and no `@ts-expect-error` added
 - [ ] `pnpm lint` passes
 - [ ] `pnpm test` passes
-- [ ] If the change touches extraction, ranking, or any gate: `pnpm eval` passes its
-      thresholds, and `evals/latest.md` is regenerated and committed
+- [ ] If the change touches a path `pnpm eval` reads — `evals/**`, `lib/ai/**`, or the
+      domain modules the scorers import — `pnpm eval` passes its thresholds, and
+      `evals/latest.md` is regenerated and committed. `scripts/workflow/eval-report.sh`
+      is the list, and it says which rule it applied
 - [ ] The issue's acceptance checklist is ticked, with evidence (output, screenshot, test name)
 - [ ] The README still describes what the code actually does
 
