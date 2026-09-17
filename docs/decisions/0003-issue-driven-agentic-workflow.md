@@ -70,8 +70,28 @@ merge    human, always
   An independent review found six bypasses (`git -c x commit`, `push -u origin main`,
   `checkout main && commit`, `commit -am`, …), which is why those rules moved into git
   hooks.
-- **Local hooks are not a guarantee.** Anyone with a shell can skip them. Branch
-  protection on `main` (#4) is the guarantee; the hooks make the right path the easy one.
+  A second review found more routes past the Claude hooks. The cheap ones are closed:
+  `chmod -x` on the git hooks, `.git/config` edits, and a second `-c core.hooksPath`.
+  These are accepted as known gaps:
+  - a quoted `"-n"`, and a fake `<<X` marker that hides later lines
+  - a heredoc body fed to `bash`
+  - `dd of=`, and copying into the `evals/` directory rather than the file
+  - `./` or `//` in paths passed to Edit/Write
+  - `package.json` edits that don't look like dependencies
+  - `pnpm-workspace.yaml` overrides
+  - A whole command is denied if any part of it contains `--no-verify` or a
+    protected path in a write-shaped position, even inside a quoted message.
+    Use a heredoc or `--body-file` for text like that.
+- **Local hooks are not a guarantee.** Anyone with a shell can skip them.
+  - `pnpm i --ignore-scripts` skips the install.
+  - A worktree made from a commit without `.githooks/` has no hooks.
+  - Local `main` can still move by fast-forward, cherry-pick or rebase. Only `pre-push`
+    stops those changes reaching origin.
+  - Branch protection on `main` (#4) is the guarantee; the hooks make the right path
+    the easy one.
+- **`verify.sh` checks that `evals/latest.md` changed, not that it passes.** Any test
+  file counts toward the fixture rule. Checking the eval report needs the eval runner
+  to exist first (follow-up issue).
 - **Some steps are enforced by instruction only:**
   - `/ship` checks that `verify.sh` passed for the commit, not that the reviewer ran.
   - The reviewer has Bash, so "read-only" is an instruction, not a tool restriction.

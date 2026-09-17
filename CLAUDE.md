@@ -130,11 +130,13 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 - **Gate labels** — `gate:resolution`, `gate:query`, `gate:output` — are set at `/spec`.
   A gate-labelled issue doesn't pass `/verify` without a changed test or fixture and a
   regenerated `evals/latest.md`.
-- **Git hooks** (`.githooks/`, installed by `pnpm i`) reject commits on `main`, pushes
-  to `main`, and commit subjects over 72 chars or without `(#n)`.
+- **Git hooks** (`.githooks/`, installed by `pnpm i`) reject commits made on `main`, any
+  push to `main`, and commit subjects over 72 chars or without `(#n)`. They're local and
+  can be skipped by anyone with a shell. Branch protection is the guarantee (ADR 0003
+  lists the known gaps).
 - **Claude Code hooks** (`.claude/hooks/`, need `jq`):
-  - They deny `--no-verify`, changes to `core.hooksPath`, and writes to
-    `evals/thresholds.ts` or the verified record.
+  - They deny `--no-verify`, changes to `core.hooksPath` or `.git/config`, `chmod` on
+    the git hooks, and writes to `evals/thresholds.ts` or the verified record.
   - They put dependency changes and edits to the guards to the human.
 - A hook rejection is a rule, not an obstacle. Fix what it rejected; don't route
   around it.

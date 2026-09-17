@@ -75,8 +75,10 @@ The model parses intent and writes prose. It never decides what exists.
 
 ## Running it
 
+Needs Node, pnpm, Docker, and [`jq`](https://jqlang.org) for the workflow guards.
+
 ```bash
-pnpm install
+pnpm install                   # also installs the git hooks (skipped by --ignore-scripts)
 cp .env.example .env.local     # add your ANTHROPIC_API_KEY
 docker compose up -d           # Postgres on :5432 (POSTGRES_PORT to change it)
 pnpm db:push                   # apply the Drizzle schema
