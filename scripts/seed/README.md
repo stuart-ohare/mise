@@ -23,7 +23,8 @@ nobody tags `clarified butter` and it is still dairy.
 
 Before anything is written, the file is parsed with its Zod schema and validated as a
 whole (`lib/domain/taxonomy.ts`): every parent exists, there are no cycles, and names and
-aliases are lowercase and unique across one shared namespace. A failure writes nothing.
+aliases are lowercase and unique across one shared namespace, and each allergen root
+carries exactly its own tag while any other root carries none. A failure writes nothing.
 
 Decisions worth knowing:
 
@@ -33,10 +34,11 @@ Decisions worth knowing:
   routinely contaminated with wheat.
 - **Shellfish includes molluscs** (mussels, clams, scallops, squid), not only crustaceans.
 - **An ingredient with two allergens carries the second tag itself.** The tree is
-  single-parent, so `soy sauce` sits under `soy` and is tagged `gluten`. A child never
-  repeats a tag it already inherits. Excluding an allergen therefore can't be a subtree
-  walk alone: `exclusionIds` in `lib/domain/ingredient-tree.ts` also removes every node
-  tagged with it, and gate 2's SQL has to match that function.
+  single-parent, so `soy sauce` and `miso` sit under `soy` and are tagged `gluten`: both
+  are commonly made with wheat or barley, and rice-only miso is over-excluded on purpose.
+  A child never repeats a tag it already inherits. Excluding an allergen therefore can't
+  be a subtree walk alone: `exclusionIds` in `lib/domain/ingredient-tree.ts` also removes
+  every node tagged with it, and gate 2's SQL has to match that function.
 - **Hand aliases include common plurals** (`eggs`, `prawns`). Gate 1 matches exactly, so
   a missing plural becomes a question to the user rather than a match.
 - **An existing alias is never re-pointed.** If an alias in the database already points

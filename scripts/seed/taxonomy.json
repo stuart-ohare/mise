@@ -44,7 +44,7 @@
     { "name": "tofu", "parent": "soy", "allergenTags": [], "aliases": ["beancurd"] },
     { "name": "soy sauce", "parent": "soy", "allergenTags": ["gluten"], "aliases": ["soya sauce"] },
     { "name": "edamame", "parent": "soy", "allergenTags": [], "aliases": [] },
-    { "name": "miso", "parent": "soy", "allergenTags": [], "aliases": [] },
+    { "name": "miso", "parent": "soy", "allergenTags": ["gluten"], "aliases": [] },
     { "name": "soy milk", "parent": "soy", "allergenTags": [], "aliases": [] }
   ]
 }

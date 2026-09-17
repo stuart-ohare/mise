@@ -53,11 +53,17 @@ export function validateTaxonomy(taxonomy: Taxonomy): TaxonomyValidation {
       continue;
     }
     byName.set(name, node);
-    const claimant = owner.get(name);
-    if (claimant !== undefined) {
-      errors.push(`"${name}" is a name and also an alias of "${claimant}"`);
-    }
     owner.set(name, name);
+
+    // exclusionIds widens an allergen root's exclusion by that root's own tag, so an
+    // allergen root must carry exactly its tag and no other root may carry one.
+    if (node.parent === null) {
+      const expected = ALLERGENS.filter((allergen) => allergen === name);
+      const tags = [...node.allergenTags].sort();
+      if (tags.length !== expected.length || tags.some((tag, i) => tag !== expected[i])) {
+        errors.push(`root "${name}" must have allergenTags [${expected.join(", ")}]`);
+      }
+    }
   }
 
   for (const node of byName.values()) {
