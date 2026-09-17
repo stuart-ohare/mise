@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: mise-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mise
+      POSTGRES_PASSWORD: mise
+      POSTGRES_DB: mise
+    ports:
+      # Override with POSTGRES_PORT if 5432 is taken by another project.
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - mise-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mise -d mise"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mise-pgdata:
