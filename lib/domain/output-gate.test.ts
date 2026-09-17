@@ -158,6 +158,51 @@ describe("scanProse", () => {
       { term: "butter", index: 8, match: "buttery" },
     ]);
   });
+
+  it.each([
+    ["en dash", "a little self\u2013raising flour"],
+    ["em dash", "a little self\u2014raising flour"],
+    ["non-breaking hyphen", "a little self\u2011raising flour"],
+  ])("treats a %s as a separator too", (_name, text) => {
+    // Typographic dashes reach prose from anywhere text is pasted or auto-formatted.
+    expect(terms(scanProse(text, ["self-raising flour"]))).toEqual(["self-raising flour"]);
+  });
+
+  it.each([
+    ["a cheesy crust", "cheese"],
+    ["two cheeses", "cheese"],
+    ["an oatmeal topping", "oats"],
+    ["creamy oat milk", "oats"],
+  ])("matches a variant of the term's last word: %s", (text, term) => {
+    expect(terms(scanProse(text, [term]))).toEqual([term]);
+  });
+
+  it.each([
+    ["when the pan is hot", "whey"],
+    ["a wheat-free loaf", "whey"],
+    ["a ghetto blaster", "ghee"],
+  ])("does not shorten a term to a fragment: %s", (text, term) => {
+    // The length floors are the whole safety margin on the stem. Without them "whey"
+    // would hit "when", "wheat" and "whether", and every dairy search would downgrade.
+    expect(scanProse(text, [term])).toEqual([]);
+  });
+
+  it("folds accents in both directions", () => {
+    for (const text of ["cr\u00e8me fraiche", "creme fra\u00eeche", "CR\u00c8ME FRA\u00ceCHE"]) {
+      expect(terms(scanProse(text, ["cr\u00e8me fra\u00eeche"]))).toEqual(["cr\u00e8me fra\u00eeche"]);
+      expect(terms(scanProse(text, ["creme fraiche"]))).toEqual(["creme fraiche"]);
+    }
+  });
+
+  it("reports an index into the caller's string, not the folded one", () => {
+    // Folding drops the combining acute, so the folded text is a character shorter and
+    // a raw offset into it would point at the wrong place. It matters the moment an
+    // offset is persisted with output_violation.
+    const text = "cre\u0301me and butter";
+    expect(scanProse(text, ["butter"])).toEqual([
+      { term: "butter", index: text.indexOf("butter"), match: "butter" },
+    ]);
+  });
 });
 
 describe("collectStrings", () => {
