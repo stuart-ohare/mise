@@ -1,0 +1,323 @@
+"use client";
+
+import Link from "next/link";
+import { useRef, useState, type ReactElement } from "react";
+
+import {
+  chipsFor,
+  clearMaxMinutes,
+  demoteExclusion,
+  nextRequest,
+  removeTerm,
+  type Chip,
+} from "@/lib/domain/constraint-edits";
+import type { Constraints } from "@/lib/domain/constraints";
+import type { CandidateRecipe } from "@/lib/db/candidates";
+
+import { cookResponseSchema, type CookResponse } from "../api/cook/schema";
+
+/**
+ * The whole Cook interaction, and the only client component in the app. One POST per
+ * submit, no streaming: the response is parsed and checked before anything renders,
+ * which is the opposite of what streaming asks for (CLAUDE.md §2).
+ *
+ * The edits a chip makes live in lib/domain/constraint-edits.ts, tested offline. This
+ * file renders them and nothing more — the ✕ that refuses is refusing because the pure
+ * function refused, not because a component remembered to check.
+ */
+
+const notUnderstood: Record<
+  Extract<CookResponse, { kind: "not_understood" }>["reason"],
+  string
+> = {
+  empty_query: "There's nothing to go on yet. Say what you have and what you can't eat.",
+  refused: "Mise couldn't read that as a request for something to cook.",
+  parse_failed: "Mise couldn't make sense of that one. Try saying it a different way.",
+  api_error: "Mise couldn't reach the model just now. Try again in a moment.",
+};
+
+const cardsReason: Record<Extract<CookResponse, { kind: "cards" }>["reason"], string> = {
+  output_violation:
+    "These rows are filtered and safe, but we couldn't write a safe summary for them, so we're not showing one.",
+  ranking_unavailable: "Ranking is unavailable right now, so these are in no particular order.",
+};
+
+export default function CookClient() {
+  const [query, setQuery] = useState("");
+  const [response, setResponse] = useState<CookResponse | null>(null);
+  const [constraints, setConstraints] = useState<Constraints | null>(null);
+  const [pending, setPending] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
+
+  // Chip edits fire one POST each, and they can overtake one another. Only the newest
+  // request may write state: a superseded response rendered beside corrected chips would
+  // show a shortlist that was filtered on constraints the chips no longer state.
+  const latest = useRef(0);
+
+  const unresolved = response?.kind === "needs_resolution" ? response.unresolved : [];
+  const chips = constraints ? chipsFor(constraints, unresolved) : [];
+
+  async function post(body: unknown, optimistic: Constraints | null): Promise<void> {
+    const id = ++latest.current;
+    setPending(true);
+    setFailure(null);
+    if (optimistic) setConstraints(optimistic);
+
+    try {
+      const res = await fetch("/api/cook", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (id !== latest.current) return;
+
+      if (!res.ok) {
+        setResponse(null);
+        setFailure(
+          res.status === 400
+            ? "Mise couldn't read that request. This is a bug, not something you did."
+            : "Something broke on the way to the kitchen. Nothing was shown rather than something unchecked.",
+        );
+        return;
+      }
+
+      // Parsed with the schema the route validates against, so a pipeline change shows
+      // up here as a caught failure rather than a half-rendered screen (§6).
+      const parsed = cookResponseSchema.safeParse(await res.json());
+      if (id !== latest.current) return;
+
+      if (!parsed.success) {
+        setResponse(null);
+        setFailure("Mise got an answer it didn't recognise, so it isn't showing it.");
+        return;
+      }
+
+      setResponse(parsed.data);
+      setConstraints("constraints" in parsed.data ? parsed.data.constraints : null);
+    } catch {
+      if (id === latest.current) {
+        setResponse(null);
+        setFailure("Couldn't reach Mise. Check the connection and try again.");
+      }
+    } finally {
+      if (id === latest.current) setPending(false);
+    }
+  }
+
+  function onChip(chip: Chip): void {
+    if (!constraints || !chip.removable) return;
+
+    const next =
+      chip.field === "exclude"
+        ? demoteExclusion(constraints, chip.term, unresolved)
+        : chip.field === "maxMinutes"
+          ? clearMaxMinutes(constraints)
+          : removeTerm(constraints, chip.field, chip.term);
+
+    // The pure function refused. Nothing to post, and the chip stays as it is.
+    if (next === constraints) return;
+
+    void post(nextRequest(next), next);
+  }
+
+  return (
+    <div className="space-y-6">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void post({ kind: "query", query }, null);
+        }}
+        className="space-y-3"
+      >
+        <label htmlFor="cook-query" className="block text-sm font-medium">
+          What have you got?
+        </label>
+        <textarea
+          id="cook-query"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          rows={3}
+          placeholder="half a cauliflower, no dairy, 25 minutes, and I can't face another curry"
+          className="w-full rounded border border-black/20 bg-transparent px-3 py-2 text-sm dark:border-white/20"
+        />
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
+        >
+          {pending ? "Looking…" : "Find something"}
+        </button>
+      </form>
+
+      {chips.length > 0 && <Chips chips={chips} onChip={onChip} />}
+
+      {failure && (
+        <p className="rounded border border-black/20 px-4 py-3 text-sm dark:border-white/20">
+          {failure}
+        </p>
+      )}
+
+      {response && !failure && <Outcome response={response} />}
+    </div>
+  );
+}
+
+function Chips({ chips, onChip }: { chips: Chip[]; onChip: (chip: Chip) => void }) {
+  return (
+    <section className="space-y-2">
+      <h2 className="text-xs font-medium tracking-wide uppercase opacity-60">
+        What Mise understood
+      </h2>
+      <ul className="flex flex-wrap gap-2">
+        {chips.map((chip) => (
+          <li key={`${chip.field}:${chip.term}`}>
+            <span
+              className={
+                chip.hard
+                  ? "inline-flex items-center gap-2 rounded border-2 border-black px-2 py-1 text-sm font-semibold dark:border-white"
+                  : "inline-flex items-center gap-2 rounded border border-black/20 px-2 py-1 text-sm opacity-80 dark:border-white/20"
+              }
+            >
+              {chip.label}
+              <button
+                type="button"
+                // aria-disabled rather than disabled: the button stays focusable, so the
+                // reason it refuses is reachable instead of being skipped over.
+                aria-disabled={!chip.removable}
+                aria-label={
+                  chip.removable
+                    ? chip.hard
+                      ? `Stop excluding ${chip.term} — makes it a preference instead`
+                      : `Remove ${chip.label}`
+                    : `Mise doesn't know ${chip.term}, so it can't stop excluding it. Add it in Review first.`
+                }
+                onClick={() => onChip(chip)}
+                className={
+                  chip.removable
+                    ? "opacity-60 hover:opacity-100"
+                    : "cursor-not-allowed opacity-30"
+                }
+              >
+                ✕
+              </button>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs opacity-60">
+        ✕ on a hard exclusion makes it a preference rather than deleting it. Removing it
+        takes a second ✕.
+      </p>
+    </section>
+  );
+}
+
+function Outcome({ response }: { response: CookResponse }): ReactElement {
+  switch (response.kind) {
+    case "ranked":
+      return (
+        <ul className="space-y-3">
+          {response.results.map(({ recipe, rationale }) => (
+            <li key={recipe.id}>
+              <Card recipe={recipe} rationale={rationale} />
+            </li>
+          ))}
+        </ul>
+      );
+
+    case "cards":
+      return (
+        <div className="space-y-3">
+          <p className="rounded border border-black/20 px-4 py-3 text-sm opacity-80 dark:border-white/20">
+            {cardsReason[response.reason]}
+          </p>
+          <ul className="space-y-3">
+            {response.results.map((recipe) => (
+              <li key={recipe.id}>
+                <Card recipe={recipe} rationale={null} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+
+    case "needs_resolution":
+      return (
+        <div className="space-y-3 rounded border border-black/20 px-4 py-4 text-sm dark:border-white/20">
+          <p>
+            Mise doesn&rsquo;t know{" "}
+            {response.unresolved.map((term, index) => (
+              <span key={term}>
+                {index > 0 && ", "}
+                <em>{term}</em>
+              </span>
+            ))}
+            , so it can&rsquo;t promise a recipe is free of it. No results, rather than
+            results filtered on only the part it understood.
+          </p>
+          <p className="opacity-80">
+            Edit the sentence above, or{" "}
+            <Link href="/review" className="underline">
+              add it in Review
+            </Link>{" "}
+            so Mise knows it next time.
+          </p>
+        </div>
+      );
+
+    case "no_candidates":
+      return (
+        <div className="space-y-3 rounded border border-black/20 px-4 py-4 text-sm dark:border-white/20">
+          <p>
+            Nothing matches
+            {response.constraints.exclude.length > 0 && (
+              <> once {response.constraints.exclude.join(", ")} are out</>
+            )}
+            .
+          </p>
+          {response.relaxTime && (
+            <p className="opacity-80">
+              Nothing in {response.relaxTime.limit} minutes.{" "}
+              {response.relaxTime.wouldMatch === 1
+                ? "1 match"
+                : `${response.relaxTime.wouldMatch} matches`}{" "}
+              without a time limit.
+            </p>
+          )}
+        </div>
+      );
+
+    case "not_understood":
+      return (
+        <p className="rounded border border-black/20 px-4 py-3 text-sm dark:border-white/20">
+          {notUnderstood[response.reason]}
+        </p>
+      );
+  }
+}
+
+function Card({
+  recipe,
+  rationale,
+}: {
+  recipe: CandidateRecipe;
+  rationale: string | null;
+}) {
+  const facts = [
+    recipe.minutes === null ? null : `${recipe.minutes} min`,
+    recipe.serves === null ? null : `serves ${recipe.serves}`,
+  ].filter((fact): fact is string => fact !== null);
+
+  return (
+    <article className="space-y-2 rounded border border-black/10 px-4 py-4 dark:border-white/15">
+      <div className="flex items-baseline justify-between gap-4">
+        <h3 className="font-medium">{recipe.title}</h3>
+        {facts.length > 0 && (
+          <p className="shrink-0 text-xs opacity-60">{facts.join(" · ")}</p>
+        )}
+      </div>
+      {recipe.summary && <p className="text-sm opacity-80">{recipe.summary}</p>}
+      {rationale && <p className="text-sm">{rationale}</p>}
+    </article>
+  );
+}

@@ -1,3 +1,5 @@
+import CookClient from "./_components/cook-client";
+
 export default function CookPage() {
   return (
     <section className="space-y-6">
@@ -10,10 +12,7 @@ export default function CookPage() {
         </p>
       </div>
 
-      <p className="rounded border border-dashed border-black/20 px-4 py-6 text-sm opacity-70 dark:border-white/20">
-        Not built yet. Tracked in the issues board: constraint extraction, the SQL
-        exclusion filter, then this screen.
-      </p>
+      <CookClient />
     </section>
   );
 }
