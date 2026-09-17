@@ -1,0 +1,33 @@
+name: checks
+
+# The deterministic half of the definition of done (CLAUDE.md §4.4). No secrets and
+# no model calls: pnpm eval costs money and is never wired into pushes (§4.6).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      # Deliberate failure: proves the job gates rather than always passing (#4 plan).
+      - run: exit 1
