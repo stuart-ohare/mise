@@ -97,6 +97,18 @@ describe("scripts/seed/taxonomy.json", () => {
     expect(exclusionIds(nodes, "egg")).not.toContain("pasta");
   });
 
+  it.each([
+    ["oyster sauce", ["shellfish", "gluten"]],
+    ["hoisin sauce", ["soy", "gluten"]],
+    ["green curry paste", ["shellfish"]],
+    ["worcestershire sauce", ["gluten"]],
+    ["dark chocolate", ["dairy", "soy"]],
+  ])("files %s under its hidden allergens", (name, tags) => {
+    // Generated as untagged roots and caught in #16's hand review: each passed every
+    // schema check while hiding an allergen, which is why generation never files tags.
+    expect(effectiveAllergenTags(nodes, name)).toEqual(new Set(tags));
+  });
+
   it.each(["ghee", "panko"])("leaves %s unresolvable, for the review demo", (term) => {
     expect(terms.has(term)).toBe(false);
   });
