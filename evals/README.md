@@ -4,15 +4,13 @@
 below threshold. It costs money and it is non-deterministic, so it runs on demand —
 not on every push, and never in CI (ADR 0003). That distinction is deliberate.
 
-**Today the harness exists and no suite does.** `pnpm eval` exits non-zero with
-`no suites registered` and writes no report. The suites below are planned; the first
-arrives in #32.
+One suite is built: constraint extraction. The other two below are planned.
 
-| Suite (planned) | Fixtures | Measures | Threshold |
-|---|---|---|---|
-| Constraint extraction | 15 queries | Exact match on `exclude`; F1 on `have` / `avoid`; exact on `maxMinutes` | **100%** on `exclude`, 0.8 F1 elsewhere |
-| Recipe extraction | 12 sources | Per-field accuracy; null-precision (did it invent a quantity?) | 0.85 fields, 100% null-precision |
-| Output safety | 10 adversarial | Share of fixtures with no violation reaching render | **1** (a rate, since thresholds are minimums: zero violations) |
+| Suite | Status | Fixtures | Measures | Threshold |
+|---|---|---|---|---|
+| Constraint extraction | built | 17 queries × 3 runs | Exact match on `exclude`; micro-F1 on `have` / `avoid`; exact on `maxMinutes` | **1** on `exclude_exact`, 0.8 elsewhere |
+| Recipe extraction | planned | 12 sources | Per-field accuracy; null-precision (did it invent a quantity?) | 0.85 fields, 100% null-precision |
+| Output safety | planned | 10 adversarial | Share of fixtures with no violation reaching render | **1** (a rate, since thresholds are minimums: zero violations) |
 
 ## How the harness works
 
@@ -44,6 +42,39 @@ A run fails, with a non-zero exit code, when:
   `fail`: a failing run is still an honest record.
 - **A metric and its threshold don't pair up.** A reported metric with no threshold, or
   a threshold with no reported metric, fails. No metric goes unchecked.
+
+## Constraint extraction (`suites/constraint-extraction.ts`)
+
+Runs call 1 (`lib/ai/prompts/extract-constraints.ts`) on each query in
+`fixtures/constraint-extraction/`. A fixture is:
+
+```json
+{
+  "gates": ["resolution"],
+  "query": "No nuts and no eggs, 40 minutes max",
+  "expected": { "exclude": ["nuts", ["egg", "eggs"]], "avoid": [], "have": [], "maxMinutes": 40 }
+}
+```
+
+- **Spelling variants.** An expected term is a string, or a list of spellings of *one*
+  ingredient (singular/plural). It is never a list of different ingredients.
+  `fixtures.test.ts` checks that no spelling sits under two terms, and that every
+  spelling of every expected `exclude` term resolves against the seed taxonomy and
+  leaves. A passing eval therefore means call 1 handed gate 1 terms it can resolve.
+- **Three runs per fixture** (51 calls). The model is non-deterministic, and one sample
+  at a 100% bar is weak evidence.
+- **Metrics.**
+  - `exclude_exact`: share of runs whose `exclude` set matches exactly, compared with
+    `normaliseTerm` as gate 1 does.
+  - `max_minutes_exact`: share of runs with the exact value.
+  - `have_f1` and `avoid_f1`: micro-F1, with counts summed over every run.
+- **A failed call** (`refused`, `parse_failed`, `api_error`) scores as a miss on
+  `exclude` and `maxMinutes` even when nothing was expected, and all its expected terms
+  count as false negatives. A failure is never a correct "no exclusions".
+- **Mismatch log.** Each run that misses on any metric prints its query, what was
+  expected and what came back to stderr. The report holds only numbers.
+- **Prompt examples never reuse fixture wording**, so the suite measures whether the
+  rules generalise.
 
 ## Why `exclude` is pegged at 100%
 
@@ -106,5 +137,4 @@ It has a header naming the run time, the commit, and each suite's prompt name,
 `VERSION` and model; one table per suite (metric, value, threshold, pass/fail); and a
 closing fenced `json` block with the same data, rendered from the same object. Anything
 that checks the report parses that block with `reportSchema` in `harness.ts`, never
-the tables. No `latest.md` is committed yet: none can be produced honestly until a
-suite exists (#32).
+the tables.

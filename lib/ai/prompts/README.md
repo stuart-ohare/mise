@@ -12,6 +12,32 @@ Three calls, each with one narrow job:
 | `rank-and-explain.ts` | 3 | capable | Pre-filtered candidate rows → ordered recipe IDs with a one-line rationale each. |
 | `seed-catalogue.ts` | offline | capable | One-off catalogue generation for `scripts/seed/`. Never called by the app or `pnpm seed`. |
 
+## Call 1 — `extract-constraints.ts`
+
+`extractConstraints(query)` returns `{ ok: true, constraints }` or
+`{ ok: false, reason }`. The reason is `empty_query`, `refused`, `parse_failed` or
+`api_error`. It never retries. **It fails closed:** a failure never becomes
+`exclude: []`, because gate 1 can only ask about exclusions it is handed.
+
+- **Vocabulary.** The prompt names only the six allergen roots, taken from `ALLERGENS`.
+  A whole-group exclusion ("dairy-free") uses the root name. Anything else is the food
+  as a bare noun in the user's words. No taxonomy is in context: a term that doesn't
+  resolve is gate 1's to ask about.
+- **If in doubt, exclude.** Any statement that a named food shouldn't be eaten goes in
+  `exclude`, hedged or not, including dislikes. `avoid` is only for fatigue, mood or
+  history.
+- **Exclude wins, in code.** A food that is excluded anywhere in the request belongs in
+  `exclude` only, even when the request also says the cook is tired of it or has it in.
+  The prompt asks for this and the model doesn't always comply — on the salmon fixture it
+  listed the food in both fields in three runs of three — so after parsing, any term that
+  is also excluded is removed from `avoid` and `have`. `exclude` itself is never touched.
+- **Carve-outs never narrow an exclusion.** "No dairy but butter is fine" is
+  `exclude: ["dairy"]`, and butter appears nowhere.
+- **Output is parsed twice.** The SDK checks a plain model schema, because structured
+  output can't express `.min(1)` or `.positive()`. Then `constraintsSchema` parses the
+  result. A truncated response (`max_tokens`) is `parse_failed` even if it parses,
+  because it may have lost an exclusion.
+
 ## Rules
 
 - **Bump `VERSION` whenever the prompt text changes**, and re-run `pnpm eval`. An eval

@@ -1,0 +1,14 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Half a cauliflower and 25 minutes",
+  "expected": {
+    "exclude": [],
+    "avoid": [],
+    "have": [
+      "cauliflower"
+    ],
+    "maxMinutes": 25
+  }
+}

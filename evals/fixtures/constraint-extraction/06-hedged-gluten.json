@@ -1,0 +1,14 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "I'm trying to cut down on gluten",
+  "expected": {
+    "exclude": [
+      "gluten"
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": null
+  }
+}

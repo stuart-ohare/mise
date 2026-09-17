@@ -1,0 +1,17 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Something with mushrooms in under half an hour",
+  "expected": {
+    "exclude": [],
+    "avoid": [],
+    "have": [
+      [
+        "mushroom",
+        "mushrooms"
+      ]
+    ],
+    "maxMinutes": 30
+  }
+}

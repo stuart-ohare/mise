@@ -1,0 +1,21 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Half a cauliflower, no dairy, 25 minutes, and I can't face another curry",
+  "expected": {
+    "exclude": [
+      "dairy"
+    ],
+    "avoid": [
+      [
+        "curry",
+        "curries"
+      ]
+    ],
+    "have": [
+      "cauliflower"
+    ],
+    "maxMinutes": 25
+  }
+}

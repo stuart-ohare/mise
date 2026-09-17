@@ -1,0 +1,14 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Nothing with milk products for my son",
+  "expected": {
+    "exclude": [
+      "dairy"
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": null
+  }
+}

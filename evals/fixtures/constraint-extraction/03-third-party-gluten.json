@@ -1,0 +1,14 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "I'm cooking for Sam, they can't do gluten",
+  "expected": {
+    "exclude": [
+      "gluten"
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": null
+  }
+}
