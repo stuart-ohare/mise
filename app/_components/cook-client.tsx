@@ -228,10 +228,12 @@ function Chips({ chips, onChip }: { chips: Chip[]; onChip: (chip: Chip) => void 
           </li>
         ))}
       </ul>
-      <p className="text-xs opacity-60">
-        ✕ on a hard exclusion makes it a preference rather than deleting it. Removing it
-        takes a second ✕.
-      </p>
+      {chips.some((chip) => chip.hard) && (
+        <p className="text-xs opacity-60">
+          ✕ on a hard exclusion stops excluding it and keeps it as a preference, so the
+          change is visible rather than silent. A second ✕ drops the preference too.
+        </p>
+      )}
     </section>
   );
 }

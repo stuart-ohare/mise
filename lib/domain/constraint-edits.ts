@@ -1,4 +1,20 @@
 import type { Constraints } from "./constraints";
+import { normaliseTerm } from "./resolve-exclusions";
+
+/**
+ * Whether gate 1 failed to map this term.
+ *
+ * Compared on the normalised form, not the exact string, because `resolveExclusions`
+ * dedupes by normalised key and reports only the first spelling it saw: `exclude:
+ * ["ghee", "GHEE"]` comes back as `unresolved: ["ghee"]` alone. Matching exactly would
+ * mark the `GHEE` chip removable. That is harmless today — the reported spelling is the
+ * one that stays in `exclude`, so the route keeps answering `needs_resolution` — but it
+ * is a refusal, and a refusal should be the wider comparison of the two.
+ */
+function isUnresolved(term: string, unresolved: readonly string[]): boolean {
+  const normalised = normaliseTerm(term);
+  return unresolved.some((entry) => normaliseTerm(entry) === normalised);
+}
 
 /**
  * The edits the Cook screen can make to an extracted constraint set, as pure functions
@@ -34,7 +50,7 @@ export function chipsFor(constraints: Constraints, unresolved: readonly string[]
     term,
     label: `✗ ${term}`,
     hard: true,
-    removable: !unresolved.includes(term),
+    removable: !isUnresolved(term, unresolved),
   }));
 
   for (const term of constraints.avoid) {
@@ -57,8 +73,13 @@ export function chipsFor(constraints: Constraints, unresolved: readonly string[]
 }
 
 /**
- * Trade a hard exclusion down to a soft preference — the first of the two deliberate
- * acts it takes to stop filtering on a food.
+ * Trade a hard exclusion down to a soft preference.
+ *
+ * Be precise about what this click does: it is the one that stops gate 2 filtering on the
+ * food, because `excludedIds` is built from `exclude` alone. The second ✕, on the now-soft
+ * chip, only drops the ranking weight. So it is two clicks to clear a food off the row and
+ * one to stop filtering on it — which is why this click's accessible name says so, and why
+ * an unresolved term can't take it at all.
  *
  * Refuses an unresolved term, and refuses one that was never excluded. Gate 2 filters on
  * a canonical id, so an exclusion gate 1 could not map has nothing behind it: demoting it
@@ -74,7 +95,7 @@ export function demoteExclusion(
   term: string,
   unresolved: readonly string[],
 ): Constraints {
-  if (unresolved.includes(term) || !constraints.exclude.includes(term)) return constraints;
+  if (isUnresolved(term, unresolved) || !constraints.exclude.includes(term)) return constraints;
 
   return {
     ...constraints,

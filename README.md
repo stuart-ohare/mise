@@ -39,8 +39,14 @@ one distinctly, and the union makes a sixth outcome a compile error rather than 
 panel. Substitutions are not among them: no row in the catalogue supports one yet.
 
 **✕ on a hard exclusion demotes it; it doesn't delete it.** `✗ dairy` becomes the soft
-`not: dairy`, and a second ✕ removes that — two deliberate acts to stop filtering on a
-food, where one careless click would do it. An exclusion gate 1 couldn't resolve can't
+`not: dairy`, and a second ✕ removes that. Be precise about what each click does: the
+first one is what stops the filtering, because gate 2 reads `exclude` alone — the second
+only drops the ranking weight. So it takes two clicks to clear a food off the row and
+one to stop excluding it. What the demotion buys is not an extra confirmation step but
+visibility: the chip changes under your hand from `✗ dairy` to `not: dairy`, the ✕ says
+"stop excluding dairy — makes it a preference instead" before you press it, and the food
+stays on screen instead of vanishing. A mistake is legible and reversible rather than
+silent. An exclusion gate 1 couldn't resolve can't
 be demoted at all: gate 2 filters on a canonical id, so a term that mapped to nothing
 has nothing behind it, and moving it to a list that only weights ranking would leave a
 shortlist that was never filtered on the food the cook named. That rule lives in

@@ -119,6 +119,20 @@ describe("chipsFor", () => {
     expect(chips.find((chip) => chip.term === "dairy")?.removable).toBe(true);
   });
 
+  // resolveExclusions dedupes by normalised key and reports only the first spelling, so
+  // a second casing of an unresolved term never appears in `unresolved`. Both chips must
+  // still refuse: the refusal compares normalised, even though the edit matches exactly.
+  it("refuses every casing of an unresolved term, not just the reported one", () => {
+    const duplicated: Constraints = { ...constraints, exclude: ["ghee", "GHEE"] };
+    const chips = chipsFor(duplicated, ["ghee"]);
+
+    expect(chips.filter((chip) => chip.field === "exclude").map((chip) => chip.removable)).toEqual([
+      false,
+      false,
+    ]);
+    expect(demoteExclusion(duplicated, "GHEE", ["ghee"])).toEqual(duplicated);
+  });
+
   it("omits the time chip when no limit was stated", () => {
     const chips = chipsFor({ ...constraints, maxMinutes: null }, unresolved);
 
