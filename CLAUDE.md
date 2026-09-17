@@ -131,8 +131,9 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 - **Don't set `status:done` by hand.** CI sets it from the PR's `Closes #n` when the PR
   merges, so a merged PR needs `Closes #n` in its body.
 - **Gate labels** — `gate:resolution`, `gate:query`, `gate:output` — are set at `/spec`.
-  A gate-labelled issue doesn't pass `/verify` without a changed test or fixture and a
-  regenerated `evals/latest.md`.
+  A gate-labelled issue doesn't pass `/verify` unless each labelled gate has an added or
+  modified test or fixture that declares it (`// @gate query` in a Vitest file,
+  `"gates": ["query"]` in a JSON eval fixture), and `evals/latest.md` is regenerated.
 - **Git hooks** (`.githooks/`, installed by `pnpm i`) reject commits made on `main`, any
   push to `main`, and commit subjects over 72 chars or without `(#n)`. They're local and
   can be skipped by anyone with a shell. Branch protection is the guarantee (ADR 0003
