@@ -61,7 +61,8 @@ It lost for three reasons:
 **The provider was chosen by reasoning, not measurement.** No other provider has been run
 against Mise's fixtures, and the eval suite that would do it is defined in
 [`evals/README.md`](../../evals/README.md) but not yet built. The decision should change
-if another provider, on the same fixtures, meets every hard threshold and is cheaper or better on the rest:
+if another provider, on the same fixtures, meets every hard threshold and is cheaper or
+better on the rest:
 
 - exclusion accuracy on constraint extraction — 100%;
 - null-precision on recipe extraction — 100%;
