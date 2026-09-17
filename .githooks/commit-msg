@@ -2,10 +2,11 @@
 # CLAUDE.md §4.3 — imperative subject, ≤ 72 chars, referencing its issue.
 subject=$(grep -v '^#' "$1" | sed -n '/[^[:space:]]/{p;q;}')
 
-# Subjects git writes itself.
-case $subject in
-  "Merge "* | "fixup! "* | "squash! "* | "amend! "*) exit 0 ;;
-esac
+# Merge commits keep git's own subject — but only a real merge, not any subject that
+# happens to start with "Merge ".
+if [ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+  exit 0
+fi
 
 length=$(printf '%s' "$subject" | wc -m | tr -d ' ')
 if [ "$length" -gt 72 ]; then

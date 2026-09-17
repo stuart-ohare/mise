@@ -24,6 +24,9 @@ case $path in
   */evals/thresholds.ts | evals/thresholds.ts)
     echo "evals/thresholds.ts is read-only for agents (CLAUDE.md §4.5: the exclusion threshold is 100% and not negotiable). A failing fixture means a better prompt or a narrower schema — stop and ask the human." >&2
     exit 2 ;;
+  */.git/config)
+    echo "Editing .git/config can switch off the git hooks (core.hooksPath). Stop and ask the human." >&2
+    exit 2 ;;
   */mise-verified)
     echo "The verified record is written only by scripts/workflow/verify.sh. Run /verify." >&2
     exit 2 ;;

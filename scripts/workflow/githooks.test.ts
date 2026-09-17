@@ -101,6 +101,12 @@ describe("commit-msg: subject format", () => {
     expect(commit(`Fix thing (#7)\n\n${"Long body line. ".repeat(10)}`).status).toBe(0);
   });
 
+  // Second review: the "Merge " carve-out was a free pass for any subject.
+  it("rejects a subject that only looks like a merge", () => {
+    const result = commit(`Merge whatever I like, no issue ref, ${"x".repeat(60)}`);
+    expect(result.status).not.toBe(0);
+  });
+
   it("allows git's own merge subjects", () => {
     git("switch", "-q", "-c", "7-other", "main");
     commit("Other work (#7)", "other.txt");

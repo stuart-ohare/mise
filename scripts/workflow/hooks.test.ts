@@ -79,8 +79,25 @@ describe("guard-bash: git hooks can't be switched off", () => {
     "git config core.hooksPath /tmp/none",
     "git config --unset core.hooksPath",
     "rm -rf .githooks",
+    // Second review: routes that switched the hooks off anyway.
+    "chmod -x .githooks/pre-commit .githooks/commit-msg",
+    "sed -i '' '/hooksPath/d' .git/config",
+    'git config core.hooksPath .githooks && git -c core.hooksPath=/dev/null commit -m "x (#3)"',
+    'git -c core.hooksPath= commit -m "x (#3)"',
+    "git config unset core.hooksPath",
+    'git commit "--no-verify" -m "x (#3)"',
+    'git commit --no-verif -m "x (#3)"',
   ])("denies %s", (command) => {
     expect(bash(command).status).toBe(2);
+  });
+
+  it.each([
+    "grep -rn core.hooksPath docs",
+    "git config core.hooksPath ./.githooks",
+    "gh pr view 5 --json body | grep -- --no-verify",
+    'git commit -m "Handle -n flag in parser (#9)"',
+  ])("allows (second review false positive) %s", (command) => {
+    expect(allows(bash(command))).toBe(true);
   });
 
   it("allows installing the repo's own hooks", () => {
@@ -163,6 +180,7 @@ describe("guard-bash: protected files", () => {
     "git diff evals/thresholds.ts 2>&1 | head",
     "cp evals/thresholds.ts /tmp/backup.ts",
     "cat .git/mise-verified",
+    "git restore --staged evals/thresholds.ts",
   ])("allows reading: %s", (command) => {
     expect(allows(bash(command))).toBe(true);
   });
@@ -200,6 +218,10 @@ describe("guard-edit", () => {
 
   it("denies a case-variant thresholds path", () => {
     expect(edit("Write", { file_path: "/repo/Evals/Thresholds.ts" }).status).toBe(2);
+  });
+
+  it("denies editing git config, where core.hooksPath lives", () => {
+    expect(edit("Write", { file_path: "/repo/.git/config", content: "" }).status).toBe(2);
   });
 
   it("denies writing the verified record", () => {
