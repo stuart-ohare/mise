@@ -93,6 +93,23 @@ describe("extractConstraints", () => {
     }
   });
 
+  // Exclude wins, whatever the model does: the prompt asks for it, this guarantees it.
+  it("drops from avoid and have any term that is also excluded", async () => {
+    const { client } = stub({
+      stop_reason: "end_turn",
+      parsed_output: {
+        exclude: ["salmon", "dairy"],
+        avoid: [" Salmon ", "curry"],
+        have: ["salmon", "cauliflower"],
+        maxMinutes: null,
+      },
+    });
+    expect(await extractConstraints("bored of salmon, and she's allergic to it", client)).toEqual({
+      ok: true,
+      constraints: { exclude: ["salmon", "dairy"], avoid: ["curry"], have: ["cauliflower"], maxMinutes: null },
+    });
+  });
+
   // The default client must not be built before the blank check: with no key it throws.
   it("returns empty_query without a client or an API key", async () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "");
