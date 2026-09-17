@@ -29,5 +29,3 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
-      # Deliberate failure: proves the job gates rather than always passing (#4 plan).
-      - run: exit 1
