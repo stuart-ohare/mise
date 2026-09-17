@@ -15,6 +15,7 @@ import type { Constraints } from "@/lib/domain/constraints";
 import type { CandidateRecipe } from "@/lib/db/candidates";
 
 import { cookResponseSchema, type CookResponse } from "../api/cook/schema";
+import { understoodFrom, type Understood } from "./understood";
 
 /**
  * The whole Cook interaction, and the only client component in the app. One POST per
@@ -45,7 +46,8 @@ const cardsReason: Record<Extract<CookResponse, { kind: "cards" }>["reason"], st
 export default function CookClient() {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState<CookResponse | null>(null);
-  const [constraints, setConstraints] = useState<Constraints | null>(null);
+  // Constraints and their unresolved terms are one value, never two. See ./understood.
+  const [understood, setUnderstood] = useState<Understood | null>(null);
   const [pending, setPending] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
 
@@ -54,14 +56,13 @@ export default function CookClient() {
   // show a shortlist that was filtered on constraints the chips no longer state.
   const latest = useRef(0);
 
-  const unresolved = response?.kind === "needs_resolution" ? response.unresolved : [];
-  const chips = constraints ? chipsFor(constraints, unresolved) : [];
+  const chips = understood ? chipsFor(understood.constraints, understood.unresolved) : [];
 
-  async function post(body: unknown, optimistic: Constraints | null): Promise<void> {
+  async function post(body: unknown, optimistic: Understood | null): Promise<void> {
     const id = ++latest.current;
     setPending(true);
     setFailure(null);
-    if (optimistic) setConstraints(optimistic);
+    if (optimistic) setUnderstood(optimistic);
 
     try {
       const res = await fetch("/api/cook", {
@@ -93,7 +94,7 @@ export default function CookClient() {
       }
 
       setResponse(parsed.data);
-      setConstraints("constraints" in parsed.data ? parsed.data.constraints : null);
+      setUnderstood(understoodFrom(parsed.data));
     } catch {
       if (id === latest.current) {
         setResponse(null);
@@ -104,20 +105,25 @@ export default function CookClient() {
     }
   }
 
-  function onChip(chip: Chip): void {
-    if (!constraints || !chip.removable) return;
+  function edit(next: Constraints): void {
+    if (!understood || next === understood.constraints) return;
 
-    const next =
+    // The unresolved terms travel with the constraints they belong to. An edit can't
+    // resolve anything, so the list carries over untouched.
+    void post(nextRequest(next), { constraints: next, unresolved: understood.unresolved });
+  }
+
+  function onChip(chip: Chip): void {
+    if (!understood || !chip.removable) return;
+    const { constraints, unresolved } = understood;
+
+    edit(
       chip.field === "exclude"
         ? demoteExclusion(constraints, chip.term, unresolved)
         : chip.field === "maxMinutes"
           ? clearMaxMinutes(constraints)
-          : removeTerm(constraints, chip.field, chip.term);
-
-    // The pure function refused. Nothing to post, and the chip stays as it is.
-    if (next === constraints) return;
-
-    void post(nextRequest(next), next);
+          : removeTerm(constraints, chip.field, chip.term),
+    );
   }
 
   return (
@@ -157,7 +163,12 @@ export default function CookClient() {
         </p>
       )}
 
-      {response && !failure && <Outcome response={response} />}
+      {response && (
+        <Outcome
+          response={response}
+          onRelaxTime={() => understood && edit(clearMaxMinutes(understood.constraints))}
+        />
+      )}
     </div>
   );
 }
@@ -169,8 +180,10 @@ function Chips({ chips, onChip }: { chips: Chip[]; onChip: (chip: Chip) => void 
         What Mise understood
       </h2>
       <ul className="flex flex-wrap gap-2">
-        {chips.map((chip) => (
-          <li key={`${chip.field}:${chip.term}`}>
+        {chips.map((chip, index) => (
+          // Index included: constraintsSchema doesn't dedupe, so the same term can
+          // legitimately appear twice in one list.
+          <li key={`${chip.field}:${chip.term}:${index}`}>
             <span
               className={
                 chip.hard
@@ -212,7 +225,13 @@ function Chips({ chips, onChip }: { chips: Chip[]; onChip: (chip: Chip) => void 
   );
 }
 
-function Outcome({ response }: { response: CookResponse }): ReactElement {
+function Outcome({
+  response,
+  onRelaxTime,
+}: {
+  response: CookResponse;
+  onRelaxTime: () => void;
+}): ReactElement {
   switch (response.kind) {
     case "ranked":
       return (
@@ -276,13 +295,22 @@ function Outcome({ response }: { response: CookResponse }): ReactElement {
             .
           </p>
           {response.relaxTime && (
-            <p className="opacity-80">
-              Nothing in {response.relaxTime.limit} minutes.{" "}
-              {response.relaxTime.wouldMatch === 1
-                ? "1 match"
-                : `${response.relaxTime.wouldMatch} matches`}{" "}
-              without a time limit.
-            </p>
+            <div className="space-y-3">
+              <p className="opacity-80">
+                Nothing in {response.relaxTime.limit} minutes.{" "}
+                {response.relaxTime.wouldMatch === 1
+                  ? "1 match"
+                  : `${response.relaxTime.wouldMatch} matches`}{" "}
+                without a time limit.
+              </p>
+              <button
+                type="button"
+                onClick={onRelaxTime}
+                className="rounded border border-black/30 px-3 py-1.5 text-sm font-medium dark:border-white/30"
+              >
+                Drop the time limit
+              </button>
+            </div>
           )}
         </div>
       );
