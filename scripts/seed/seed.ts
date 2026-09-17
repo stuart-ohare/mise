@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { eq } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import type { z } from "zod";
 
 import { recipesSchema, leavesSchema, type Recipe } from "@/lib/ai/prompts/seed-catalogue";
@@ -16,6 +17,7 @@ import {
 import { buildNameIndex, deriveRecipeStatus, resolveTerm } from "@/lib/domain/resolution";
 import { taxonomySchema, validateTaxonomy, type TaxonomyNode } from "@/lib/domain/taxonomy";
 import { claimsFromNodes, findTermCollisions, type TermCollision } from "@/lib/domain/term-namespace";
+import { findTreeChanges, type TreeChange } from "@/lib/domain/tree-changes";
 
 /**
  * The body of `pnpm seed`, apart from the connection, so the database tests can run it
@@ -29,7 +31,12 @@ export type SeedFiles = { nodes: TaxonomyNode[]; recipes: Recipe[] };
 
 export type SeedCounts = { draft: number; published: number; skipped: number };
 
-export type SeedResult = { ok: true; counts: SeedCounts } | { ok: false; collisions: TermCollision[] };
+export type SeedOptions = { applyTreeChanges?: boolean };
+
+/** `treeChanges` lists what was applied on success, and what was refused otherwise. */
+export type SeedResult =
+  | { ok: true; counts: SeedCounts; treeChanges: TreeChange[] }
+  | { ok: false; collisions: TermCollision[]; treeChanges: TreeChange[] };
 
 function readJson<T>(file: string, schema: z.ZodType<T>): { ok: true; data: T } | { ok: false; errors: string[] } {
   const parsed = schema.safeParse(JSON.parse(readFileSync(resolve(__dirname, file), "utf8")));
@@ -75,9 +82,10 @@ export function readSeedFiles(): { ok: true; files: SeedFiles } | { ok: false; e
  * draft someone has since promoted in review.
  *
  * Before anything is written, every name and alias in the database and the files must
- * belong to one ingredient. Otherwise it writes nothing and returns the collisions.
+ * belong to one ingredient, and no existing node's parent or tags may differ from the
+ * files unless `applyTreeChanges` is set. Otherwise it writes nothing and returns both.
  */
-export async function seedDatabase(tx: Tx, files: SeedFiles): Promise<SeedResult> {
+export async function seedDatabase(tx: Tx, files: SeedFiles, options: SeedOptions = {}): Promise<SeedResult> {
   // Checked against the database, not just the files: review can add names and aliases
   // the files don't know about, and an alias moved onto another ingredient is exactly how
   // an allergen would move.
@@ -93,7 +101,31 @@ export async function seedDatabase(tx: Tx, files: SeedFiles): Promise<SeedResult
     ...existingAliases,
     ...claimsFromNodes(files.nodes),
   ]);
-  if (collisions.length > 0) return { ok: false, collisions };
+
+  // Parents compare by name because the files have no ids. parent_id has no foreign key,
+  // so a dangling one gets a name no committed node has, and always shows as a change.
+  const parent = alias(canonicalIngredient, "parent");
+  const existingNodes = await tx
+    .select({
+      name: canonicalIngredient.name,
+      parentId: canonicalIngredient.parentId,
+      parentName: parent.name,
+      allergenTags: canonicalIngredient.allergenTags,
+    })
+    .from(canonicalIngredient)
+    .leftJoin(parent, eq(canonicalIngredient.parentId, parent.id));
+  const treeChanges = findTreeChanges(
+    existingNodes.map((node) => ({
+      name: node.name,
+      parent: node.parentId === null ? null : (node.parentName ?? `(missing parent ${node.parentId})`),
+      allergenTags: node.allergenTags,
+    })),
+    files.nodes,
+  );
+
+  if (collisions.length > 0 || (treeChanges.length > 0 && !options.applyTreeChanges)) {
+    return { ok: false, collisions, treeChanges };
+  }
 
   const counts: SeedCounts = { draft: 0, published: 0, skipped: 0 };
 
@@ -102,6 +134,8 @@ export async function seedDatabase(tx: Tx, files: SeedFiles): Promise<SeedResult
     const parentId = node.parent === null ? null : ids.get(node.parent);
     if (parentId === undefined) throw new Error(`"${node.name}" was ordered before its parent`);
 
+    // Overwriting is safe only because of the check above: any parent or tags this
+    // changes were listed, and the caller asked for them.
     const [row] = await tx
       .insert(canonicalIngredient)
       .values({ name: node.name, parentId, allergenTags: node.allergenTags })
@@ -174,5 +208,5 @@ export async function seedDatabase(tx: Tx, files: SeedFiles): Promise<SeedResult
       .values(entry.steps.map((text, position) => ({ recipeId: row.id, position: position + 1, text })));
   }
 
-  return { ok: true, counts };
+  return { ok: true, counts, treeChanges };
 }
