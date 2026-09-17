@@ -224,6 +224,7 @@ describe("guard-bash: only the human approves a plan", () => {
     'bash -c "gh issue edit 18 --add-label status:planned"',
     "/opt/homebrew/bin/gh issue edit 18 --add-label status:planned",
     'gh issue edit 18 --add-label "bug, status:planned"',
+    "echo `gh issue edit 18 --add-label status:planned`",
   ])("asks on %s", (command) => {
     expect(asks(bash(command))).toBe(true);
   });

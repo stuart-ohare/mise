@@ -13,7 +13,7 @@ agent under pressure to make something pass is most tempted to route around.
 
 ## Decision
 
-The loop is six project skills, each moving a `status:*` label on the issue:
+The loop is six project skills. Most of them move a `status:*` label on the issue:
 
 ```
 /spec    grill-me interview → human approves draft → issue filed        status:spec
@@ -27,10 +27,10 @@ merge    human, always; CI then relabels the closed issue               status:d
 
 - **Humans approve three things:** the spec (before filing), the plan, and the merge.
   The plan is approved by running `/approve <n>` and accepting the permission prompt it
-  triggers (#25). Only that user-only skill adds `status:planned`, and only behind an ask:
+  triggers (#25). The human can also move the label by hand. The agent adds
+  `status:planned` only through that skill, and only behind the prompt:
   `disable-model-invocation` stops the model starting it, and the Bash guard asks before
-  a direct `gh` command adds the label, so the agent can't casually approve its own plan
-  elsewhere either.
+  a direct `gh` command adds the label anywhere else.
 - **What can be a script is a script.** `verify.sh` runs the definition of done and the
   §4.2 fixture rule for `gate:*` issues, and records the verified commit; `/ship`
   refuses any other commit.
@@ -86,7 +86,7 @@ merge    human, always; CI then relabels the closed issue               status:d
   `/approve` adds it, and the guard asks before a `gh issue edit`/`create` that adds it
   or a `gh api` call that mentions it. The guard reads shell text, so these get past it:
   a script, `curl` to the API, `gh api --input`, a `gh api graphql` mutation (it names
-  labels by ID), and a `gh` alias. A separate bot identity would close this.
+  labels by ID), a `gh` alias, and a heredoc body fed to `bash`. A separate bot identity would close this.
 - **Claude Code hooks parse shell text, so they're best-effort.** An indirect write gets
   past them (a script or `python -c` that opens the thresholds file), and heredoc bodies
   are deliberately ignored. The first build tried to enforce the git rules this way too.

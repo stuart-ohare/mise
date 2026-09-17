@@ -98,8 +98,8 @@ done <<<"$segments"
 
 # Pass 2 — questions for the human.
 opts="($ws+-[^[:space:]]+($ws+[^-[:space:]][^[:space:]]*)?)*"
-# gh may follow a path (/opt/homebrew/bin/gh) or a quote (bash -c "gh …").
-gh_at="(^|[[:space:]\"'(/])gh$ws+"
+# gh may follow a path (/opt/homebrew/bin/gh), a quote (bash -c "gh …") or a backtick.
+gh_at="(^|[[:space:]\"'(/\`])gh$ws+"
 gh_issue_write="${gh_at}issue$ws+(edit|create)($ws|$end)"
 gh_api="${gh_at}api($ws|$end)"
 adds_planned="$ws(--add-label|--label|-l)(=|$ws+)([\"'][^\"']*|[^[:space:]]*)status:planned"
