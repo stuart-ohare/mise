@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ResolutionIndex } from "./resolve-exclusions";
+import { normaliseTerm, type ResolutionIndex } from "./resolve-exclusions";
 
 /**
  * What call 2 returns, and what Intake writes.
@@ -67,16 +67,50 @@ export type IntakeDraft = {
   fieldConfidence: FieldConfidence;
 };
 
+/**
+ * Gate 1 for Intake: each extracted line resolved against the canonical index, or left
+ * explicitly unresolved.
+ *
+ * `names` maps a canonical id to its name, only so the screen can say what a line
+ * resolved to. Resolution itself never reads it — a line's id comes from the index and
+ * nowhere else.
+ */
 export function buildIntakeDraft(
-  _extracted: DraftRecipe,
-  _index: ResolutionIndex,
-  _names: ReadonlyMap<string, string>,
+  extracted: DraftRecipe,
+  index: ResolutionIndex,
+  names: ReadonlyMap<string, string>,
 ): IntakeDraft {
+  const ingredients = extracted.ingredients.map((line): IntakeIngredient => {
+    // Exact after normalisation, as gate 1 is everywhere else: a near miss belongs in
+    // review, because a guessed match is how an allergen gets filed under the wrong node.
+    const canonicalId = index.get(normaliseTerm(line.name)) ?? null;
+    return {
+      canonicalId,
+      canonicalName: canonicalId === null ? null : (names.get(canonicalId) ?? null),
+      rawText: line.rawText,
+      qty: line.qty,
+      unit: line.unit,
+      optional: line.optional,
+      confidence: line.confidence,
+    };
+  });
+
   return {
-    recipe: { title: "", serves: null, minutes: null, status: "draft" },
-    ingredients: [],
-    steps: [],
-    unresolved: [],
-    fieldConfidence: { title: 0, serves: 0, minutes: 0, ingredients: [] },
+    recipe: {
+      title: extracted.title,
+      serves: extracted.serves,
+      minutes: extracted.minutes,
+      // Always draft, whatever resolved and whatever the scores say. `deriveRecipeStatus`
+      // publishes a fully-resolved recipe, which is right for the committed catalogue and
+      // wrong for extraction: a human promotes an intake draft from /review (§2).
+      status: "draft",
+    },
+    ingredients,
+    steps: extracted.steps.map((text, i) => ({ position: i + 1, text })),
+    unresolved: ingredients.flatMap((i) => (i.canonicalId === null ? [i.rawText] : [])),
+    fieldConfidence: {
+      ...extracted.confidence,
+      ingredients: extracted.ingredients.map(({ rawText, confidence }) => ({ rawText, confidence })),
+    },
   };
 }
