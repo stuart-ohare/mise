@@ -1,0 +1,23 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Dairy-free please, we've got potatoes and leeks",
+  "expected": {
+    "exclude": [
+      "dairy"
+    ],
+    "avoid": [],
+    "have": [
+      [
+        "potato",
+        "potatoes"
+      ],
+      [
+        "leek",
+        "leeks"
+      ]
+    ],
+    "maxMinutes": null
+  }
+}

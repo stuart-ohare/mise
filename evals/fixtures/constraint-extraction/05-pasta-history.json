@@ -1,0 +1,14 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Had pasta twice this week, so something else",
+  "expected": {
+    "exclude": [],
+    "avoid": [
+      "pasta"
+    ],
+    "have": [],
+    "maxMinutes": null
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Something quick with tomatoes",
+  "expected": {
+    "exclude": [],
+    "avoid": [],
+    "have": [
+      [
+        "tomato",
+        "tomatoes"
+      ]
+    ],
+    "maxMinutes": null
+  }
+}

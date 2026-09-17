@@ -1,0 +1,18 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "No nuts and no eggs, 40 minutes max",
+  "expected": {
+    "exclude": [
+      "nuts",
+      [
+        "egg",
+        "eggs"
+      ]
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": 40
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Nothing too heavy tonight, I've got chickpeas and spinach",
+  "expected": {
+    "exclude": [],
+    "avoid": [],
+    "have": [
+      [
+        "chickpea",
+        "chickpeas"
+      ],
+      "spinach"
+    ],
+    "maxMinutes": null
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "No prawns, my partner's allergic",
+  "expected": {
+    "exclude": [
+      [
+        "prawn",
+        "prawns"
+      ]
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": null
+  }
+}
