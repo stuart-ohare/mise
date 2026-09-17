@@ -114,6 +114,18 @@ hooks stop agents skipping those git hooks, editing the eval thresholds, or chan
 dependencies without approval; they need [`jq`](https://jqlang.org). Why it's built this way is in
 [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 
+### CI
+
+GitHub Actions runs one workflow, `checks` (typecheck, lint, test), on every PR and
+push to `main`. It needs no secrets and calls no model. `pnpm eval` never runs in CI,
+because it costs money and isn't deterministic.
+
+`main` is protected: changes arrive by PR, `checks` must pass, force-pushes are blocked,
+and the rules apply to admins too.
+
+Claude doesn't run on GitHub. The `invariant-reviewer` runs locally in `/verify`, and
+its report goes in the PR body.
+
 ## Trade-offs
 
 To be written as the decisions land. Individual decisions worth defending are recorded
