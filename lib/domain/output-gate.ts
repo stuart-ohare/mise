@@ -29,12 +29,23 @@ export type OutputGateResult<T> =
 /**
  * The names and aliases of every id gate 2 excludes, so the prose is held to the same
  * widened set as the rows: ancestors and cross-tree tagged nodes included.
+ *
+ * Throws on an id that isn't in `nodes`. Gate 2 fails closed on a bad id — the row
+ * stays excluded — so gate 3 must not answer the same mistake with an empty term set,
+ * which would scan for nothing and pass everything. An empty result therefore only
+ * ever means nothing was excluded.
  */
 export function outputTerms(
   nodes: readonly IngredientNode[],
   aliases: readonly { canonicalId: string; alias: string }[],
   excludedIds: readonly string[],
 ): string[] {
+  const known = new Set(nodes.map((node) => node.id));
+  const missing = [...new Set(excludedIds.filter((id) => !known.has(id)))].sort();
+  if (missing.length > 0) {
+    throw new Error(`Excluded ingredient not in the node list: ${missing.join(", ")}`);
+  }
+
   const ids = new Set(excludedIds.flatMap((id) => [...exclusionIds(nodes, id)]));
   const raw = [
     ...nodes.filter((node) => ids.has(node.id)).map((node) => node.name),
@@ -49,8 +60,10 @@ const escapeRegex = (text: string) => text.replace(/[\\^$.*+?()[\]{}|/]/g, "\\$&
 
 /**
  * Word-start prefix match: "butter" hits "buttery" and "butternut" but not
- * "unbuttered". Only the last word of a multi-word term is prefix-matched, and words
- * may be separated by any whitespace or hyphens. Negation is deliberately not parsed:
+ * "unbuttered". Only the last word of a multi-word term is prefix-matched. Whitespace
+ * and hyphens are interchangeable in both directions, because prose and the catalogue
+ * disagree about them: the alias "self-raising flour" must hit "self raising flour".
+ * Negation is deliberately not parsed:
  * "dairy-free" is a hit, because prose must not name an excluded ingredient at all.
  */
 export function scanProse(text: string, terms: readonly string[]): ScanHit[] {
@@ -58,7 +71,7 @@ export function scanProse(text: string, terms: readonly string[]): ScanHit[] {
   const hits: ScanHit[] = [];
   for (const term of new Set(terms.map(normaliseTerm))) {
     if (term.length === 0) continue;
-    const words = term.split(" ").map(escapeRegex).join("[\\s-]+");
+    const words = term.split(/[\s-]+/).map(escapeRegex).join("[\\s-]+");
     const pattern = new RegExp(`(?<![\\p{L}\\p{N}])${words}\\p{L}*`, "giu");
     for (const found of haystack.matchAll(pattern)) {
       hits.push({ term, index: found.index, match: found[0] });
