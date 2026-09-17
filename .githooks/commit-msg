@@ -1,0 +1,21 @@
+#!/bin/sh
+# CLAUDE.md §4.3 — imperative subject, ≤ 72 chars, referencing its issue.
+subject=$(grep -v '^#' "$1" | sed -n '/[^[:space:]]/{p;q;}')
+
+# Merge commits keep git's own subject — but only a real merge, not any subject that
+# happens to start with "Merge ".
+if [ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+  exit 0
+fi
+
+length=$(printf '%s' "$subject" | wc -m | tr -d ' ')
+if [ "$length" -gt 72 ]; then
+  echo "✗ Commit subject is $length chars; the limit is 72 (CLAUDE.md §4.3):" >&2
+  echo "  $subject" >&2
+  exit 1
+fi
+if ! printf '%s' "$subject" | grep -Eq '\(#[0-9]+\)'; then
+  echo "✗ Commit subject must reference its issue as (#n) (CLAUDE.md §4.3):" >&2
+  echo "  $subject" >&2
+  exit 1
+fi

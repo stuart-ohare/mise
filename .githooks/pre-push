@@ -1,0 +1,9 @@
+#!/bin/sh
+# CLAUDE.md §4.1 — main changes only through a merged PR. Git hands this hook the
+# real refs being updated, so HEAD:main, refs/heads/main and --force all land here.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = refs/heads/main ]; then
+    echo "✗ Refusing to push to main (CLAUDE.md §4.1). Push the issue branch and open a PR with /ship." >&2
+    exit 1
+  fi
+done
