@@ -91,6 +91,12 @@ describe("scripts/seed/taxonomy.json", () => {
     }
   });
 
+  it("makes egg pasta both gluten and egg, so an egg-free search can tell it from pasta", () => {
+    expect(effectiveAllergenTags(nodes, "egg pasta")).toEqual(new Set(["gluten", "egg"]));
+    expect(exclusionIds(nodes, "egg")).toContain("egg pasta");
+    expect(exclusionIds(nodes, "egg")).not.toContain("pasta");
+  });
+
   it.each(["ghee", "panko"])("leaves %s unresolvable, for the review demo", (term) => {
     expect(terms.has(term)).toBe(false);
   });
