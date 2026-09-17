@@ -48,10 +48,19 @@ Each fixture declares which gate it exercises, in a top-level `gates` array:
 { "gates": ["output"], "query": "no dairy, something rich", "…": "…" }
 ```
 
-Vitest cases do the same with a comment line: `// @gate query`. The names are
-`resolution`, `query` and `output`, matching the `gate:*` issue labels. For a
-gate-labelled issue, `/verify` requires at least one added or modified test or fixture
-tagged for each of its gates. A test that exists but covers a different gate doesn't count.
+Vitest cases do the same with a comment line: `// @gate query`, or `// @gate query output`
+for several gates. The line holds gate names only; put any explanation on the line above.
+The names are `resolution`, `query` and `output`, matching the `gate:*` issue labels.
+
+- For a gate-labelled issue, `/verify` requires at least one added or modified test or
+  fixture tagged for each of its gates. A test that exists but covers a different gate
+  doesn't count.
+- An unknown name fails `/verify` on any issue, so a typo is caught in the PR that
+  introduces it.
+
+A tag is a claim, not proof of coverage. Renaming an old tagged test also satisfies the
+rule. Whether the tagged test actually exercises the change is what the
+`invariant-reviewer` checks.
 
 ## `latest.md`
 
