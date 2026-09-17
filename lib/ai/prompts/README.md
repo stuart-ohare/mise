@@ -38,6 +38,34 @@ Three calls, each with one narrow job:
   result. A truncated response (`max_tokens`) is `parse_failed` even if it parses,
   because it may have lost an exclusion.
 
+## Call 3 — `rank-and-explain.ts`
+
+`rankAndExplain({ candidates, constraints }, client?, violatedTerms?)` returns
+`{ ok: true, ranking }` or `{ ok: false, reason }`, where reason is `no_candidates`,
+`no_valid_ids`, `refused`, `parse_failed` or `api_error`. `ranking` is at most
+`MAX_RESULTS` (5) entries of `{ id, rationale }`, in the model's order. It never
+retries — that is gate 3's job, and this function is the `generate` that
+`runOutputGate` drives.
+
+- **The drop is code, not prompt.** The prompt asks the model to copy ids from the rows
+  it was given; `keepKnownIds` is what guarantees it. Ids are matched case-insensitively
+  and re-emitted in the candidate's own spelling, duplicates keep their first position,
+  and truncation to five happens *after* the drop so an invented id can never push out a
+  real recipe.
+- **An all-invented response is a failure.** `no_valid_ids`, never `ok: true` with an
+  empty list: "nothing suits you" and "the model made this up" are different answers.
+- **Excluded foods are named in the prompt as words never to write.** Gate 3 doesn't
+  parse negation, so "a dairy-free take" is a violation — the rows are already safe, so
+  there is nothing to reassure the cook about. `violatedTerms` travels in the request
+  payload as `forbidden`, which is the only difference between attempt 1 and the retry.
+- **The row shape is gate 2's.** `rankingCandidateSchema` extends `candidateRecipeSchema`
+  from `lib/db/candidates.ts` with the ingredient names, so the compiler rejects a call 3
+  that has drifted from what the query returns. Nothing re-parses the rows at runtime:
+  they arrive from gate 2, not across a boundary, and the boundary that does need a parse
+  is the route's. Selecting those names is the caller's job.
+- **Static `SYSTEM`, variable payload.** Rules in the system prompt, candidates and
+  constraints in the user message, so `VERSION` tracks rule changes and not requests.
+
 ## Rules
 
 - **Bump `VERSION` whenever the prompt text changes**, and re-run `pnpm eval`. An eval
