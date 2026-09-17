@@ -8,7 +8,7 @@ One suite is built: constraint extraction. The other two below are planned.
 
 | Suite | Status | Fixtures | Measures | Threshold |
 |---|---|---|---|---|
-| Constraint extraction | built | 15 queries × 3 runs | Exact match on `exclude`; micro-F1 on `have` / `avoid`; exact on `maxMinutes` | **1** on `exclude_exact`, 0.8 elsewhere |
+| Constraint extraction | built | 17 queries × 3 runs | Exact match on `exclude`; micro-F1 on `have` / `avoid`; exact on `maxMinutes` | **1** on `exclude_exact`, 0.8 elsewhere |
 | Recipe extraction | planned | 12 sources | Per-field accuracy; null-precision (did it invent a quantity?) | 0.85 fields, 100% null-precision |
 | Output safety | planned | 10 adversarial | Share of fixtures with no violation reaching render | **1** (a rate, since thresholds are minimums: zero violations) |
 
@@ -61,7 +61,7 @@ Runs call 1 (`lib/ai/prompts/extract-constraints.ts`) on each query in
   `fixtures.test.ts` checks that no spelling sits under two terms, and that every
   spelling of every expected `exclude` term resolves against the seed taxonomy and
   leaves. A passing eval therefore means call 1 handed gate 1 terms it can resolve.
-- **Three runs per fixture** (45 calls). The model is non-deterministic, and one sample
+- **Three runs per fixture** (51 calls). The model is non-deterministic, and one sample
   at a 100% bar is weak evidence.
 - **Metrics.**
   - `exclude_exact`: share of runs whose `exclude` set matches exactly, compared with

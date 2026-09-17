@@ -15,7 +15,7 @@ import { ALLERGENS } from "@/lib/domain/taxonomy";
  * errors toward over-exclusion, and every failure returns no constraints at all.
  */
 
-export const VERSION = "4";
+export const VERSION = "5";
 
 // Structured output can't express `.min(1)` or `.positive()`, so the model gets a plain
 // shape and every response is then parsed with `constraintsSchema`.
@@ -48,7 +48,8 @@ maxMinutes: the time limit in whole minutes, only when one is stated ("ready in 
 Rules for every field:
 - Never put a person's name, or who the meal is for, in any field.
 - Only foods and dishes go in any field. Descriptions of a meal ("something light", "nothing too rich", "nothing fancy") go in no field; do not turn their adjectives into terms.
-- Each food appears once, in one field. An empty list is a correct answer.
+- Each food appears once, in one field. If a food is excluded anywhere in the request, it goes in exclude only, whatever else is said about it: "sick of lentils, and lentils upset my stomach" → exclude "lentils", not avoid; "a jar of honey to finish, but the baby can't have honey" → exclude "honey", not have. An excluded food never appears in avoid or have.
+- An empty list is a correct answer.
 
 Before answering, check exclude against the request: a request can mix several constraints in one sentence (what the cook has, a time limit, what they are tired of), and every phrase saying a food must not be eaten ("no …", "… -free", "can't have", "allergic to", "without …") must still produce its own exclude term. A phrase about being tired of or bored with a dish is avoid, not exclude. If the request says any food or group must not be eaten, exclude is not empty.`;
 
@@ -68,14 +69,16 @@ export interface ConstraintsClient {
 
 export async function extractConstraints(
   query: string,
-  client: ConstraintsClient = anthropic(),
+  client?: ConstraintsClient,
 ): Promise<ExtractionResult> {
   const text = query.trim();
   if (text === "") return { ok: false, reason: "empty_query" };
+  // Built only after the blank check, so an empty query never needs an API key.
+  const { messages } = client ?? anthropic();
 
   let message: Awaited<ReturnType<ConstraintsClient["messages"]["parse"]>>;
   try {
-    message = await client.messages.parse({
+    message = await messages.parse({
       model: MODELS.fast,
       max_tokens: 512,
       system: SYSTEM,
