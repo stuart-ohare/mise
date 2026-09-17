@@ -175,7 +175,10 @@ async function main(): Promise<void> {
   console.log(`Wrote ${recipes.recipes.length} recipes and ${leaves.nodes.length} leaves.`);
 
   const handTerms = taxonomy.nodes.flatMap((n) => [n.name, ...n.aliases]);
-  const compounds = leaves.nodes.filter((l) => handTerms.some((t) => new RegExp(`\\b${t}\\b`).test(l.name)));
+  const escape = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const compounds = leaves.nodes.filter((l) =>
+    handTerms.some((t) => new RegExp(`(^|[^\\p{L}])${escape(t)}($|[^\\p{L}])`, "u").test(l.name)),
+  );
   if (compounds.length > 0) {
     console.log("Review by hand — leaf names containing a hand-authored term:");
     for (const l of compounds) console.log(`  ${l.name} (under ${l.parent ?? "no parent"})`);

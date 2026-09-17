@@ -2625,7 +2625,7 @@
         "Add garlic and chillies, cook for 1 minute until fragrant",
         "Add prawns and smoked paprika, cook for 3-4 minutes until prawns are pink",
         "Season with salt and add lemon juice",
-        "Garnish with parsley and serve immediately with crusty bread"
+        "Garnish with parsley and serve immediately"
       ],
       "adversarialCase": null,
       "duplicateOf": null
@@ -3827,7 +3827,7 @@
     },
     {
       "title": "Pistachio and lemon biscotti",
-      "summary": "Twice-baked Italian almond biscuits with pistachios and bright lemon zest",
+      "summary": "Twice-baked Italian biscuits with pistachios and bright lemon zest",
       "minutes": 60,
       "serves": 20,
       "ingredients": [

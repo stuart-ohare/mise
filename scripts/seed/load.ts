@@ -3,9 +3,9 @@ import { resolve } from "node:path";
 
 import { config } from "dotenv";
 import { inArray } from "drizzle-orm";
-import type { z } from "zod";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import type { z } from "zod";
 
 import { leavesSchema, recipesSchema } from "@/lib/ai/prompts/seed-catalogue";
 import {

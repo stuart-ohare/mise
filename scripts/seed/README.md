@@ -117,8 +117,17 @@ whole record of what review changed:
 - **Considered and left alone:** stock, baking powder and curry powder, which some brands
   make with wheat. Over-excluding stock would empty most risottos and soups from a
   gluten-free search for a risk the recipe line doesn't carry.
+- **Two recipes mentioned an allergen their ingredients don't carry.** *Garlic and chilli
+  king prawns* ended "serve with crusty bread", and *Pistachio and lemon biscotti* was
+  summarised as "almond biscuits". Gate 2 never reads prose, so both would pass an
+  exclusion and then name the excluded food. Both lines were cut, and
+  `catalogue.test.ts` now fails if a title, summary or step names a hand-authored
+  ingredient, or anything under one, that the recipe doesn't carry.
 - **The near-duplicate** had resolved `shrimp` to `prawn` itself; its `name` became
   `shrimp`, so the duplicate actually exercises the alias.
+- **`cannelloni`, `linguine` and `penne` sit under `pasta` untagged,** following the
+  taxonomy's decision for pasta: some dried tubes contain egg, and a recipe that means egg
+  pasta names `egg pasta`.
 
 A leaf whose name contains a hand-authored term (`smooth peanut butter`, `coconut milk`)
 is the likeliest place for a second allergen to hide, so `catalogue.test.ts` fails until
