@@ -65,6 +65,18 @@ describe("outputTerms", () => {
     }
   });
 
+  it("throws when an excluded id is not in the node list", () => {
+    // A lookup that misses must not leave the scanner with nothing to match:
+    // gate 2 fails closed on a bad id, so gate 3 can't fail open on one.
+    expect(() => outputTerms(nodes, aliases, ["ghee", "nope", "also-nope"])).toThrow(
+      /also-nope, nope/,
+    );
+  });
+
+  it("returns no terms only when nothing is excluded", () => {
+    expect(outputTerms(nodes, aliases, [])).toEqual([]);
+  });
+
   it("normalises, de-duplicates and combines several exclusions", () => {
     const combined = outputTerms(nodes, [...aliases, { canonicalId: "butter", alias: "BUTTER" }], [
       "double-cream",
@@ -100,6 +112,16 @@ describe("scanProse", () => {
   it("treats a hyphen between words of a multi-word term as a separator", () => {
     expect(terms(scanProse("a clarified-butter finish", ["clarified butter"]))).toEqual([
       "clarified butter",
+    ]);
+  });
+
+  it("matches a hyphenated term against spaced prose", () => {
+    // The catalogue ships "self-raising flour" as an alias; prose writes it either way.
+    expect(terms(scanProse("a little self raising flour", ["self-raising flour"]))).toEqual([
+      "self-raising flour",
+    ]);
+    expect(terms(scanProse("a little self-raising flour", ["self-raising flour"]))).toEqual([
+      "self-raising flour",
     ]);
   });
 
