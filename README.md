@@ -28,14 +28,22 @@ What the system understood renders as chips above the results, so a misread can 
 corrected without retyping the sentence. Hard exclusions look different from soft
 preferences, because the interface should tell the same story as the architecture.
 
-`POST /api/cook` is built and is where the three gates meet; the screen that renders it
-is not, and is tracked in [#56](https://github.com/stuart-ohare/mise/issues/56). The
-route answers with one of five outcomes rather than results-or-error: a ranked
-shortlist, cards without prose (gate 3 rejected the sentences twice, or ranking was
-unavailable), a question when an exclusion resolved to nothing, nothing-found — with
-the time limit offered back when relaxing it would help — or a report that the request
-itself couldn't be read. Substitutions are not among them: no row in the catalogue
-supports one yet.
+`POST /api/cook` is where the three gates meet. It answers with one of five outcomes
+rather than results-or-error: a ranked shortlist, cards without prose (gate 3 rejected
+the sentences twice, or ranking was unavailable), a question when an exclusion resolved
+to nothing, nothing-found — with the time limit offered back when relaxing it would
+help — or a report that the request itself couldn't be read. The screen renders each
+one distinctly, and the union makes a sixth outcome a compile error rather than a blank
+panel. Substitutions are not among them: no row in the catalogue supports one yet.
+
+**✕ on a hard exclusion demotes it; it doesn't delete it.** `✗ dairy` becomes the soft
+`not: dairy`, and a second ✕ removes that — two deliberate acts to stop filtering on a
+food, where one careless click would do it. An exclusion gate 1 couldn't resolve can't
+be demoted at all: gate 2 filters on a canonical id, so a term that mapped to nothing
+has nothing behind it, and moving it to a list that only weights ranking would leave a
+shortlist that was never filtered on the food the cook named. That rule lives in
+[`lib/domain/constraint-edits.ts`](lib/domain/constraint-edits.ts) as a pure function
+with tests, not in the component that draws the button.
 
 **Intake.** Paste a recipe blog's wall of text or a photo of a handwritten card. Out
 comes a structured recipe with per-field confidence, landing in a review queue — never
