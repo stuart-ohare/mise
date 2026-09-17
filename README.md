@@ -16,8 +16,10 @@ tree, the alias table, the allergen hierarchy — all of it is prep work done be
 single query arrives. At request time the system looks things up and explains them. It
 does not ask a model to be careful at the moment carefulness is hardest to verify.
 
-> **Status: scaffold.** The structure, domain model and working agreements are in
-> place; the three screens are not built yet. Progress is tracked in
+> **Status: Cook works end to end.** The structure, domain model and working
+> agreements are in place, and `POST /api/cook` plus the Cook screen run the full
+> path — constraints out of free text, gate 2's filter, ranked prose behind gate 3.
+> Intake and Review are still placeholders. Progress is tracked in
 > [Issues](../../issues).
 
 ## Two surfaces
@@ -28,14 +30,28 @@ What the system understood renders as chips above the results, so a misread can 
 corrected without retyping the sentence. Hard exclusions look different from soft
 preferences, because the interface should tell the same story as the architecture.
 
-`POST /api/cook` is built and is where the three gates meet; the screen that renders it
-is not, and is tracked in [#56](https://github.com/stuart-ohare/mise/issues/56). The
-route answers with one of five outcomes rather than results-or-error: a ranked
-shortlist, cards without prose (gate 3 rejected the sentences twice, or ranking was
-unavailable), a question when an exclusion resolved to nothing, nothing-found — with
-the time limit offered back when relaxing it would help — or a report that the request
-itself couldn't be read. Substitutions are not among them: no row in the catalogue
-supports one yet.
+`POST /api/cook` is where the three gates meet. It answers with one of five outcomes
+rather than results-or-error: a ranked shortlist, cards without prose (gate 3 rejected
+the sentences twice, or ranking was unavailable), a question when an exclusion resolved
+to nothing, nothing-found — with the time limit offered back when relaxing it would
+help — or a report that the request itself couldn't be read. The screen renders each
+one distinctly, and the union makes a sixth outcome a compile error rather than a blank
+panel. Substitutions are not among them: no row in the catalogue supports one yet.
+
+**✕ on a hard exclusion demotes it; it doesn't delete it.** `✗ dairy` becomes the soft
+`not: dairy`, and a second ✕ removes that. Be precise about what each click does: the
+first one is what stops the filtering, because gate 2 reads `exclude` alone — the second
+only drops the ranking weight. So it takes two clicks to clear a food off the row and
+one to stop excluding it. What the demotion buys is not an extra confirmation step but
+visibility: the chip changes under your hand from `✗ dairy` to `not: dairy`, the ✕ says
+"stop excluding dairy — makes it a preference instead" before you press it, and the food
+stays on screen instead of vanishing. A mistake is legible and reversible rather than
+silent. An exclusion gate 1 couldn't resolve can't
+be demoted at all: gate 2 filters on a canonical id, so a term that mapped to nothing
+has nothing behind it, and moving it to a list that only weights ranking would leave a
+shortlist that was never filtered on the food the cook named. That rule lives in
+[`lib/domain/constraint-edits.ts`](lib/domain/constraint-edits.ts) as a pure function
+with tests, not in the component that draws the button.
 
 **Intake.** Paste a recipe blog's wall of text or a photo of a handwritten card. Out
 comes a structured recipe with per-field confidence, landing in a review queue — never
