@@ -31,8 +31,17 @@ Refuse and stop, naming the reason, unless **all** of these hold:
 
 ## 2. Show what's being approved
 
-Print the URL of the **latest** non-amendment `## Plan` comment, then the URL of every
-`## Plan amendment`, in order. Say plainly: accepting the next prompt approves these.
+Before moving the label, write out the full comment URLs from the `url` field, one per
+line, in this shape. Never summarise them as "a single plan" or leave them out:
+
+```
+Plan:      https://github.com/<owner>/<repo>/issues/<n>#issuecomment-…
+Amendment: https://github.com/<owner>/<repo>/issues/<n>#issuecomment-…
+```
+
+`Plan` is the **latest** non-amendment `## Plan` comment. There's one `Amendment` line
+for each `## Plan amendment`, oldest first, or none. Then say: accepting the next prompt
+approves these.
 
 ## 3. Move the label
 
