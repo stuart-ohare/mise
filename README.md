@@ -23,10 +23,19 @@ does not ask a model to be careful at the moment carefulness is hardest to verif
 ## Two surfaces
 
 **Cook.** Free text in — *"half a cauliflower, no dairy, 25 minutes, and I can't face
-another curry"* — and a ranked shortlist out, with substitutions explained. What the
-system understood renders as chips above the results, so a misread can be corrected
-without retyping the sentence. Hard exclusions look different from soft preferences,
-because the interface should tell the same story as the architecture.
+another curry"* — and a ranked shortlist out, each recipe with a one-line rationale.
+What the system understood renders as chips above the results, so a misread can be
+corrected without retyping the sentence. Hard exclusions look different from soft
+preferences, because the interface should tell the same story as the architecture.
+
+`POST /api/cook` is built and is where the three gates meet; the screen that renders it
+is not, and is tracked in [#56](https://github.com/stuart-ohare/mise/issues/56). The
+route answers with one of five outcomes rather than results-or-error: a ranked
+shortlist, cards without prose (gate 3 rejected the sentences twice, or ranking was
+unavailable), a question when an exclusion resolved to nothing, nothing-found — with
+the time limit offered back when relaxing it would help — or a report that the request
+itself couldn't be read. Substitutions are not among them: no row in the catalogue
+supports one yet.
 
 **Intake.** Paste a recipe blog's wall of text or a photo of a handwritten card. Out
 comes a structured recipe with per-field confidence, landing in a review queue — never

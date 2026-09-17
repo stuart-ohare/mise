@@ -147,3 +147,43 @@ export async function findCandidateRecipes(
   `);
   return z.array(candidateRecipeSchema).parse(rows);
 }
+
+const ingredientRowSchema = z.object({ recipeId: z.string(), name: z.string() });
+
+/**
+ * The ingredient names of rows gate 2 already returned, so call 3 can rank on what the
+ * cook says they have. Separate from `findCandidateRecipes` on purpose: gate 2's query
+ * is pinned against `exclusionIds` by a parity test, and a join added to it for a
+ * non-gate reason is exactly the kind of change that can quietly alter which rows
+ * come back.
+ */
+export async function loadCandidateIngredients(
+  db: Executor,
+  recipeIds: readonly string[],
+): Promise<Map<string, string[]>> {
+  if (recipeIds.length === 0) return new Map();
+  const ids = sql.join(
+    normalizeIds(recipeIds).map((id) => sql`${id}::uuid`),
+    sql`, `,
+  );
+
+  // The join drops a line whose canonical_id is null. That is only reachable with no
+  // exclusions — gate 2 removes such a recipe whenever anything is excluded — so no
+  // exclusion promise rests on the omission, and inventing a name from raw_text would
+  // hand the model wording the canonical tree never vouched for.
+  const rows = await db.execute(sql`
+    SELECT ri.recipe_id AS "recipeId", ci.name AS "name"
+    FROM recipe_ingredient ri
+    JOIN canonical_ingredient ci ON ci.id = ri.canonical_id
+    WHERE ri.recipe_id IN (${ids})
+    ORDER BY ri.recipe_id, ci.name
+  `);
+
+  const byRecipe = new Map<string, string[]>();
+  for (const row of z.array(ingredientRowSchema).parse(rows)) {
+    const names = byRecipe.get(row.recipeId);
+    if (names) names.push(row.name);
+    else byRecipe.set(row.recipeId, [row.name]);
+  }
+  return byRecipe;
+}

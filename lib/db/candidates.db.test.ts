@@ -8,7 +8,12 @@ import { afterAll, describe, expect, it } from "vitest";
 
 import { exclusionIds, type IngredientNode } from "@/lib/domain/ingredient-tree";
 
-import { excludedIngredientIds, findCandidateRecipes, type CandidateRecipe } from "./candidates";
+import {
+  excludedIngredientIds,
+  findCandidateRecipes,
+  loadCandidateIngredients,
+  type CandidateRecipe,
+} from "./candidates";
 import * as schema from "./schema";
 
 const url = process.env.DATABASE_URL;
@@ -310,6 +315,68 @@ describe("excludedIngredientIds", () => {
       expect(await excludedIngredientIds(tx, [t["soy sauce"].toUpperCase()])).toEqual(
         exclusionIds(nodes, t["soy sauce"]),
       );
+    });
+  });
+});
+
+describe("loadCandidateIngredients", () => {
+  it("returns every resolved ingredient name of a recipe, grouped by recipe", async () => {
+    await inRollback(async (tx) => {
+      const tree = await buildTree(tx);
+      const stew = await addRecipe(tx, "published", [
+        { id: tree.cauliflower },
+        { id: tree.butter },
+        { id: tree["wheat flour"] },
+      ]);
+      const plain = await addRecipe(tx, "published", [{ id: tree.cauliflower }]);
+
+      const byRecipe = await loadCandidateIngredients(tx, [stew, plain]);
+
+      // A recipe has many ingredient rows: the grouping is the whole job here.
+      expect(byRecipe.get(stew)?.length).toBe(3);
+      expect(byRecipe.get(plain)?.length).toBe(1);
+    });
+  });
+
+  it("names the ingredients by their canonical name", async () => {
+    await inRollback(async (tx) => {
+      const tree = await buildTree(tx);
+      const id = await addRecipe(tx, "published", [{ id: tree.butter }]);
+
+      const names = await loadCandidateIngredients(tx, [id]);
+
+      expect(names.get(id)?.[0]).toMatch(/^butter /);
+    });
+  });
+
+  it("asks for nothing when there are no candidate rows", async () => {
+    await inRollback(async (tx) => {
+      expect(await loadCandidateIngredients(tx, [])).toEqual(new Map());
+    });
+  });
+
+  it("omits an unresolved line rather than inventing a name for it", async () => {
+    await inRollback(async (tx) => {
+      const tree = await buildTree(tx);
+      // Only reachable with no exclusions: gate 2 removes such a recipe otherwise, so
+      // no exclusion promise rests on the omission.
+      const id = await addRecipe(tx, "published", [{ id: tree.cauliflower }, { id: null }]);
+
+      const byRecipe = await loadCandidateIngredients(tx, [id]);
+
+      expect(byRecipe.get(id)?.length).toBe(1);
+    });
+  });
+
+  it("returns nothing for a recipe id that isn't asked about", async () => {
+    await inRollback(async (tx) => {
+      const tree = await buildTree(tx);
+      const asked = await addRecipe(tx, "published", [{ id: tree.butter }]);
+      const other = await addRecipe(tx, "published", [{ id: tree["wheat flour"] }]);
+
+      const byRecipe = await loadCandidateIngredients(tx, [asked]);
+
+      expect(byRecipe.has(other)).toBe(false);
     });
   });
 });

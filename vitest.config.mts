@@ -10,7 +10,15 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["lib/**/*.test.ts", "scripts/**/*.test.ts", "evals/**/*.test.ts"],
+    // `app/**` is included so a route's offline test actually runs: gate-fixtures.sh
+    // matches *.test.ts anywhere, so a gate-tagged test left out of this list would
+    // satisfy §4.2 while executing nothing.
+    include: [
+      "app/**/*.test.ts",
+      "lib/**/*.test.ts",
+      "scripts/**/*.test.ts",
+      "evals/**/*.test.ts",
+    ],
     exclude: [...configDefaults.exclude, "**/*.db.test.ts"],
   },
 });
