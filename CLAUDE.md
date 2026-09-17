@@ -82,6 +82,9 @@ lib/
     client.ts         Connection
   domain/             Pure functions: constraint types, exclusion logic, validation
 scripts/seed/         One-off generation script + committed JSON catalogue
+scripts/workflow/     verify.sh (definition of done) + hook tests
+.claude/              Workflow skills, invariant-reviewer agent, guard hooks
+.github/              Issue and PR templates
 evals/                Fixtures, runner, and latest.md (the last committed run)
 docs/decisions/       ADRs — one file per decision worth defending
 ```
@@ -110,6 +113,26 @@ was built, so it is written for a reader, not for a queue.
 ```
 issue → failing test or eval fixture → implement → verify → PR → merge
 ```
+
+The loop is tooled — use it rather than doing the steps by hand. Design and trade-offs
+in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
+
+| Step | Skill | Label after | Human |
+|---|---|---|---|
+| Specify | `/spec` — grill one question at a time, draft, file on approval | `status:spec` | approves the draft |
+| Plan | `/plan <n>` — plan as an issue comment, then stop | — | moves label to `status:planned` |
+| Build | `/build <n>` — refuses without `status:planned`; worktree; failing test first | `status:building` | |
+| Verify | `/verify` — `scripts/workflow/verify.sh`, then the `invariant-reviewer` agent | | decides on CONCERNS |
+| Ship | `/ship` — refuses unless this commit verified; PR with evidence | `status:in-review` | merges |
+
+- **Never add `status:planned` yourself.** It is the human's plan approval.
+- **Gate labels** — `gate:resolution`, `gate:query`, `gate:output` — are set at `/spec`.
+  A gate-labelled issue doesn't pass `/verify` without a changed test or fixture and a
+  regenerated `evals/latest.md`.
+- **Hooks** (`.claude/hooks/`, need `jq`) deny commits and pushes on `main`, writes to
+  `evals/thresholds.ts`, and commit subjects over 72 chars or without `(#n)`; they put
+  dependency changes to the human. A hook block is a rule, not an obstacle — don't route
+  around it.
 
 - **Write the failing thing first.** For domain logic that's a Vitest case. For model
   behaviour that's an eval fixture. A change to exclusion behaviour with no fixture
