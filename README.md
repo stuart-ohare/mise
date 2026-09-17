@@ -124,8 +124,8 @@ GitHub Actions runs two workflows. Neither needs a secret or calls a model:
 
 `pnpm eval` never runs in CI, because it costs money and isn't deterministic.
 
-`main` is protected: changes arrive by PR, `checks` must pass, force-pushes are blocked,
-and the rules apply to admins too.
+`main` is protected: changes arrive by PR, `checks` must pass, force-pushes are
+blocked, the branch can't be deleted, and the rules apply to admins too.
 
 Claude doesn't run on GitHub. The `invariant-reviewer` runs locally in `/verify`, and
 its report goes in the PR body.
