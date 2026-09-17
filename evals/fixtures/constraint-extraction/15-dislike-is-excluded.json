@@ -1,0 +1,15 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Soya-free please, and nothing with coriander, I can't stand it",
+  "expected": {
+    "exclude": [
+      "soy",
+      "coriander"
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": null
+  }
+}

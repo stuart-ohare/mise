@@ -1,0 +1,14 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "I don't really do shellfish",
+  "expected": {
+    "exclude": [
+      "shellfish"
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": null
+  }
+}

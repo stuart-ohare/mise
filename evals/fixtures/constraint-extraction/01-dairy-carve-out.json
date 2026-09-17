@@ -1,0 +1,16 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "No dairy but butter is fine, something with cauliflower",
+  "expected": {
+    "exclude": [
+      "dairy"
+    ],
+    "avoid": [],
+    "have": [
+      "cauliflower"
+    ],
+    "maxMinutes": null
+  }
+}

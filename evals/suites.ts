@@ -1,4 +1,5 @@
 import type { AnySuite } from "./harness";
+import { constraintExtraction } from "./suites/constraint-extraction";
 
-/** Every suite `pnpm eval` runs. Empty until the first suite lands (#32). */
-export const suites: readonly AnySuite[] = [];
+/** Every suite `pnpm eval` runs. */
+export const suites: readonly AnySuite[] = [constraintExtraction];
