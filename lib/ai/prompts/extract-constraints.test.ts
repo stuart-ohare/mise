@@ -1,7 +1,7 @@
 // @gate resolution
 import { APIConnectionError, APIError, AnthropicError } from "@anthropic-ai/sdk";
 import type { MessageCreateParamsNonStreaming } from "@anthropic-ai/sdk/resources/messages";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { MODELS } from "@/lib/ai/client";
 import { constraintsSchema } from "@/lib/domain/constraints";
@@ -90,6 +90,16 @@ describe("extractConstraints", () => {
       const { client, calls } = stub({ stop_reason: "end_turn", parsed_output: valid });
       expect(await extractConstraints(query, client)).toEqual({ ok: false, reason: "empty_query" });
       expect(calls).toHaveLength(0);
+    }
+  });
+
+  // The default client must not be built before the blank check: with no key it throws.
+  it("returns empty_query without a client or an API key", async () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "");
+    try {
+      expect(await extractConstraints("  ")).toEqual({ ok: false, reason: "empty_query" });
+    } finally {
+      vi.unstubAllEnvs();
     }
   });
 

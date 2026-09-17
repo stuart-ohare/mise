@@ -1,0 +1,14 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "Bored of salmon lately, and my wife is allergic to it anyway",
+  "expected": {
+    "exclude": [
+      "salmon"
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": null
+  }
+}

@@ -42,8 +42,8 @@ const index = buildResolutionIndex([
 const spellings = (term: string | readonly string[]) => (typeof term === "string" ? [term] : [...term]);
 
 describe("constraint-extraction fixtures", () => {
-  it("has the 15 hand-written fixtures", () => {
-    expect(files).toHaveLength(15);
+  it("has the 17 hand-written fixtures", () => {
+    expect(files).toHaveLength(17);
   });
 
   it.each(fixtures)("$file declares gate resolution and parses", ({ json }) => {

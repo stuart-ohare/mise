@@ -1,0 +1,17 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "query": "I've got a tin of peanuts to use up, but my nephew is allergic to peanuts",
+  "expected": {
+    "exclude": [
+      [
+        "peanut",
+        "peanuts"
+      ]
+    ],
+    "avoid": [],
+    "have": [],
+    "maxMinutes": null
+  }
+}
