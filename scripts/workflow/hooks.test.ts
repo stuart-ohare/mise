@@ -209,6 +209,30 @@ describe("guard-bash: protected files", () => {
   });
 });
 
+describe("guard-bash: only the human approves a plan", () => {
+  it.each([
+    "gh issue edit 18 --remove-label status:spec --add-label status:planned",
+    'gh issue edit 18 --add-label "status:planned"',
+    'gh api -X POST repos/stuart-ohare/mise/issues/18/labels -f "labels[]=status:planned"',
+    "gh issue edit 18 --add-label=status:planned",
+    "gh issue edit 18 --add-label bug,status:planned",
+    "gh issue create --title x --label status:planned",
+    "gh issue view 18 && gh issue edit 18 --add-label status:planned",
+  ])("asks on %s", (command) => {
+    expect(asks(bash(command))).toBe(true);
+  });
+
+  it.each([
+    "gh issue edit 18 --remove-label status:planned --add-label status:building",
+    "gh issue edit 18 --add-label status:spec",
+    "gh issue view 18 --json labels",
+    "gh issue comment 18 --body-file plan.md",
+    "gh issue list --label status:planned",
+  ])("allows %s", (command) => {
+    expect(allows(bash(command))).toBe(true);
+  });
+});
+
 describe("guard-edit", () => {
   it.each(["Edit", "Write", "MultiEdit"])("denies %s on evals/thresholds.ts", (tool) => {
     const result = edit(tool, { file_path: "/repo/evals/thresholds.ts" });
