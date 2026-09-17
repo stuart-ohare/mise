@@ -1,14 +1,47 @@
 # Evals
 
 `pnpm eval` runs fixtures against the real model, prints a table, and exits non-zero
-below threshold. It costs money and it is non-deterministic, so it runs on demand and
-on a schedule — not on every push. That distinction is deliberate.
+below threshold. It costs money and it is non-deterministic, so it runs on demand —
+not on every push, and never in CI (ADR 0003). That distinction is deliberate.
 
-| Suite | Fixtures | Measures | Threshold |
+**Today the harness exists and no suite does.** `pnpm eval` exits non-zero with
+`no suites registered` and writes no report. The suites below are planned; the first
+arrives in #32.
+
+| Suite (planned) | Fixtures | Measures | Threshold |
 |---|---|---|---|
 | Constraint extraction | 15 queries | Exact match on `exclude`; F1 on `have` / `avoid`; exact on `maxMinutes` | **100%** on `exclude`, 0.8 F1 elsewhere |
 | Recipe extraction | 12 sources | Per-field accuracy; null-precision (did it invent a quantity?) | 0.85 fields, 100% null-precision |
 | Output safety | 10 adversarial | Violations reaching render | 0 |
+
+## How the harness works
+
+| File | Role |
+|---|---|
+| `run.ts` | `pnpm eval`. Loads `.env.local`, runs the registry, writes `latest.md`, sets the exit code |
+| `harness.ts` | The rules below. Never calls a model — suites do — so it is tested offline (`harness.test.ts`) |
+| `suites.ts` | The registry: every suite `pnpm eval` runs |
+| `thresholds.ts` | `suite → metric → minimum`. **Human-written**: the guard hooks deny agent writes (CLAUDE.md §4.5) |
+| `fixtures/<suite>/*.json` | One directory per suite, named after it |
+
+A suite is registered with `defineSuite({ name, prompt: { name, version }, model,
+fixtureSchema, run })`. `run` receives the parsed fixtures and returns
+`Record<metric, number>`. `prompt.version` is the prompt's `VERSION` constant, so every
+report is tied to the text that produced it.
+
+A run fails, with a non-zero exit code, when:
+
+- **No suite is registered.** No report is written — an empty run can never produce one.
+- **Any fixture is invalid** — not JSON, no non-empty `gates` array of known gate names,
+  or failing the suite's own `fixtureSchema` — or a suite has no fixtures, or two suites
+  share a name. Every fixture is parsed before any suite runs, so nothing is spent on a
+  run that can't finish. No report is written.
+- **A suite throws.** The run aborts with no report; a partial run isn't a record.
+- **A metric is below its threshold.** A metric passes when `value >= threshold`, so
+  "zero violations" is expressed as a rate of 1. The report **is** written, marked
+  `fail`: a failing run is still an honest record.
+- **A metric and its threshold don't pair up.** A reported metric with no threshold, or
+  a threshold with no reported metric, fails. No metric goes unchecked.
 
 ## Why `exclude` is pegged at 100%
 
@@ -66,3 +99,10 @@ rule. Whether the tagged test actually exercises the change is what the
 
 The last run's output is committed here so a reviewer who doesn't want to spend their
 own API credits can still see that the suite exists and what it found.
+
+It has a header naming the run time, the commit, and each suite's prompt name,
+`VERSION` and model; one table per suite (metric, value, threshold, pass/fail); and a
+closing fenced `json` block with the same data, rendered from the same object. Anything
+that checks the report parses that block with `reportSchema` in `harness.ts`, never
+the tables. No `latest.md` is committed yet: none can be produced honestly until a
+suite exists (#32).
