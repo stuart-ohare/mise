@@ -185,13 +185,15 @@ export async function runCook(input: CookRequest, deps: CookDeps): Promise<CookR
   if (!gate.output.ok) return cards("ranking_unavailable");
 
   const byId = new Map(within.map((row) => [row.id, row]));
-  return {
-    kind: "ranked",
-    constraints,
-    attempts: gate.attempts,
-    results: gate.output.ranking.flatMap((entry) => {
-      const row = byId.get(entry.id);
-      return row ? [{ recipe: withoutIngredients(row), rationale: entry.rationale }] : [];
-    }),
-  };
+  const results = gate.output.ranking.flatMap((entry) => {
+    const row = byId.get(entry.id);
+    return row ? [{ recipe: withoutIngredients(row), rationale: entry.rationale }] : [];
+  });
+
+  // Nothing left to rank is the same failure as `no_valid_ids`, noticed a layer out, so
+  // it gets the same answer: the rows cleared gates 1 and 2 and are still worth showing,
+  // and `ranked` must never describe an empty list as a shortlist.
+  if (results.length === 0) return cards("ranking_unavailable");
+
+  return { kind: "ranked", constraints, attempts: gate.attempts, results };
 }

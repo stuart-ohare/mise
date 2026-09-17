@@ -33,8 +33,8 @@ forget the rest — an unhandled `kind` is a type error.
 
 | `kind` | Means |
 |---|---|
-| `ranked` | Prose survived gate 3. `attempts` is 1, or 2 when the retry was the clean one |
-| `cards` | Safe rows, no prose. `reason` is `output_violation` (gate 3 rejected both attempts) or `ranking_unavailable` (call 3 failed) |
+| `ranked` | Prose survived gate 3, and at least one row did. `attempts` is 1, or 2 when the retry was the clean one |
+| `cards` | Safe rows, no prose. `reason` is `output_violation` (gate 3 rejected both attempts) or `ranking_unavailable` (call 3 failed, or named only ids gate 2 never returned) |
 | `needs_resolution` | An exclusion mapped to nothing. No rows and no model call — it's a question for the cook |
 | `no_candidates` | Nothing survived. `relaxTime` carries the stated limit and how many would match without it, when that is more than none |
 | `not_understood` | Constraint extraction itself failed |
@@ -57,6 +57,13 @@ parts of it fail closed:
 
 Call 3 failing is not treated as a gate event: the rows are still correct, so they
 still go out as `cards`, and the retry isn't spent on an API error.
+
+A ranking naming only ids gate 2 never returned is the same failure. Those ids are
+dropped — a recipe gate 2 didn't approve cannot reach the screen however convincingly
+the model names it — and if that leaves nothing, the answer is `cards` too, not a
+`ranked` shortlist of no recipes. `ranked` carrying an empty `results` is rejected by
+the response schema, so the one way to reach it is a pipeline regression, which is a
+500 and a stack trace rather than a blank panel.
 
 ### `output_violation`
 

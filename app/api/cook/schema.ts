@@ -36,10 +36,13 @@ const rankedResultSchema = z.object({
  * Every outcome in one union, so a client cannot handle the happy path and forget
  * `needs_resolution` — an unhandled `kind` is a type error rather than a blank screen.
  *
- * - `ranked` — prose survived gate 3.
+ * - `ranked` — prose survived gate 3. At least one row, always: `run.ts` answers an
+ *   all-invented ranking with `cards` rather than an empty shortlist, so `.min(1)` here
+ *   can only fail on a pipeline regression — which is what the outward parse is for.
  * - `cards` — safe rows without prose. `output_violation` is gate 3 rejecting both
- *   attempts; `ranking_unavailable` is call 3 failing. The rows are still correct, so
- *   losing the prose is the cost the architecture exists to be able to pay.
+ *   attempts; `ranking_unavailable` is call 3 failing, or naming no recipe that gate 2
+ *   returned. The rows are still correct, so losing the prose is the cost the
+ *   architecture exists to be able to pay.
  * - `needs_resolution` — an exclusion gate 1 could not map. No rows, by design.
  * - `no_candidates` — nothing survived. `relaxTime` is the one constraint worth
  *   offering back, and only when relaxing it would actually help.
@@ -49,7 +52,7 @@ export const cookResponseSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("ranked"),
     constraints: constraintsSchema,
-    results: z.array(rankedResultSchema),
+    results: z.array(rankedResultSchema).min(1),
     attempts: z.union([z.literal(1), z.literal(2)]),
   }),
   z.object({

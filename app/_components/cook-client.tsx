@@ -247,14 +247,10 @@ function Outcome({
 }): ReactElement {
   switch (response.kind) {
     case "ranked":
-      // `results` has no minimum: call 3 naming only ids the candidate set didn't
-      // contain leaves every row dropped. Say so rather than render an empty list.
-      return response.results.length === 0 ? (
-        <Nothing>
-          Mise filtered the recipes but couldn&rsquo;t put a shortlist together. Try
-          again.
-        </Nothing>
-      ) : (
+      // No empty case: `ranked` carries at least one row (schema.ts), and this only ever
+      // renders what `cookResponseSchema` parsed. A server that sent an empty shortlist
+      // would be refused by that parse and never reach here.
+      return (
         <ul className="space-y-3">
           {response.results.map(({ recipe, rationale }) => (
             <li key={recipe.id}>
