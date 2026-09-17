@@ -88,10 +88,21 @@ export async function runEval(options: RunOptions): Promise<number> {
     return 1;
   }
 
+  // Thresholds and suites must pair up exactly, or a suite could pass with nothing to
+  // check, or a registered bar (the 100% exclude one included) could be skipped unseen.
+  const errors: string[] = [];
+  for (const suite of suites) {
+    if (Object.keys(thresholds[suite.name] ?? {}).length === 0) {
+      errors.push(`suite ${suite.name} has no thresholds in evals/thresholds.ts`);
+    }
+  }
+  for (const name of Object.keys(thresholds)) {
+    if (!names.includes(name)) errors.push(`thresholds for ${name}, but no suite ${name} is registered`);
+  }
+
   // Every fixture for every suite parses before any suite runs: a bad fixture found
   // halfway through would leave a partial run that has already spent money.
   const loaded: unknown[][] = [];
-  const errors: string[] = [];
   for (const suite of suites) {
     const result = loadFixtures(suite, fixturesRoot);
     if (result.ok) loaded.push(result.fixtures);

@@ -32,10 +32,12 @@ report is tied to the text that produced it.
 A run fails, with a non-zero exit code, when:
 
 - **No suite is registered.** No report is written — an empty run can never produce one.
-- **Any fixture is invalid** — not JSON, no non-empty `gates` array of known gate names,
-  or failing the suite's own `fixtureSchema` — or a suite has no fixtures, or two suites
-  share a name. Every fixture is parsed before any suite runs, so nothing is spent on a
-  run that can't finish. No report is written.
+- **The setup is wrong.** A fixture is invalid (not JSON, no non-empty `gates` array of
+  known gate names, or failing the suite's own `fixtureSchema`). Or a suite has no
+  fixtures, two suites share a name, a suite has no thresholds (or an empty entry), or
+  `thresholds.ts` has an entry for a suite that isn't registered. All of this is checked
+  before any suite runs, so nothing is spent on a run that can't finish, and no report
+  is written.
 - **A suite throws.** The run aborts with no report; a partial run isn't a record.
 - **A metric is below its threshold.** A metric passes when `value >= threshold`, so
   "zero violations" is expressed as a rate of 1. The report **is** written, marked
