@@ -73,6 +73,13 @@ describe("outputTerms", () => {
     );
   });
 
+  it("throws when an excluded id contributes no usable term", () => {
+    // A blank name is unreachable through the seed schema today, and a second write
+    // path would make it reachable. An empty term set must never mean "scan nothing".
+    const blank = [...nodes, { id: "blank", name: "  ", parentId: null, allergenTags: [] }];
+    expect(() => outputTerms(blank, aliases, ["blank"])).toThrow(/blank/);
+  });
+
   it("returns no terms only when nothing is excluded", () => {
     expect(outputTerms(nodes, aliases, [])).toEqual([]);
   });
