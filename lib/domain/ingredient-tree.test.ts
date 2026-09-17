@@ -69,20 +69,32 @@ describe("exclusionIds", () => {
 
   it("widens an exclusion below an allergen root by that root's tag", () => {
     // "No bread" may be a wheat allergy; soy sauce's wheat is only visible as its tag.
-    expect(exclusionIds(multi, "bread")).toEqual(new Set(["bread", "soy sauce", "tamari"]));
+    expect(exclusionIds(multi, "bread")).toEqual(
+      new Set(["bread", "gluten", "soy sauce", "tamari"]),
+    );
   });
 
   it("does not widen by the excluded node's own extra tag", () => {
     // Excluding soy sauce must not exclude every gluten ingredient.
-    expect(exclusionIds(multi, "soy sauce")).toEqual(new Set(["soy sauce", "tamari"]));
+    expect(exclusionIds(multi, "soy sauce")).toEqual(new Set(["soy sauce", "tamari", "soy"]));
   });
 
-  it("is just the subtree under a root that carries no allergen", () => {
+  it("does not widen under a root that carries no allergen", () => {
     const withVeg: IngredientNode[] = [
       ...multi,
       { id: "veg", name: "vegetable", parentId: null, allergenTags: [] },
       { id: "leek", name: "leek", parentId: "veg", allergenTags: [] },
     ];
-    expect(exclusionIds(withVeg, "leek")).toEqual(new Set(["leek"]));
+    expect(exclusionIds(withVeg, "leek")).toEqual(new Set(["leek", "veg"]));
+  });
+
+  it("excludes every ancestor, since a generic ingredient may contain the excluded one", () => {
+    // "No ghee" must remove a recipe that only says "butter" or "dairy".
+    expect(exclusionIds(nodes, "ghee")).toEqual(new Set(["ghee", "butter", "dairy"]));
+  });
+
+  it("adds ancestors as single nodes, not their subtrees", () => {
+    expect(exclusionIds(nodes, "ghee")).not.toContain("cream");
+    expect(exclusionIds(multi, "tamari")).toEqual(new Set(["tamari", "soy sauce", "soy"]));
   });
 });

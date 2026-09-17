@@ -63,6 +63,25 @@ describe("scripts/seed/taxonomy.json", () => {
     expect(exclusionIds(nodes, excluded)).toContain(tagged);
   });
 
+  it.each([
+    ["egg white", "egg"],
+    ["peanut", "nuts"],
+    ["prawn", "shellfish"],
+  ])("'no %s' also removes a recipe that only says %s", (excluded, generic) => {
+    // Recipe lines like "3 eggs" or "nuts" resolve to the generic node.
+    expect(exclusionIds(nodes, excluded)).toContain(generic);
+  });
+
+  it("puts every ancestor of a node inside that node's exclusion", () => {
+    const byId = new Map(nodes.map((n) => [n.id, n]));
+    for (const n of nodes) {
+      const excluded = exclusionIds(nodes, n.id);
+      for (let p = n.parentId; p !== null; p = byId.get(p)?.parentId ?? null) {
+        expect(excluded, `${n.name} -> ${p}`).toContain(p);
+      }
+    }
+  });
+
   it.each(ALLERGENS)("excludes every node whose tags include %s", (allergen) => {
     // Ties the two readings of the tree together: whatever effectiveAllergenTags
     // says is dairy, the exclusion gate 2 runs must remove.
