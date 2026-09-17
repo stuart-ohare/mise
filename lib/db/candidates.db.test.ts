@@ -1,7 +1,7 @@
 // @gate query
 import { randomUUID } from "node:crypto";
 
-import { TransactionRollbackError } from "drizzle-orm";
+import { eq, TransactionRollbackError } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, describe, expect, it } from "vitest";
@@ -256,6 +256,42 @@ describe("excludedIngredientIds", () => {
 
       const expected = new Set([...exclusionIds(nodes, t.dairy), ...exclusionIds(nodes, t.egg)]);
       expect(await excludedIngredientIds(tx, [t.dairy, t.egg])).toEqual(expected);
+    });
+  });
+
+  it("equals exclusionIds for a cyclic chain and a dangling parent", async () => {
+    await inRollback(async (tx) => {
+      const t = await buildTree(tx);
+      const suffix = randomUUID().slice(0, 8);
+      const insert = async (name: string, parentId: string | null, tags: string[]) => {
+        const [row] = await tx
+          .insert(schema.canonicalIngredient)
+          .values({ name: `${name} ${suffix}`, parentId, allergenTags: tags })
+          .returning({ id: schema.canonicalIngredient.id });
+        return row.id;
+      };
+
+      // parent_id has no foreign key, so bad seed data can hold both shapes. Each is
+      // tagged gluten, so a gluten exclusion must widen into it: it sits in no root's tree.
+      const loopA = await insert("loop a", null, ["gluten"]);
+      const loopB = await insert("loop b", loopA, []);
+      const loopChild = await insert("loop child", loopB, []);
+      await tx
+        .update(schema.canonicalIngredient)
+        .set({ parentId: loopB })
+        .where(eq(schema.canonicalIngredient.id, loopA));
+      const orphan = await insert("orphan", randomUUID(), ["gluten"]);
+      const orphanChild = await insert("orphan child", orphan, []);
+
+      const nodes = await allNodes(tx);
+      for (const id of [t.gluten, loopA, loopB, loopChild, orphan, orphanChild]) {
+        expect(await excludedIngredientIds(tx, [id])).toEqual(exclusionIds(nodes, id));
+      }
+      // The widening itself, not just agreement: gluten reaches both bad chains.
+      const gluten = await excludedIngredientIds(tx, [t.gluten]);
+      for (const id of [loopA, loopB, loopChild, orphan, orphanChild]) {
+        expect(gluten.has(id)).toBe(true);
+      }
     });
   });
 
