@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -8,23 +8,36 @@ import { describe, expect, it } from "vitest";
 /**
  * The server/client boundary as a fact about the import graph rather than a hope about
  * tree-shaking. Gate 2's recursive CTE lives in lib/db/candidates.ts; the Cook screen is
- * a client component. Nothing the screen imports for its value may reach that module,
- * because "the bundler drops it" is an optimisation, not a boundary — a module-scope env
- * read or a `server-only` marker added upstream would turn the same graph into a build
- * failure a long way from whatever caused it.
+ * a client component. Nothing a client entry point imports for its value may reach that
+ * module, because "the bundler drops it" is an optimisation, not a boundary — a
+ * module-scope env read or a `server-only` marker added upstream would turn the same
+ * graph into a build failure a long way from whatever caused it.
+ *
+ * The entry points are discovered rather than listed, so a client component added later
+ * is covered the day it appears instead of the day someone remembers this file.
  *
  * Deliberately offline and build-free: a guard only worth having is one that runs in
  * `pnpm test`.
  */
 
 const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
-const CLIENT_ENTRY = resolve(REPO_ROOT, "app/_components/cook-client.tsx");
+const APP_DIR = resolve(REPO_ROOT, "app");
 
 const FORBIDDEN_DIR = "lib/db/";
 const FORBIDDEN_PACKAGES = ["drizzle-orm", "postgres"];
 const LOCAL_PREFIXES = ["@/", "./", "../"];
 
 const EXTENSIONS = ["", ".ts", ".tsx", "/index.ts", "/index.tsx"];
+
+function parse(file: string): ts.SourceFile {
+  return ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+}
 
 function resolveLocal(specifier: string, fromFile: string): string | null {
   const base = specifier.startsWith("@/")
@@ -47,6 +60,10 @@ function resolveLocal(specifier: string, fromFile: string): string | null {
  * a client component is allowed to know a server module's shape. `import "x"` has no
  * clause at all and is the realest edge there is, and `import {} from "x"` is the same
  * thing spelled differently, so neither counts as erased.
+ *
+ * `import { type X }` is erased only because tsconfig.json doesn't set
+ * `verbatimModuleSyntax`; under that flag the emitted code keeps a bare `import "x"` and
+ * this would under-report. Revisit here if that flag is ever turned on.
  */
 function isErased(clause: ts.ImportClause | undefined): boolean {
   if (clause === undefined) return false;
@@ -66,16 +83,9 @@ function pushSpecifier(into: string[], node: ts.Expression): void {
 }
 
 /** The specifiers that survive to runtime, static and dynamic alike. */
-function valueImports(file: string): string[] {
-  const source = ts.createSourceFile(
-    file,
-    readFileSync(file, "utf8"),
-    ts.ScriptTarget.Latest,
-    true,
-    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-  );
-
+function valueImports(source: ts.SourceFile): string[] {
   const specifiers: string[] = [];
+
   const visit = (node: ts.Node): void => {
     if (ts.isImportDeclaration(node)) {
       if (!isErased(node.importClause)) pushSpecifier(specifiers, node.moduleSpecifier);
@@ -95,18 +105,37 @@ function valueImports(file: string): string[] {
   return specifiers;
 }
 
-/** Every local file, and every package, the entry point pulls in at runtime. */
-function valueGraph(entry: string): { files: Set<string>; packages: Set<string> } {
+/** A `"use client"` directive has to be the first statement to mean anything. */
+function isClientEntry(source: ts.SourceFile): boolean {
+  const [first] = source.statements;
+  return (
+    first !== undefined &&
+    ts.isExpressionStatement(first) &&
+    ts.isStringLiteral(first.expression) &&
+    first.expression.text === "use client"
+  );
+}
+
+function clientEntries(): string[] {
+  return readdirSync(APP_DIR, { recursive: true, encoding: "utf8" })
+    .map((name) => resolve(APP_DIR, name))
+    .filter((file) => /\.tsx?$/.test(file) && statSync(file).isFile())
+    .filter((file) => isClientEntry(parse(file)))
+    .sort();
+}
+
+/** Every local file, and every package, these entry points pull in at runtime. */
+function valueGraph(entries: readonly string[]): { files: Set<string>; packages: Set<string> } {
   const files = new Set<string>();
   const packages = new Set<string>();
-  const queue = [entry];
+  const queue = [...entries];
 
   while (queue.length > 0) {
     const file = queue.pop();
     if (file === undefined || files.has(file)) continue;
     files.add(file);
 
-    for (const specifier of valueImports(file)) {
+    for (const specifier of valueImports(parse(file))) {
       const local = resolveLocal(specifier, file);
       if (local === null) packages.add(specifier);
       else if (!files.has(local)) queue.push(local);
@@ -116,12 +145,18 @@ function valueGraph(entry: string): { files: Set<string>; packages: Set<string> 
   return { files, packages };
 }
 
-describe("the Cook client's import graph", () => {
-  it("reaches no database module", () => {
-    const { files, packages } = valueGraph(CLIENT_ENTRY);
+describe("the client import graph", () => {
+  it("reaches no database module from any client entry point", () => {
+    const entries = clientEntries();
+    // Discovery that found nothing would leave this passing while checking nothing.
+    expect(entries.map((file) => relative(REPO_ROOT, file))).toContain(
+      "app/_components/cook-client.tsx",
+    );
+
+    const { files, packages } = valueGraph(entries);
 
     // A local specifier the walk couldn't resolve gets filed under `packages` and then
-    // skipped, which would leave the check below unsound rather than merely failing. An
+    // skipped, which would leave the checks below unsound rather than merely failing. An
     // extension or a path alias this resolver doesn't know about shows up here first.
     const unresolved = [...packages]
       .filter((name) => LOCAL_PREFIXES.some((prefix) => name.startsWith(prefix)))
