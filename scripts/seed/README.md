@@ -4,8 +4,8 @@ The recipe catalogue is **synthetic**, generated once by a script here and commi
 JSON. No recipe site was scraped — that is a licensing problem this project does not
 need, and a generated catalogue can be designed to contain the adversarial cases.
 
-The canonical ingredient taxonomy — specifically the allergen hierarchy, its top two
-levels — is **written by hand**, because a generated allergen tree is the one part of
+The canonical ingredient taxonomy — specifically the allergen hierarchy above the
+leaves — is **written by hand**, because a generated allergen tree is the one part of
 this dataset a model shouldn't be trusted with. Generation fills the leaves, and a leaf
 can never carry an allergen tag of its own — only inherit one from the hand-authored node
 it hangs under.
@@ -19,8 +19,8 @@ does, and prints the host and database it wrote to so a missed production URL is
 
 ## The allergen tree — `taxonomy.json`
 
-Six roots — `dairy`, `gluten`, `nuts`, `shellfish`, `egg`, `soy` — and their immediate
-children, one node per line. Only a root carries its own tag; descendants inherit it, so
+Six roots — `dairy`, `gluten`, `nuts`, `shellfish`, `egg`, `soy` — and the hand-authored
+nodes under them, one node per line. Only a root carries its own tag; descendants inherit it, so
 nobody tags `clarified butter` and it is still dairy.
 
 Before anything is written, the file is parsed with its Zod schema and validated as a
@@ -34,6 +34,18 @@ Decisions worth knowing:
   expects peanuts to be covered, and over-exclusion is the safe direction.
 - **Oats are under `gluten`,** for the same reason: unless labelled gluten-free, oats are
   routinely contaminated with wheat.
+- **Wheat is its own node under `gluten`,** with `wheat flour`, `bread`, `breadcrumbs`,
+  `pasta` and `couscous` under it, so "no wheat" removes bread and pasta, not only flour.
+  The tree is single-parent, and "made from wheat" is the one parent these share. `oats`,
+  `barley`, `rye` and `worcestershire sauce` stay directly under `gluten`: "no wheat"
+  doesn't remove them. `pasta` means wheat pasta; a rice or lentil pasta gets its own node
+  outside `wheat`. This puts generated leaves up to four levels deep
+  (`gluten → wheat → pasta → linguine`).
+- **The alias `flour` belongs to `wheat`, not `wheat flour`.** Someone typing "no flour"
+  usually means the allergy, and resolving it to one node would still offer bread and
+  pasta. `plain flour` and `self-raising flour` stay on `wheat flour`. It over-excludes on
+  purpose: a recipe line that just says "flour" resolves to `wheat`, so "no pasta" removes
+  that recipe too, through the ancestor rule below.
 - **Shellfish includes molluscs** (mussels, clams, scallops, squid), not only crustaceans.
 - **An ingredient with two allergens carries the second tag itself.** The tree is
   single-parent, so `soy sauce` and `miso` sit under `soy` and are tagged `gluten`: both
