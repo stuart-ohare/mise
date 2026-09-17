@@ -102,7 +102,7 @@ Every change goes through the same loop, run as Claude Code skills against GitHu
 issues:
 
 ```
-/spec → /plan → /build → /verify → /ship → human merge
+/spec → /plan → /build → /verify → /ship → human merge → status:done (automatic)
 ```
 
 The issue is the spec. The plan is an issue comment the human approves by moving a
@@ -116,9 +116,13 @@ dependencies without approval; they need [`jq`](https://jqlang.org). Why it's bu
 
 ### CI
 
-GitHub Actions runs one workflow, `checks` (typecheck, lint, test), on every PR and
-push to `main`. It needs no secrets and calls no model. `pnpm eval` never runs in CI,
-because it costs money and isn't deterministic.
+GitHub Actions runs two workflows. Neither needs a secret or calls a model:
+
+- `checks` (typecheck, lint, test) runs on every PR and push to `main`.
+- `issue-done` runs when a PR merges. It moves every issue the PR closes (`Closes #n`)
+  to `status:done`.
+
+`pnpm eval` never runs in CI, because it costs money and isn't deterministic.
 
 `main` is protected: changes arrive by PR, `checks` must pass, force-pushes are blocked,
 and the rules apply to admins too.

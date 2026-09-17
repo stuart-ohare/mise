@@ -1,0 +1,23 @@
+name: issue-done
+
+# The last stage of the loop (ADR 0003): when a PR merges, every issue it closes
+# moves to status:done. No model and no secrets beyond the built-in token.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  mark-done:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: scripts/workflow/mark-done.sh ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ github.token }}
