@@ -186,5 +186,93 @@ its report goes in the PR body.
 
 ## Trade-offs
 
-To be written as the decisions land. Individual decisions worth defending are recorded
-in [`docs/decisions/`](docs/decisions).
+Six decisions that shaped what is here, each with what it cost and what would change it.
+The ones worth defending at length are recorded in [`docs/decisions/`](docs/decisions).
+
+### No streaming
+
+Gate 3 scans generated prose for every alias of every excluded ingredient before any of
+it renders, and on a second failure `runOutputGate` returns a `downgraded` result that
+carries no generated text at all. A token already on screen cannot be unsent, so
+validation and streaming want the same moment and only one of them can have it
+([ADR 0002](docs/decisions/0002-exclusion-is-a-database-constraint.md)).
+
+**Cost.** Cook will feel slower than a streaming chat: nothing can appear until the whole
+response has been scanned, and a retry doubles that wait.
+
+**Revisit when.** The filtered cards can render while only the prose waits on the gate.
+Gate 2 has already proved those rows safe — that is a partial result rather than a
+streamed one, and it is the version of this idea worth building.
+
+### Two models, not one
+
+Constraint extraction runs on `claude-haiku-4-5`. Recipe extraction and ranking are
+reserved for `claude-sonnet-4-5`, which so far only the one-off catalogue generator
+calls. Short frequent input with a small schema and long messy input where a mistake is
+expensive are different jobs, and `lib/ai/client.ts` names the two tiers separately
+([ADR 0004](docs/decisions/0004-model-provider.md)).
+
+**Cost.** Two sets of model quirks to learn and two eval baselines to keep honest — and
+only one of those exists. The 17 committed fixtures all run against the fast model;
+nothing yet measures `MODELS.capable`, which is the tier doing the expensive work.
+
+**Revisit when.** One model clears both bars on the same fixtures at the cheaper price.
+That is a measurement rather than a guess, so the suite that would make it has to exist
+first.
+
+### `exclude` is pegged at 100%
+
+`evals/thresholds.ts` sets `exclude_exact: 1`. Not 0.98 — a threshold set by what the
+model currently achieves is a threshold that moves when the model has a bad day.
+
+**Cost.** One failing fixture blocks a merge, and the only permitted fixes are a better
+prompt or a narrower schema (CLAUDE.md §4.5). That is real time spent on a red build
+that a lower number would have turned green.
+
+**Revisit when.** Never for the bar itself. What moves is the fixture set — 17 today, and
+every new way someone phrases an exclusion belongs in it. A failure is answered by making
+the extraction better, never by making the test weaker.
+
+### Hand-authored tree, generated leaves
+
+The 53 nodes of the allergen hierarchy are written by hand; the 125 leaves and 60 recipes
+were generated once and committed as JSON. Only 11 of those leaves hang under a
+hand-authored node — `parmesan` under `cheese`, `linguine` under `pasta` — and the other
+114 stand outside the tree, where no allergen it models is at stake. A generated leaf
+can never carry a tag of its own, so every allergen in the catalogue traces to a node a
+human placed ([`scripts/seed/README.md`](scripts/seed/README.md)).
+
+**Cost.** The tree does not grow at the speed of the catalogue. Every new allergen,
+cuisine or awkward ingredient needs a human to decide where it hangs, and until someone
+does, an unresolved ingredient blocks its recipe from leaving draft.
+
+**Revisit when.** A leaf's placement can be verified as cheaply as it can be generated —
+an eval over resolution, rather than a person reading a diff of the tree.
+
+### No caching, no queue, no model wrapper
+
+Nothing is memoised and nothing is queued, so each Cook request will call constraint
+extraction again. The Anthropic SDK is imported directly in one file rather than behind a
+provider-agnostic client (Tech stack, above, and ADR 0004).
+
+**Cost.** Repeated work at repeated cost, and no protection against a slow or failing
+provider — an outage will break Cook rather than degrade it. Swapping provider means
+editing `lib/ai/client.ts` and each call site: roughly a day, growing with each new call.
+
+**Revisit when.** A second consumer appears, an identical query is repeated often enough
+to measure, or an eval run on the same fixtures says another provider is better.
+
+### No model in CI
+
+`checks` runs typecheck, lint and test on every PR and holds no Anthropic secret. The
+`invariant-reviewer` runs locally inside `/verify`, and `pnpm eval` is run by hand —
+`verify.sh` only checks that a gate-labelled change committed a fresh `evals/latest.md`
+([ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md)).
+
+**Cost.** The model-checked half of the definition of done is only as reliable as the
+person who ran it. A PR can be green with a stale `evals/latest.md`, and the reviewer's
+report is pasted evidence rather than something CI reproduced.
+
+**Revisit when.** `pnpm eval` is deterministic or cheap enough to run per PR, or there is
+a budget worth defending for it. Until then the honest version is a local run with its
+report committed.
