@@ -11,6 +11,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:db": "vitest run --config vitest.db.config.mts",
     "eval": "tsx evals/run.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
