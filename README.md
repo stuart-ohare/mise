@@ -90,7 +90,7 @@ pnpm dev
 |---|---|
 | `pnpm typecheck` | `next typegen` then `tsc --noEmit` |
 | `pnpm test` | Vitest units — no network, no API calls, no database |
-| `pnpm test:db` | Gate 2's SQL and the seed's term-collision check against Postgres (`*.db.test.ts`). Needs `docker compose up -d`, `pnpm db:push` and `DATABASE_URL` in `.env.local`. Every write rolls back, and it doesn't need the seed. Not run in CI |
+| `pnpm test:db` | Gate 2's SQL and the seed's term-collision and tree-change checks against Postgres (`*.db.test.ts`). Needs `docker compose up -d`, `pnpm db:push` and `DATABASE_URL` in `.env.local`. Every write rolls back, and it doesn't need the seed. Not run in CI |
 | `pnpm eval` | Eval suite against the real model. **Costs money** — one run is 51 calls — and is non-deterministic. Runs the constraint-extraction suite: 17 fixtures, 3 runs each ([evals/README.md](evals/README.md)) |
 
 ## Deploying
@@ -136,6 +136,10 @@ safe to rerun, and prints the host it wrote to — check it isn't `localhost`:
 ```bash
 DATABASE_URL='<neon pooled url>' pnpm seed
 ```
+
+If a change to the tree since the last seed would move an existing ingredient's parent or
+tags, it writes nothing and lists each one. Once every line is intended, run it again with
+`--apply-tree-changes` ([scripts/seed/README.md](scripts/seed/README.md)).
 
 **5. Deploy.** Pushing to `main` deploys production. Env vars only reach a build made
 after they were set — after changing one, redeploy (`vercel redeploy <deployment-url>
