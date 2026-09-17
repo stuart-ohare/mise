@@ -29,18 +29,20 @@ const aliases = taxonomy.nodes.flatMap((n) =>
 const termsFor = (excluded: string) => outputTerms(nodes, aliases, [excluded]);
 
 describe("scanning the committed catalogue", () => {
+  // The third column is the term the hit must be attributable to. Asserting only that
+  // something matched would stay green if stemming broke and a noisier rule replaced it.
   it.each([
-    ["dairy", "a cheesy crust"],
-    ["dairy", "finish with a cheesy crumb"],
-    ["dairy", "a spoonful of crème fraiche"],
-    ["dairy", "a spoonful of creme fraiche"],
-    ["dairy", "A SPOONFUL OF CRÈME FRAÎCHE"],
-    ["gluten", "creamy oat milk"],
-    ["gluten", "an oatmeal topping"],
-    ["egg", "a spoon of mayo"],
-    ["gluten", "a dash of Worcester sauce"],
-  ])("with %s excluded, rejects: %s", (excluded, prose) => {
-    expect(scanProse(prose, termsFor(excluded))).not.toEqual([]);
+    ["dairy", "a cheesy crust", "cheese"],
+    ["dairy", "finish with a cheesy crumb", "cheese"],
+    ["dairy", "a spoonful of crème fraiche", "crème fraîche"],
+    ["dairy", "a spoonful of creme fraiche", "creme fraiche"],
+    ["dairy", "A SPOONFUL OF CRÈME FRAÎCHE", "crème fraîche"],
+    ["gluten", "creamy oat milk", "oats"],
+    ["gluten", "an oatmeal topping", "oats"],
+    ["egg", "a spoon of mayo", "mayo"],
+    ["gluten", "a dash of Worcester sauce", "worcester sauce"],
+  ])("with %s excluded, rejects: %s", (excluded, prose, term) => {
+    expect(scanProse(prose, termsFor(excluded)).map((hit) => hit.term)).toContain(term);
   });
 
   it("leaves a sentence naming nothing excluded alone", () => {
