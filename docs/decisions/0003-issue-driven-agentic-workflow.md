@@ -13,19 +13,24 @@ agent under pressure to make something pass is most tempted to route around.
 
 ## Decision
 
-The loop is five project skills, each moving a `status:*` label on the issue:
+The loop is six project skills. Most of them move a `status:*` label on the issue:
 
 ```
 /spec    grill-me interview → human approves draft → issue filed        status:spec
-/plan    plan posted as issue comment → human moves label               status:planned
+/plan    plan posted as issue comment
+/approve human-only; the label move is a prompt the human accepts       status:planned
 /build   worktree, failing test first, smallest change                  status:building
 /verify  scripts/workflow/verify.sh + invariant-reviewer subagent
 /ship    PR with every criterion ticked against evidence                status:in-review
 merge    human, always; CI then relabels the closed issue               status:done
 ```
 
-- **Humans approve three things:** the spec (before filing), the plan (by moving the
-  label to `status:planned` — the skills never add it), and the merge.
+- **Humans approve three things:** the spec (before filing), the plan, and the merge.
+  The plan is approved by running `/approve <n>` and accepting the permission prompt it
+  triggers (#25). The human can also move the label by hand. The agent adds
+  `status:planned` only through that skill, and only behind the prompt:
+  `disable-model-invocation` stops the model starting it, and the Bash guard asks before
+  a direct `gh` command adds the label anywhere else.
 - **What can be a script is a script.** `verify.sh` runs the definition of done and the
   §4.2 fixture rule for `gate:*` issues, and records the verified commit; `/ship`
   refuses any other commit.
@@ -39,8 +44,9 @@ merge    human, always; CI then relabels the closed issue               status:d
   - **Claude Code hooks** (`.claude/hooks/`) cover what git can't see:
     - They deny `--no-verify`, `commit -n`, and retargeting or unsetting `core.hooksPath`.
     - They deny writes to `evals/thresholds.ts` and to the `/verify` record.
-    - They ask the human before dependency changes and before edits to the guards
-      themselves.
+    - They ask the human before dependency changes, before edits to the guards
+      themselves, and before a `gh issue edit`/`create` or `gh api` call adds
+      `status:planned`.
   - Both sets run real inputs in `scripts/workflow/{githooks,hooks}.test.ts`.
 - **Review comes from fresh context.** `invariant-reviewer` sees the diff, the issue and
   CLAUDE.md — never the building conversation. It runs only locally, in `/verify`, and
@@ -75,9 +81,14 @@ merge    human, always; CI then relabels the closed issue               status:d
 
 ## Cost accepted
 
-- **Approval is honour-system at the identity level.** The agent's `gh` runs as the same
-  account as the human, so GitHub can't distinguish who moved `status:planned`. The skills
-  forbid it; nothing technically prevents it. A separate bot identity would close this.
+- **Approval is best-effort at the identity level.** The agent's `gh` runs as the same
+  account as the human, so GitHub can't distinguish who moved `status:planned`. The
+  agent adds it only through `/approve`, and the guard asks before a `gh issue edit`/`create` that adds it
+  or a `gh api` call that mentions it. The guard reads shell text, so indirection gets
+  past it. Examples, not a complete list: a script, `curl` to the API, `gh api --input`,
+  a `gh api graphql` mutation (it names labels by ID), a `gh` alias, the label held in a
+  shell variable, and a heredoc body fed to `bash`. A separate bot identity would close
+  this.
 - **Claude Code hooks parse shell text, so they're best-effort.** An indirect write gets
   past them (a script or `python -c` that opens the thresholds file), and heredoc bodies
   are deliberately ignored. The first build tried to enforce the git rules this way too.

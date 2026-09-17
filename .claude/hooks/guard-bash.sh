@@ -3,6 +3,7 @@
 #   - switching those git hooks off (--no-verify, core.hooksPath, chmod)  deny
 #   - writes to eval thresholds or the /verify record (CLAUDE.md §4.5)    deny
 #   - dependency changes, and edits to the guards themselves              ask
+#   - adding status:planned, the human's plan approval (ADR 0003)          ask
 # Exit 2 denies with stderr shown to the agent; "ask" puts it to the human.
 #
 # This reads shell text, so it closes the obvious routes and no more — known gaps are
@@ -36,6 +37,10 @@ shell_lines=$(awk -v q="$q" '
     if (match($0, "(^|[^<])<<-?[[:space:]]*[\"" q "]?[A-Za-z_][A-Za-z0-9_-]*")) {
       delim = substr($0, RSTART, RLENGTH); sub("^[^<]*<<-?[[:space:]]*[\"" q "]?", "", delim); skip = 1
     } }' <<<"$cmd")
+
+# A trailing backslash continues the command, so flags on the next line are its flags.
+shell_lines=$(awk '{ if (sub(/\\$/, "")) { buf = buf $0 " "; next } print buf $0; buf = "" }
+  END { if (buf != "") print buf }' <<<"$shell_lines")
 
 # One simple command per line. Lowercased because macOS filesystems are
 # case-insensitive (Evals/Thresholds.ts is the same file) and git config keys are too.
@@ -97,6 +102,11 @@ done <<<"$segments"
 
 # Pass 2 — questions for the human.
 opts="($ws+-[^[:space:]]+($ws+[^-[:space:]][^[:space:]]*)?)*"
+# gh may follow a path (/opt/homebrew/bin/gh), a quote (bash -c "gh …") or a backtick.
+gh_at="(^|[[:space:]\"'(/\`])gh$ws+"
+gh_issue_write="${gh_at}issue$ws+(edit|create)($ws|$end)"
+gh_api="${gh_at}api($ws|$end)"
+adds_planned="$ws(--add-label|--label|-l)(=|$ws+)([\"'][^\"']*|[^[:space:]]*)status:planned"
 while IFS= read -r s; do
   # §4.5 — every dependency is a decision someone has to defend.
   if [[ $s =~ (^|$ws|\()(pnpm|npm|yarn)$opts$ws+(add|remove|rm|uninstall|un|update|up|upgrade)($ws|$end) ]] ||
@@ -107,6 +117,14 @@ while IFS= read -r s; do
     ask "Shell write to package.json may change dependencies (CLAUDE.md §4.5)."
   writes_to "$s" '(\.githooks|\.claude/hooks|\.claude/settings)' &&
     ask "This changes the workflow guards themselves. Approve only if that's the intended change."
+
+  # ADR 0003 — status:planned is the human's plan approval. Inside /approve this prompt
+  # is the approval click; anywhere else it stops the agent approving its own plan.
+  # The value is matched per flag, so /build's --remove-label status:planned is allowed.
+  if [[ $s =~ $gh_issue_write && $s =~ $adds_planned ]] ||
+     [[ $s =~ $gh_api && $s =~ status:planned ]]; then
+    ask "This approves a plan by adding status:planned (ADR 0003). Accept only if you ran /approve and have read the plan."
+  fi
 done <<<"$segments"
 
 exit 0

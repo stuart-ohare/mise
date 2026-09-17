@@ -12,7 +12,7 @@ gh issue view <n> --json state,labels,title,body,comments
 ```
 
 Proceed only if the issue is open **and** labelled `status:planned`, and a `## Plan`
-comment exists. Otherwise stop: tell the user to approve the plan by moving the label.
+comment exists. Otherwise stop: tell the user to approve the plan with `/approve <n>`.
 Never add the label yourself.
 
 Read the plan and every `## Plan amendment` after it. The plan is the scope.
