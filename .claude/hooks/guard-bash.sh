@@ -38,6 +38,10 @@ shell_lines=$(awk -v q="$q" '
       delim = substr($0, RSTART, RLENGTH); sub("^[^<]*<<-?[[:space:]]*[\"" q "]?", "", delim); skip = 1
     } }' <<<"$cmd")
 
+# A trailing backslash continues the command, so flags on the next line are its flags.
+shell_lines=$(awk '{ if (sub(/\\$/, "")) { buf = buf $0 " "; next } print buf $0; buf = "" }
+  END { if (buf != "") print buf }' <<<"$shell_lines")
+
 # One simple command per line. Lowercased because macOS filesystems are
 # case-insensitive (Evals/Thresholds.ts is the same file) and git config keys are too.
 segments=$(tr '[:upper:]' '[:lower:]' <<<"$shell_lines" | tr ';&|' '\n\n\n')

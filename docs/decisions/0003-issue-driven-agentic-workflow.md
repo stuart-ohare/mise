@@ -82,11 +82,13 @@ merge    human, always; CI then relabels the closed issue               status:d
 ## Cost accepted
 
 - **Approval is best-effort at the identity level.** The agent's `gh` runs as the same
-  account as the human, so GitHub can't distinguish who moved `status:planned`. Only
-  `/approve` adds it, and the guard asks before a `gh issue edit`/`create` that adds it
-  or a `gh api` call that mentions it. The guard reads shell text, so these get past it:
-  a script, `curl` to the API, `gh api --input`, a `gh api graphql` mutation (it names
-  labels by ID), a `gh` alias, and a heredoc body fed to `bash`. A separate bot identity would close this.
+  account as the human, so GitHub can't distinguish who moved `status:planned`. The
+  agent adds it only through `/approve`, and the guard asks before a `gh issue edit`/`create` that adds it
+  or a `gh api` call that mentions it. The guard reads shell text, so indirection gets
+  past it. Examples, not a complete list: a script, `curl` to the API, `gh api --input`,
+  a `gh api graphql` mutation (it names labels by ID), a `gh` alias, the label held in a
+  shell variable, and a heredoc body fed to `bash`. A separate bot identity would close
+  this.
 - **Claude Code hooks parse shell text, so they're best-effort.** An indirect write gets
   past them (a script or `python -c` that opens the thresholds file), and heredoc bodies
   are deliberately ignored. The first build tried to enforce the git rules this way too.
