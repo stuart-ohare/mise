@@ -1,9 +1,9 @@
 /**
  * The canonical ingredient tree, as pure functions over an in-memory node list.
  *
- * Gate 2 does this walk in SQL. These mirror it so the rule — an exclusion covers
- * a node and every descendant, and a tag on an ancestor applies to every
- * descendant — is pinned by unit tests that need no database.
+ * Gate 2 does this in SQL. These mirror it so the rules are pinned by unit tests
+ * that need no database: a tag on an ancestor applies to every descendant, and an
+ * exclusion is exactly `exclusionIds` — not just a node and its descendants.
  */
 
 export type IngredientNode = {
@@ -78,8 +78,6 @@ export function exclusionIds(nodes: readonly IngredientNode[], excludedId: strin
   const ids = subtreeIds(nodes, excludedId);
   const byId = new Map(nodes.map((node) => [node.id, node]));
 
-  // Ancestors are excluded as single nodes: a recipe that only says "eggs" (the egg
-  // root) may contain the egg white that was excluded. Their other children are not.
   let root = byId.get(excludedId);
   const visited = new Set<string>();
   while (root && root.parentId !== null && !visited.has(root.id)) {
