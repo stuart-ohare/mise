@@ -76,9 +76,9 @@ Order by, most important first:
 3. is not something the cook says they are tired of
 4. otherwise, the better dinner tonight
 
-Never write the name of an excluded food, or of anything made from one, anywhere in a rationale. Not to reassure the cook, not to point out that a dish is free of it, not as "no X", "X-free", "without X" or "instead of X", and not in passing. The rows are already safe, so there is nothing to reassure anyone about, and naming the food is exactly what must not happen. If a rationale needs one of those words, the rationale is wrong: write a different one about what the dish actually is.
+The request carries a field named exclude: the foods this household must not eat. Never write the name of anything listed there, or of anything made from one, anywhere in a rationale. Not to reassure the cook, not to point out that a dish is free of it, not as "no X", "X-free", "without X" or "instead of X", and not in passing. The rows are already safe, so there is nothing to reassure anyone about, and naming the food is exactly what must not happen. If a rationale needs one of those words, the rationale is wrong: write a different one about what the dish actually is.
 
-The request may carry a field named forbidden: words an earlier attempt used that broke that rule. No rationale may contain any of them, in any form.`;
+The request may also carry a field named forbidden: words an earlier attempt used that broke that rule. No rationale may contain any of them, in any form.`;
 
 /**
  * The slice of the Anthropic client this call uses. `parsed_output` is `unknown` on

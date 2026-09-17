@@ -61,9 +61,13 @@ const ranked = (...ids: string[]) => ({
 });
 
 /** The single string the model is shown: system rules plus the request payload. */
-function prompt(call: MessageCreateParamsNonStreaming): string {
+function prompt(calls: readonly MessageCreateParamsNonStreaming[]): string {
+  const call = calls.at(0);
+  if (!call) throw new Error("the model was never called");
   return JSON.stringify({ system: call.system, messages: call.messages });
 }
+
+const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g;
 
 describe("rankAndExplain", () => {
   it("returns the model's order with each rationale attached", async () => {
@@ -236,20 +240,22 @@ describe("rankAndExplain", () => {
     const { client, calls } = stub({ stop_reason: "end_turn", parsed_output: ranked(STEW) });
 
     await rankAndExplain({ candidates, constraints }, client);
-    const sent = prompt(calls[0]!);
+    const sent = prompt(calls);
 
-    for (const row of candidates) expect(sent).toContain(row.id);
-    expect(sent).not.toContain(INVENTED);
+    // Every id in the payload, not just the absence of one invented constant.
+    expect([...new Set(sent.match(UUID) ?? [])].sort()).toEqual(
+      candidates.map((row) => row.id).sort(),
+    );
   });
 
   it("names the violated terms only when the gate passes them", async () => {
     const clean = stub({ stop_reason: "end_turn", parsed_output: ranked(STEW) });
     await rankAndExplain({ candidates, constraints }, clean.client);
-    expect(prompt(clean.calls[0]!)).not.toContain("creme fraiche");
+    expect(prompt(clean.calls)).not.toContain("creme fraiche");
 
     const retry = stub({ stop_reason: "end_turn", parsed_output: ranked(STEW) });
     await rankAndExplain({ candidates, constraints }, retry.client, ["creme fraiche", "butter"]);
-    const sent = prompt(retry.calls[0]!);
+    const sent = prompt(retry.calls);
     expect(sent).toContain("creme fraiche");
     expect(sent).toContain("butter");
   });

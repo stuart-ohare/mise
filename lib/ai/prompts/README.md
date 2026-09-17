@@ -59,8 +59,10 @@ retries — that is gate 3's job, and this function is the `generate` that
   there is nothing to reassure the cook about. `violatedTerms` travels in the request
   payload as `forbidden`, which is the only difference between attempt 1 and the retry.
 - **The row shape is gate 2's.** `rankingCandidateSchema` extends `candidateRecipeSchema`
-  from `lib/db/candidates.ts` with the ingredient names, so what call 3 accepts can't
-  drift from what the query returns. Selecting those names is the caller's job.
+  from `lib/db/candidates.ts` with the ingredient names, so the compiler rejects a call 3
+  that has drifted from what the query returns. Nothing re-parses the rows at runtime:
+  they arrive from gate 2, not across a boundary, and the boundary that does need a parse
+  is the route's. Selecting those names is the caller's job.
 - **Static `SYSTEM`, variable payload.** Rules in the system prompt, candidates and
   constraints in the user message, so `VERSION` tracks rule changes and not requests.
 
