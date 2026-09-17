@@ -14,7 +14,7 @@ Hand-authored where wrong answers matter, generated where they don't.
 
 `pnpm seed` loads the committed JSON, so it works offline from a clean clone. It needs
 only `DATABASE_URL` — no network, no API key — and is safe to rerun: a second run
-changes nothing. Unset, it falls back to the local Docker database, as `drizzle.config.ts`
+changes nothing, and a run that would move an existing ingredient refuses (below). Unset, it falls back to the local Docker database, as `drizzle.config.ts`
 does, and prints the host and database it wrote to so a missed production URL is visible.
 
 ## The allergen tree — `taxonomy.json`
@@ -75,6 +75,24 @@ Decisions worth knowing:
   collision with both ingredients, writes nothing and exits 1. Terms are compared the
   way gate 1 normalises them: Unicode NFC, lowercase, trimmed, runs of whitespace
   collapsed. So an existing alias is never re-pointed.
+- **An existing ingredient's parent and tags are never overwritten unasked.** Moving a
+  node, or changing its tags, moves every recipe under it into or out of an exclusion.
+  Before writing, the seed compares each node already in the database with the files
+  (`lib/domain/tree-changes.ts`: parents by name, tags as a set). If any differ, it lists
+  them, writes nothing and exits 1:
+
+  ```
+  Nothing written: existing ingredients differ from the files.
+    "pasta": parent "gluten" → "wheat"
+  Re-run with --apply-tree-changes to apply them.
+  ```
+
+  A deliberate correction to the files, like #23 moving `pasta` and `bread` under
+  `wheat`, reaches a database that's already seeded (production included) in two runs:
+  `pnpm seed` to read the list, then `pnpm seed --apply-tree-changes` once every line is
+  one you meant. The flag applies all of them, prints each, and never bypasses the term
+  check above. A line you didn't expect means something else moved the node: find out
+  what before applying.
 - **Removing a node from the file doesn't delete it** from the database.
 
 ## Deliberately missing aliases
