@@ -56,6 +56,13 @@ describe("scripts/seed/taxonomy.json", () => {
     expect(exclusionIds(nodes, "gluten")).toContain(name);
   });
 
+  it.each([
+    ["wheat flour", "soy sauce"],
+    ["barley", "miso"],
+  ])("'no %s' also removes %s", (excluded, tagged) => {
+    expect(exclusionIds(nodes, excluded)).toContain(tagged);
+  });
+
   it.each(ALLERGENS)("excludes every node whose tags include %s", (allergen) => {
     // Ties the two readings of the tree together: whatever effectiveAllergenTags
     // says is dairy, the exclusion gate 2 runs must remove.

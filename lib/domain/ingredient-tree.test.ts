@@ -67,8 +67,22 @@ describe("exclusionIds", () => {
     expect(exclusionIds(multi, "soy")).toEqual(new Set(["soy", "tofu", "soy sauce", "tamari"]));
   });
 
-  it("is just the subtree when the excluded node isn't an allergen root", () => {
+  it("widens an exclusion below an allergen root by that root's tag", () => {
+    // "No bread" may be a wheat allergy; soy sauce's wheat is only visible as its tag.
+    expect(exclusionIds(multi, "bread")).toEqual(new Set(["bread", "soy sauce", "tamari"]));
+  });
+
+  it("does not widen by the excluded node's own extra tag", () => {
     // Excluding soy sauce must not exclude every gluten ingredient.
     expect(exclusionIds(multi, "soy sauce")).toEqual(new Set(["soy sauce", "tamari"]));
+  });
+
+  it("is just the subtree under a root that carries no allergen", () => {
+    const withVeg: IngredientNode[] = [
+      ...multi,
+      { id: "veg", name: "vegetable", parentId: null, allergenTags: [] },
+      { id: "leek", name: "leek", parentId: "veg", allergenTags: [] },
+    ];
+    expect(exclusionIds(withVeg, "leek")).toEqual(new Set(["leek"]));
   });
 });
