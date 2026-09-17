@@ -125,6 +125,15 @@ describe("mark-done.sh", () => {
     expect(edits()).toEqual([]);
   });
 
+  // Review finding: a jq failure in a for-loop word list escaped set -e and exited 0.
+  it("fails loudly when the closing references can't be read", () => {
+    writeFileSync(join(dir, "pr.json"), '{"state":"MERGED","closingIssuesReferences":"oops"}');
+
+    const result = markDone();
+    expect(result.status).not.toBe(0);
+    expect(edits()).toEqual([]);
+  });
+
   it("fails loudly when gh fails, so a missed relabel shows as a red run", () => {
     writeFileSync(join(dir, "pr-fails"), "");
 

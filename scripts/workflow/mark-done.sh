@@ -13,7 +13,9 @@ if [[ $(jq -r .state <<<"$json") != MERGED ]]; then
   exit 0
 fi
 
-for issue in $(jq -r '.closingIssuesReferences[].number' <<<"$json"); do
+# Assigned first: a failure inside a for-loop word list would escape set -e.
+issues=$(jq -r '.closingIssuesReferences[].number' <<<"$json")
+for issue in $issues; do
   stale=$(gh issue view "$issue" --json labels |
     jq -r '[.labels[].name | select(startswith("status:") and . != "status:done")] | join(",")')
   args=(issue edit "$issue" --add-label status:done)
