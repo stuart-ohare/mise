@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import type { IngredientNode } from "./ingredient-tree";
 import { outputTerms, scanProse } from "./output-gate";
-import { taxonomySchema } from "./taxonomy";
+import { ALLERGENS, taxonomySchema } from "./taxonomy";
 
 // The scanner's unit tests use a small hand-written tree, which is where its rules are
 // pinned. This file is the other half: the phrases a model actually writes, scanned
@@ -47,5 +47,28 @@ describe("scanning the committed catalogue", () => {
 
   it("leaves a sentence naming nothing excluded alone", () => {
     expect(scanProse("a rich tomato stew", termsFor("dairy"))).toEqual([]);
+  });
+
+  // The stem's length floors are chosen against the catalogue as it stands, so they are
+  // only as good as the catalogue: add "peas" and "pea" starts firing on "peach" and
+  // "pear". This scans ordinary prose that names no excluded ingredient against the
+  // widest term set each allergen produces, so a term added later that shortens into a
+  // common word fails here rather than downgrading every answer in production.
+  const INNOCUOUS = [
+    "Roast the squash until the edges catch, then scatter over the parsley.",
+    "When the pan is hot, add the onion and cook it down slowly.",
+    "A peach and pear salad, dressed with lemon and a little olive oil.",
+    "Simmer for twenty minutes, then taste it for salt and pepper.",
+    "Char the peppers under a hot grill until the skins blister.",
+    "Fold the greens through at the last minute so they keep their bite.",
+    "Toast the spices in a dry pan, then grind them coarsely.",
+    "A quick weeknight supper that comes together in one pan.",
+  ];
+
+  it.each(ALLERGENS)("scans clean prose clean with %s excluded", (allergen) => {
+    const found = INNOCUOUS.flatMap((prose) =>
+      scanProse(prose, termsFor(allergen)).map((hit) => `${hit.match} → ${hit.term}`),
+    );
+    expect(found).toEqual([]);
   });
 });
