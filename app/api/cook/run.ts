@@ -96,10 +96,10 @@ const withoutIngredients = (row: RankingCandidate): CandidateRecipe => ({
  */
 function generatedProse(result: RankingResult): string[] {
   if (!result.ok) return [];
-  // `collectStrings` rather than reading `rationale` directly, so a field that grows
-  // nested strings is scanned whole — but the pick stays explicit, because a new
-  // generated field has to be a deliberate decision to scan, not an accident.
-  return collectStrings(result.ranking.map((entry) => ({ rationale: entry.rationale })));
+  // A deny-list, not a pick: `id` is blanked and everything else is scanned, so a field
+  // added to the ranking schema later is covered by default. Listing the fields to scan
+  // instead would silently stop covering the new one.
+  return collectStrings(result.ranking.map((entry) => ({ ...entry, id: "" })));
 }
 
 export async function runCook(input: CookRequest, deps: CookDeps): Promise<CookResponse> {
@@ -146,12 +146,26 @@ export async function runCook(input: CookRequest, deps: CookDeps): Promise<CookR
   }
 
   const terms = outputTerms(tree.nodes, tree.aliases, excludedIds);
+
+  // A call 3 failure scans as clean, because there is no prose in it to scan. That is
+  // what keeps an API error out of the gate's retry, but it would also let the retry be
+  // recorded as a success when it never produced a sentence — so the outcome of the
+  // second attempt is tracked here and the record is corrected with it.
+  let retryWroteProse = false;
+  let attempt = 0;
+
   const gate = await runOutputGate<RankingResult>({
-    generate: (violatedTerms) => deps.rank({ candidates: within, constraints }, violatedTerms),
+    generate: async (violatedTerms) => {
+      attempt += 1;
+      const result = await deps.rank({ candidates: within, constraints }, violatedTerms);
+      if (attempt === 2) retryWroteProse = result.ok;
+      return result;
+    },
     scan: (result) => generatedProse(result).flatMap((text) => scanProse(text, terms)),
     onViolation: (record) =>
       deps.recordViolation({
         ...record,
+        retrySucceeded: record.retrySucceeded && retryWroteProse,
         constraints,
         query: input.kind === "query" ? input.query : JSON.stringify(constraints),
         promptVersion: RANKING_VERSION,

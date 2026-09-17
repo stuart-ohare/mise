@@ -302,6 +302,21 @@ describe("runCook", () => {
     expect(calls.violations[0]).toMatchObject({ attempt: 1, retrySucceeded: true });
   });
 
+  it("does not record a retry that never wrote a sentence as a success", async () => {
+    const { deps, calls } = harness({
+      extract: async () => ({ ok: true, constraints: constraints({ exclude: ["dairy"] }) }),
+      rows: [ROW_A],
+      rankQueue: [ranking([ROW_A.id, "Stir in the ghee"]), { ok: false, reason: "api_error" }],
+    });
+
+    const result = await runCook({ kind: "query", query: "no dairy" }, deps);
+
+    // A failed call 3 has no prose, so it scans clean. That must not read as the gate
+    // having been satisfied — output_violation is the evidence the gate is load-bearing.
+    expect(calls.violations[0]).toMatchObject({ attempt: 1, retrySucceeded: false });
+    expect(result).toMatchObject({ kind: "cards", reason: "ranking_unavailable" });
+  });
+
   it("does not treat a recipe id as prose to scan", async () => {
     // "beef" is four hex characters, so a uuid segment can begin with it. scanProse
     // matches at a word start and treats "-" as a boundary, so scanning the ids would
