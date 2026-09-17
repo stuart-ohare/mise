@@ -22,6 +22,17 @@ config({ path: ".env.local", quiet: true });
 // Same default as drizzle.config.ts, so the clean-clone path needs no .env.local.
 const url = process.env.DATABASE_URL ?? "postgresql://mise:mise@localhost:5432/mise";
 
+// The fallback means an unset DATABASE_URL still succeeds, so say where the rows went —
+// otherwise a production seed missing its URL reports success against localhost.
+function target(connection: string): string {
+  try {
+    const parsed = new URL(connection);
+    return `${parsed.host}${parsed.pathname}`;
+  } catch {
+    return "an unparseable DATABASE_URL";
+  }
+}
+
 async function main(): Promise<number> {
   const raw: unknown = JSON.parse(readFileSync(resolve(__dirname, "taxonomy.json"), "utf8"));
   const parsed = taxonomySchema.safeParse(raw);
@@ -89,7 +100,7 @@ async function main(): Promise<number> {
 
     const nodeCount = validation.nodes.length;
     const aliasCount = validation.nodes.reduce((sum, n) => sum + n.aliases.length, 0);
-    console.log(`Seeded taxonomy: ${nodeCount} ingredients, ${aliasCount} aliases.`);
+    console.log(`Seeded taxonomy into ${target(url)}: ${nodeCount} ingredients, ${aliasCount} aliases.`);
     return 0;
   } finally {
     await client.end();

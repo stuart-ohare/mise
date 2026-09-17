@@ -13,7 +13,8 @@ Hand-authored where wrong answers matter, generated where they don't.
 
 `pnpm seed` loads the committed JSON, so it works offline from a clean clone. It needs
 only `DATABASE_URL` — no network, no API key — and is safe to rerun: a second run
-changes nothing.
+changes nothing. Unset, it falls back to the local Docker database, as `drizzle.config.ts`
+does, and prints the host and database it wrote to so a missed production URL is visible.
 
 ## The allergen tree — `taxonomy.json`
 
