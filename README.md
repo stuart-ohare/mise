@@ -82,7 +82,7 @@ pnpm install                   # also installs the git hooks (skipped by --ignor
 cp .env.example .env.local     # add your ANTHROPIC_API_KEY
 docker compose up -d           # Postgres on :5432 (POSTGRES_PORT to change it)
 pnpm db:push                   # apply the Drizzle schema
-pnpm seed                      # load the committed catalogue — not built yet
+pnpm seed                      # load the allergen tree — recipes not built yet
 pnpm dev
 ```
 
