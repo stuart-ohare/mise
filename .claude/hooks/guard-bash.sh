@@ -98,9 +98,11 @@ done <<<"$segments"
 
 # Pass 2 — questions for the human.
 opts="($ws+-[^[:space:]]+($ws+[^-[:space:]][^[:space:]]*)?)*"
-gh_issue_write="(^|$ws|\()gh$ws+issue$ws+(edit|create)($ws|$end)"
-gh_api="(^|$ws|\()gh$ws+api($ws|$end)"
-adds_planned="$ws(--add-label|--label|-l)(=|$ws+)[\"']?[^[:space:]]*status:planned"
+# gh may follow a path (/opt/homebrew/bin/gh) or a quote (bash -c "gh …").
+gh_at="(^|[[:space:]\"'(/])gh$ws+"
+gh_issue_write="${gh_at}issue$ws+(edit|create)($ws|$end)"
+gh_api="${gh_at}api($ws|$end)"
+adds_planned="$ws(--add-label|--label|-l)(=|$ws+)([\"'][^\"']*|[^[:space:]]*)status:planned"
 while IFS= read -r s; do
   # §4.5 — every dependency is a decision someone has to defend.
   if [[ $s =~ (^|$ws|\()(pnpm|npm|yarn)$opts$ws+(add|remove|rm|uninstall|un|update|up|upgrade)($ws|$end) ]] ||
@@ -116,7 +118,7 @@ while IFS= read -r s; do
   # is the approval click; anywhere else it stops the agent approving its own plan.
   # The value is matched per flag, so /build's --remove-label status:planned is allowed.
   if [[ $s =~ $gh_issue_write && $s =~ $adds_planned ]] ||
-     [[ $s =~ $gh_api && $s =~ issues/[^[:space:]]+/labels && $s =~ status:planned ]]; then
+     [[ $s =~ $gh_api && $s =~ status:planned ]]; then
     ask "This approves a plan by adding status:planned (ADR 0003). Accept only if you ran /approve and have read the plan."
   fi
 done <<<"$segments"

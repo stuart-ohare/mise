@@ -128,8 +128,8 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 | Done | `issue-done` workflow — on merge, relabels every issue the PR closes | `status:done` | |
 
 - **Never add `status:planned` yourself.** It is the human's plan approval. Only the
-  user-only `/approve <n>` adds it, and the Bash guard asks the human before any `gh`
-  command does.
+  user-only `/approve <n>` adds it, and the Bash guard asks the human before a direct
+  `gh issue edit`/`create` or `gh api` call does (ADR 0003 lists what gets past it).
 - **Don't set `status:done` by hand.** CI sets it from the PR's `Closes #n` when the PR
   merges, so a merged PR needs `Closes #n` in its body.
 - **Gate labels** — `gate:resolution`, `gate:query`, `gate:output` — are set at `/spec`.

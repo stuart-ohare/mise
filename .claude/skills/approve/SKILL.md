@@ -15,7 +15,7 @@ and then accepting the permission prompt is that approval. Nothing else counts.
 gh issue view <n> --json state,labels,comments --jq '{
   state,
   labels: [.labels[].name],
-  plans: [.comments[] | select(.body | test("^\\s*## Plan")) |
+  plans: [.comments[] | select(.body | test("^\\s*## Plan( amendment)?[ \\t]*(\\n|$)")) |
           {url, amendment: (.body | test("^\\s*## Plan amendment"))}]
 }'
 ```

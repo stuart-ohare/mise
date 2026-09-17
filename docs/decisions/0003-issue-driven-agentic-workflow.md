@@ -29,8 +29,8 @@ merge    human, always; CI then relabels the closed issue               status:d
   The plan is approved by running `/approve <n>` and accepting the permission prompt it
   triggers (#25). Only that user-only skill adds `status:planned`, and only behind an ask:
   `disable-model-invocation` stops the model starting it, and the Bash guard asks before
-  any `gh` command adds the label, so the agent can't approve its own plan elsewhere
-  either.
+  a direct `gh` command adds the label, so the agent can't casually approve its own plan
+  elsewhere either.
 - **What can be a script is a script.** `verify.sh` runs the definition of done and the
   §4.2 fixture rule for `gate:*` issues, and records the verified commit; `/ship`
   refuses any other commit.
@@ -45,7 +45,8 @@ merge    human, always; CI then relabels the closed issue               status:d
     - They deny `--no-verify`, `commit -n`, and retargeting or unsetting `core.hooksPath`.
     - They deny writes to `evals/thresholds.ts` and to the `/verify` record.
     - They ask the human before dependency changes, before edits to the guards
-      themselves, and before any `gh` command adds `status:planned`.
+      themselves, and before a `gh issue edit`/`create` or `gh api` call adds
+      `status:planned`.
   - Both sets run real inputs in `scripts/workflow/{githooks,hooks}.test.ts`.
 - **Review comes from fresh context.** `invariant-reviewer` sees the diff, the issue and
   CLAUDE.md — never the building conversation. It runs only locally, in `/verify`, and
@@ -82,10 +83,10 @@ merge    human, always; CI then relabels the closed issue               status:d
 
 - **Approval is best-effort at the identity level.** The agent's `gh` runs as the same
   account as the human, so GitHub can't distinguish who moved `status:planned`. Only
-  `/approve` adds it, and the guard asks before a `gh issue edit`/`create` or `gh api`
-  call that adds it. The guard reads shell text, so an indirect call such as a script,
-  `curl` to the API, or `gh api --input` gets past it. A separate bot identity would
-  close this.
+  `/approve` adds it, and the guard asks before a `gh issue edit`/`create` that adds it
+  or a `gh api` call that mentions it. The guard reads shell text, so these get past it:
+  a script, `curl` to the API, `gh api --input`, a `gh api graphql` mutation (it names
+  labels by ID), and a `gh` alias. A separate bot identity would close this.
 - **Claude Code hooks parse shell text, so they're best-effort.** An indirect write gets
   past them (a script or `python -c` that opens the thresholds file), and heredoc bodies
   are deliberately ignored. The first build tried to enforce the git rules this way too.
