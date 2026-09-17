@@ -57,3 +57,7 @@ export function effectiveAllergenTags(
   }
   return tags;
 }
+
+export function exclusionIds(_nodes: readonly IngredientNode[], _excludedId: string): Set<string> {
+  return new Set();
+}

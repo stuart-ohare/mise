@@ -1,7 +1,9 @@
+// @gate query
 import { describe, expect, it } from "vitest";
 
 import {
   effectiveAllergenTags,
+  exclusionIds,
   subtreeIds,
   type IngredientNode,
 } from "./ingredient-tree";
@@ -40,5 +42,33 @@ describe("effectiveAllergenTags", () => {
 
   it("returns nothing for an unrelated branch", () => {
     expect(effectiveAllergenTags(nodes, "cauliflower")).toEqual(new Set());
+  });
+});
+
+describe("exclusionIds", () => {
+  // The tree is single-parent, so soy sauce sits under soy and carries gluten as its
+  // own tag. Gate 2 must still exclude it from a gluten-free search.
+  const multi: IngredientNode[] = [
+    { id: "gluten", name: "gluten", parentId: null, allergenTags: ["gluten"] },
+    { id: "bread", name: "bread", parentId: "gluten", allergenTags: [] },
+    { id: "soy", name: "soy", parentId: null, allergenTags: ["soy"] },
+    { id: "tofu", name: "tofu", parentId: "soy", allergenTags: [] },
+    { id: "soy sauce", name: "soy sauce", parentId: "soy", allergenTags: ["gluten"] },
+    { id: "tamari", name: "tamari", parentId: "soy sauce", allergenTags: [] },
+  ];
+
+  it("excludes a node tagged with an excluded allergen outside that allergen's subtree", () => {
+    expect(exclusionIds(multi, "gluten")).toEqual(
+      new Set(["gluten", "bread", "soy sauce", "tamari"]),
+    );
+  });
+
+  it("does not pull the other allergen's nodes into the exclusion", () => {
+    expect(exclusionIds(multi, "soy")).toEqual(new Set(["soy", "tofu", "soy sauce", "tamari"]));
+  });
+
+  it("is just the subtree when the excluded node isn't an allergen root", () => {
+    // Excluding soy sauce must not exclude every gluten ingredient.
+    expect(exclusionIds(multi, "soy sauce")).toEqual(new Set(["soy sauce", "tamari"]));
   });
 });

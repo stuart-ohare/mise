@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { effectiveAllergenTags, type IngredientNode } from "@/lib/domain/ingredient-tree";
+import { effectiveAllergenTags, exclusionIds, type IngredientNode } from "@/lib/domain/ingredient-tree";
 import { ALLERGENS, taxonomySchema, validateTaxonomy } from "@/lib/domain/taxonomy";
 
 // The committed allergen tree is the data gate 2 walks. A wrong parent here leaks a
@@ -49,6 +49,19 @@ describe("scripts/seed/taxonomy.json", () => {
 
   it("tags soy sauce with both soy and gluten", () => {
     expect(effectiveAllergenTags(nodes, "soy sauce")).toEqual(new Set(["soy", "gluten"]));
+  });
+
+  it("excludes soy sauce from a gluten-free search", () => {
+    expect(exclusionIds(nodes, "gluten")).toContain("soy sauce");
+  });
+
+  it.each(ALLERGENS)("excludes every node whose tags include %s", (allergen) => {
+    // Ties the two readings of the tree together: whatever effectiveAllergenTags
+    // says is dairy, the exclusion gate 2 runs must remove.
+    const excluded = exclusionIds(nodes, allergen);
+    for (const n of nodes) {
+      if (effectiveAllergenTags(nodes, n.id).has(allergen)) expect(excluded, n.name).toContain(n.id);
+    }
   });
 
   it.each(["ghee", "panko"])("leaves %s unresolvable, for the review demo", (term) => {

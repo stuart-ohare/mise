@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { taxonomySchema, validateTaxonomy, type TaxonomyNode } from "./taxonomy";
 
 function node(name: string, parent: string | null, aliases: string[] = []): TaxonomyNode {
+  // Roots are tagged "dairy" regardless of name: these cases test structure, not tags.
   return { name, parent, allergenTags: parent === null ? ["dairy"] : [], aliases };
 }
 
