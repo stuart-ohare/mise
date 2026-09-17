@@ -34,7 +34,9 @@ Decisions worth knowing:
 - **Shellfish includes molluscs** (mussels, clams, scallops, squid), not only crustaceans.
 - **An ingredient with two allergens carries the second tag itself.** The tree is
   single-parent, so `soy sauce` sits under `soy` and is tagged `gluten`. A child never
-  repeats a tag it already inherits.
+  repeats a tag it already inherits. Excluding an allergen therefore can't be a subtree
+  walk alone: `exclusionIds` in `lib/domain/ingredient-tree.ts` also removes every node
+  tagged with it, and gate 2's SQL has to match that function.
 - **Hand aliases include common plurals** (`eggs`, `prawns`). Gate 1 matches exactly, so
   a missing plural becomes a question to the user rather than a match.
 - **An existing alias is never re-pointed.** If an alias in the database already points

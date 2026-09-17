@@ -58,6 +58,23 @@ export function effectiveAllergenTags(
   return tags;
 }
 
-export function exclusionIds(_nodes: readonly IngredientNode[], _excludedId: string): Set<string> {
-  return new Set();
+/**
+ * The ids a single exclusion removes — what gate 2's SQL must match.
+ *
+ * The tree is single-parent, so an ingredient with two allergens sits under one
+ * root and carries the other as its own tag: soy sauce is under soy, tagged gluten.
+ * Excluding an allergen root therefore removes its subtree *and* the subtree of
+ * every node tagged with that allergen. Excluding any other node removes only its
+ * subtree — excluding soy sauce must not exclude all gluten.
+ */
+export function exclusionIds(nodes: readonly IngredientNode[], excludedId: string): Set<string> {
+  const ids = subtreeIds(nodes, excludedId);
+  const excluded = nodes.find((node) => node.id === excludedId);
+  if (!excluded || excluded.parentId !== null) return ids;
+
+  for (const node of nodes) {
+    if (!node.allergenTags.some((tag) => excluded.allergenTags.includes(tag))) continue;
+    for (const id of subtreeIds(nodes, node.id)) ids.add(id);
+  }
+  return ids;
 }
