@@ -15,7 +15,7 @@ import { ALLERGENS } from "@/lib/domain/taxonomy";
  * errors toward over-exclusion, and every failure returns no constraints at all.
  */
 
-export const VERSION = "1";
+export const VERSION = "2";
 
 // Structured output can't express `.min(1)` or `.positive()`, so the model gets a plain
 // shape and every response is then parsed with `constraintsSchema`.
@@ -35,9 +35,9 @@ Return four fields.
 exclude: foods that must not be in the dish. Hard constraints.
 - Include every statement that a named food should not be eaten, however firmly or casually it is phrased: an allergy, an intolerance, "can't have", "cutting back on", "not keen on", "hates". For example "allergic to celery", "I'm off sugar at the moment", "not keen on olives". If in doubt whether something is a hard exclusion or a preference, put it in exclude.
 - An exclusion that applies to someone else ("my daughter can't eat mustard") is still an exclusion.
-- When the user means a whole allergen group, however they phrase it ("-free", "products", "intolerant", "allergy"), use exactly one of these names: ${ALLERGENS.join(", ")}. For example "lactose intolerant" is dairy.
-- Otherwise use the food itself as a bare lowercase noun, in the user's own words ("allergic to celery" → "celery"). No qualifiers, no "free", no "no".
-- An exception never narrows an exclusion. "No nuts, except almonds are OK" → exclude contains "nuts", and almonds appear in no field at all.
+- Use a group name only when the user refers to the whole group ("-free", "products", "intolerant", "allergy" said of the group itself). The group names are exactly: ${ALLERGENS.join(", ")}. For example "lactose intolerant" is dairy.
+- When the user names one food, exclude that food by its own name, as a bare lowercase noun in their words, even if it belongs to a group: "allergic to walnuts" → "walnuts", not "nuts"; "no mussels" → "mussels", not "shellfish"; "allergic to celery" → "celery". No qualifiers, no "free", no "no".
+- An exception never narrows an exclusion, and never removes it. When a request excludes something and then allows part of it ("no nuts, except almonds are OK", "nothing with egg, though mayo is fine"), the exclusion still goes in exclude exactly as if the exception had not been said, and the allowed food goes in no field at all: not in have, not in avoid. An allowed food is not an ingredient the cook has.
 
 avoid: soft preferences that are about fatigue, mood or recent history rather than a food being unsafe or unwanted ("bored of stir-fries" → "stir-fry", "we had fish last night" → "fish"). A bare lowercase noun for the dish or food.
 
@@ -47,8 +47,10 @@ maxMinutes: the time limit in whole minutes, only when one is stated ("ready in 
 
 Rules for every field:
 - Never put a person's name, or who the meal is for, in any field.
-- Words that are not a food ("something light", "nothing fancy") go in no field.
-- Each food appears once, in one field. An empty list is a correct answer.`;
+- Only foods and dishes go in any field. Descriptions of a meal ("something light", "nothing too rich", "nothing fancy") go in no field; do not turn their adjectives into terms.
+- Each food appears once, in one field. An empty list is a correct answer.
+
+Before answering, check: if the request says any food or group must not be eaten, exclude is not empty.`;
 
 export type ExtractionResult =
   | { ok: true; constraints: Constraints }
