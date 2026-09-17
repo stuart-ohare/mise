@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { candidateRecipeSchema } from "@/lib/db/candidates";
+import { candidateRecipeSchema } from "@/lib/domain/candidate";
 import { constraintsSchema } from "@/lib/domain/constraints";
 
 /**

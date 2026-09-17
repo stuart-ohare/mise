@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState, type ReactElement, type ReactNode } from "react";
 
+import type { CandidateRecipe } from "@/lib/domain/candidate";
 import {
   chipsFor,
   clearMaxMinutes,
@@ -12,7 +13,6 @@ import {
   type Chip,
 } from "@/lib/domain/constraint-edits";
 import type { Constraints } from "@/lib/domain/constraints";
-import type { CandidateRecipe } from "@/lib/db/candidates";
 
 import { cookResponseSchema, type CookResponse } from "../api/cook/schema";
 import { understoodFrom, type Understood } from "./understood";

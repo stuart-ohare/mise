@@ -6,9 +6,9 @@ import {
   type RankingInput,
   type RankingResult,
 } from "@/lib/ai/prompts/rank-and-explain";
-import type { CandidateRecipe } from "@/lib/db/candidates";
 import type { IngredientTree } from "@/lib/db/ingredients";
 import type { ResolutionTerm } from "@/lib/db/terms";
+import type { CandidateRecipe } from "@/lib/domain/candidate";
 import type { Constraints } from "@/lib/domain/constraints";
 import {
   collectStrings,

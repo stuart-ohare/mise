@@ -6,13 +6,13 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, describe, expect, it } from "vitest";
 
+import type { CandidateRecipe } from "@/lib/domain/candidate";
 import { exclusionIds, type IngredientNode } from "@/lib/domain/ingredient-tree";
 
 import {
   excludedIngredientIds,
   findCandidateRecipes,
   loadCandidateIngredients,
-  type CandidateRecipe,
 } from "./candidates";
 import * as schema from "./schema";
 

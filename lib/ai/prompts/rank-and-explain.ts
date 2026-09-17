@@ -4,7 +4,7 @@ import type { MessageCreateParamsNonStreaming } from "@anthropic-ai/sdk/resource
 import { z } from "zod";
 
 import { anthropic, MODELS } from "@/lib/ai/client";
-import { candidateRecipeSchema } from "@/lib/db/candidates";
+import { candidateRecipeSchema } from "@/lib/domain/candidate";
 import type { Constraints } from "@/lib/domain/constraints";
 
 /**

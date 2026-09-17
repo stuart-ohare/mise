@@ -1,5 +1,18 @@
+// Gate 2's SQL must never be reachable from a client bundle. The marker makes a client
+// import of this module a build error instead of something the optimiser happens to
+// drop; the row shape it used to declare now lives in lib/domain/candidate.ts so the
+// Cook screen can have it without having this.
+//
+// Next resolves `server-only` itself and never loads the npm package, so it isn't a
+// dependency. Nothing else supplies it: the Vitest configs alias it, and a new tsx entry
+// point (an eval, a script) that imports this module needs the same alias or it dies on
+// `Cannot find package 'server-only'`.
+import "server-only";
+
 import { sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
+
+import { candidateRecipeSchema, type CandidateRecipe } from "@/lib/domain/candidate";
 
 import type { Db } from "./client";
 
@@ -9,16 +22,6 @@ import type { Db } from "./client";
  */
 
 type Executor = Pick<Db, "execute">;
-
-export const candidateRecipeSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  summary: z.string().nullable(),
-  minutes: z.number().int().nullable(),
-  serves: z.number().int().nullable(),
-});
-
-export type CandidateRecipe = z.infer<typeof candidateRecipeSchema>;
 
 const idRowSchema = z.object({ id: z.string() });
 

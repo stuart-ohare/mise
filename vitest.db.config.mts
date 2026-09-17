@@ -9,7 +9,11 @@ config({ path: ".env.local" });
 // writes inside a transaction that rolls back, so the database is left as found.
 export default defineConfig({
   resolve: {
-    alias: { "@": fileURLToPath(new URL("./", import.meta.url)) },
+    alias: {
+      "@": fileURLToPath(new URL("./", import.meta.url)),
+      // Same `server-only` substitution as vitest.config.mts — see the note there.
+      "server-only": "next/dist/compiled/server-only/empty",
+    },
   },
   test: {
     environment: "node",
