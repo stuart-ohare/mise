@@ -70,18 +70,25 @@ export function effectiveAllergenTags(
  *
  * Only the tag of the root the excluded node sits under widens it, never the
  * node's own extra tag: excluding soy sauce must not exclude all gluten.
+ *
+ * Every ancestor is excluded too, as a single node, because a generic ingredient
+ * may contain the specific one: "no peanuts" removes a recipe that just says "nuts".
  */
 export function exclusionIds(nodes: readonly IngredientNode[], excludedId: string): Set<string> {
   const ids = subtreeIds(nodes, excludedId);
   const byId = new Map(nodes.map((node) => [node.id, node]));
 
+  // Ancestors are excluded as single nodes: a recipe that only says "eggs" (the egg
+  // root) may contain the egg white that was excluded. Their other children are not.
   let root = byId.get(excludedId);
   const visited = new Set<string>();
   while (root && root.parentId !== null && !visited.has(root.id)) {
     visited.add(root.id);
+    ids.add(root.id);
     root = byId.get(root.parentId);
   }
   if (!root || root.parentId !== null) return ids;
+  ids.add(root.id);
 
   // Inside the root's own tree only the subtree walk applies; the root's tag is on
   // the root itself, and following it there would turn "no bread" into "no gluten".

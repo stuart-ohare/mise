@@ -42,6 +42,10 @@ Decisions worth knowing:
   every node tagged with it, and gate 2's SQL has to match that function. The tag doesn't
   say which grain, so that widening applies to any exclusion inside the allergen's tree:
   "no wheat flour" removes soy sauce, and "no pasta" removes miso too.
+- **Excluding an ingredient also excludes its ancestors,** as single nodes. Recipe lines
+  often resolve to a generic node (`eggs` is the `egg` root), and a generic ingredient may
+  contain the specific one: "no egg white" removes a recipe that says "3 eggs", and "no
+  peanuts" removes one that says "nuts". Their other children are unaffected.
 - **Pasta and bread carry no extra tags,** though fresh pasta often has egg and bread can
   have milk. Tagging them would empty egg-free and dairy-free searches of every pasta and
   bread dish. Egg pasta belongs in the catalogue as its own leaf under `pasta`, tagged
