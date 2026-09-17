@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { count, TransactionRollbackError } from "drizzle-orm";
+import { count, eq, TransactionRollbackError } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -12,6 +12,10 @@ import { readSeedFiles, seedDatabase, type SeedFiles, type Tx } from "./seed";
 // Gate 1 resolves a term against every name and alias in the database. A term that
 // belongs to two ingredients has no safe answer, so the seed must refuse to create one
 // — whichever side of the collision was there first — and write nothing.
+//
+// Gate 2 walks the ingredient tree. Re-parenting a node, or changing its tags, moves every
+// recipe under it into or out of an exclusion, so the seed refuses to overwrite an existing
+// node's parent or tags unless it is asked to.
 
 const url = process.env.DATABASE_URL;
 if (!url) {
@@ -60,6 +64,47 @@ async function addNode(tx: Tx, name: string): Promise<string> {
   return row.id;
 }
 
+async function idOf(tx: Tx, name: string): Promise<string | undefined> {
+  const [row] = await tx
+    .select({ id: schema.canonicalIngredient.id })
+    .from(schema.canonicalIngredient)
+    .where(eq(schema.canonicalIngredient.name, name));
+  return row?.id;
+}
+
+async function nodeOf(tx: Tx, name: string) {
+  const [row] = await tx
+    .select({ parentId: schema.canonicalIngredient.parentId, allergenTags: schema.canonicalIngredient.allergenTags })
+    .from(schema.canonicalIngredient)
+    .where(eq(schema.canonicalIngredient.name, name));
+  if (!row) throw new Error(`no node "${name}"`);
+  return row;
+}
+
+// The tree cases need existing nodes to differ from, so they seed first if the database is empty.
+async function ensureSeeded(tx: Tx): Promise<void> {
+  if (await idOf(tx, "pasta")) return;
+  const result = await seedDatabase(tx, files);
+  if (!result.ok) throw new Error("the committed files don't seed an empty database");
+}
+
+async function moveUnder(tx: Tx, name: string, parent: string): Promise<string> {
+  const parentId = await idOf(tx, parent);
+  if (!parentId) throw new Error(`no node "${parent}"`);
+  await tx
+    .update(schema.canonicalIngredient)
+    .set({ parentId })
+    .where(eq(schema.canonicalIngredient.name, name));
+  return parentId;
+}
+
+async function setTags(tx: Tx, name: string, allergenTags: string[]): Promise<void> {
+  await tx
+    .update(schema.canonicalIngredient)
+    .set({ allergenTags })
+    .where(eq(schema.canonicalIngredient.name, name));
+}
+
 describe("seedDatabase", () => {
   it("seeds the committed files", async () => {
     await inRollback(async (tx) => {
@@ -78,6 +123,7 @@ describe("seedDatabase", () => {
       expect(result).toMatchObject({
         ok: false,
         collisions: expect.arrayContaining([{ term: "shrimp", ingredients: ["prawn", "shrimp"] }]),
+        treeChanges: [],
       });
       expect(await rowCounts(tx)).toEqual(before);
     });
@@ -95,6 +141,7 @@ describe("seedDatabase", () => {
       expect(result).toMatchObject({
         ok: false,
         collisions: expect.arrayContaining([{ term: "pasta", ingredients: [fixture, "pasta"] }]),
+        treeChanges: [],
       });
       expect(await rowCounts(tx)).toEqual(before);
     });
@@ -116,8 +163,83 @@ describe("seedDatabase", () => {
       expect(result).toMatchObject({
         ok: false,
         collisions: expect.arrayContaining([{ term: "prawns", ingredients: [fixture, "prawn"] }]),
+        treeChanges: [],
       });
       expect(await rowCounts(tx)).toEqual(before);
+    });
+  });
+
+  it("refuses to re-parent an existing node", async () => {
+    await inRollback(async (tx) => {
+      await ensureSeeded(tx);
+      const glutenId = await moveUnder(tx, "pasta", "gluten");
+      const before = await rowCounts(tx);
+
+      const result = await seedDatabase(tx, files);
+
+      expect(result).toEqual({
+        ok: false,
+        collisions: [],
+        treeChanges: [{ name: "pasta", parent: { from: "gluten", to: "wheat" } }],
+      });
+      expect(await rowCounts(tx)).toEqual(before);
+      expect((await nodeOf(tx, "pasta")).parentId).toBe(glutenId);
+    });
+  });
+
+  it("refuses to change an existing node's tags", async () => {
+    await inRollback(async (tx) => {
+      await ensureSeeded(tx);
+      await setTags(tx, "miso", []);
+      const before = await rowCounts(tx);
+
+      const result = await seedDatabase(tx, files);
+
+      expect(result).toEqual({
+        ok: false,
+        collisions: [],
+        treeChanges: [{ name: "miso", tags: { from: [], to: ["gluten"] } }],
+      });
+      expect(await rowCounts(tx)).toEqual(before);
+      expect((await nodeOf(tx, "miso")).allergenTags).toEqual([]);
+    });
+  });
+
+  it("applies tree changes when asked", async () => {
+    await inRollback(async (tx) => {
+      await ensureSeeded(tx);
+      await moveUnder(tx, "pasta", "gluten");
+      await setTags(tx, "miso", []);
+
+      const result = await seedDatabase(tx, files, { applyTreeChanges: true });
+
+      expect(result).toMatchObject({
+        ok: true,
+        treeChanges: [
+          { name: "miso", tags: { from: [], to: ["gluten"] } },
+          { name: "pasta", parent: { from: "gluten", to: "wheat" } },
+        ],
+      });
+      expect((await nodeOf(tx, "pasta")).parentId).toBe(await idOf(tx, "wheat"));
+      expect((await nodeOf(tx, "miso")).allergenTags).toEqual(["gluten"]);
+    });
+  });
+
+  it("still refuses a term collision when applying tree changes", async () => {
+    await inRollback(async (tx) => {
+      await ensureSeeded(tx);
+      const glutenId = await moveUnder(tx, "pasta", "gluten");
+      await addNode(tx, "shrimp");
+      const before = await rowCounts(tx);
+
+      const result = await seedDatabase(tx, files, { applyTreeChanges: true });
+
+      expect(result).toMatchObject({
+        ok: false,
+        collisions: expect.arrayContaining([{ term: "shrimp", ingredients: ["prawn", "shrimp"] }]),
+      });
+      expect(await rowCounts(tx)).toEqual(before);
+      expect((await nodeOf(tx, "pasta")).parentId).toBe(glutenId);
     });
   });
 });
