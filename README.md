@@ -92,6 +92,53 @@ pnpm dev
 | `pnpm test` | Vitest units — no network, no API calls |
 | `pnpm eval` | Eval suite against the real model. Costs money, non-deterministic — not built yet |
 
+## Deploying
+
+Vercel, with Postgres from Neon. Production and Preview share one Neon database: a
+branch per preview is deliberately not set up yet, so a schema push from any branch
+changes what production reads.
+
+**1. Provision.** In the Vercel project, **Storage → Create Database → Neon**, Free plan,
+connected to Production and Preview. Leave **Custom Prefix** empty — the app reads plain
+`DATABASE_URL`. If Vercel reports that `DATABASE_URL` already exists, look at what it
+points to before removing it.
+
+**2. Env vars.** The integration injects `DATABASE_URL` (pooled) plus
+`DATABASE_URL_UNPOOLED` and the `PG*`/`POSTGRES_*` set. The app only reads
+`DATABASE_URL`; `ANTHROPIC_API_KEY` is added by hand. Check with:
+
+```bash
+vercel link                    # once per checkout
+vercel env ls                  # DATABASE_URL should list Production and Preview
+```
+
+The Neon values are marked sensitive, so `vercel env pull` writes them as empty strings.
+Copy the pooled connection string from **Storage → your database → `.env.local` → Show
+secret** (or the Neon console) instead.
+
+**3. Schema.** From a local shell, not CI — CI holds no database secret:
+
+```bash
+DATABASE_URL='<neon pooled url>' pnpm db:push
+```
+
+The variable on the command line wins over `.env.local` (dotenv doesn't overwrite a set
+variable), so this can't hit the local database by accident — but check the host in the
+printed statements anyway. `drizzle.config.ts` is `strict`, so drizzle-kit shows the SQL and
+asks for confirmation; that prompt needs a real terminal and won't run from a pipe or an
+agent's shell. The push works through Neon's pooler; if it ever doesn't, use
+`DATABASE_URL_UNPOOLED`.
+
+**4. Seed production.** Same shape, once the seed exists:
+
+```bash
+DATABASE_URL='<neon pooled url>' pnpm seed   # not built yet
+```
+
+**5. Deploy.** Pushing to `main` deploys production. Env vars only reach a build made
+after they were set — after changing one, redeploy (`vercel redeploy <deployment-url>
+--target production`).
+
 ## Working on this repo
 
 [`CLAUDE.md`](CLAUDE.md) holds the working agreements: the invariant, the architecture
