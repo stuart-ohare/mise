@@ -84,6 +84,7 @@ describe("rankAndExplain", () => {
         { id: STEW, rationale: expect.any(String) },
         { id: CAULIFLOWER, rationale: expect.any(String) },
       ],
+      dropped: [],
     });
     expect(calls[0]?.model).toBe(MODELS.capable);
   });
@@ -100,7 +101,7 @@ describe("rankAndExplain", () => {
     expect(result.ok && result.ranking.map((entry) => entry.id)).toEqual([CAULIFLOWER, TRAYBAKE]);
   });
 
-  it("fails when every id was invented, rather than returning an empty shortlist", async () => {
+  it("fails when every id was invented, naming each one rather than shortlisting none", async () => {
     const { client } = stub({
       stop_reason: "end_turn",
       parsed_output: ranked(INVENTED, "not-a-uuid"),
@@ -109,7 +110,86 @@ describe("rankAndExplain", () => {
     expect(await rankAndExplain({ candidates, constraints }, client)).toEqual({
       ok: false,
       reason: "no_valid_ids",
+      dropped: [INVENTED, "not-a-uuid"],
     });
+  });
+
+  it("records nothing when every id came from the rows", async () => {
+    const { client } = stub({ stop_reason: "end_turn", parsed_output: ranked(STEW, CAULIFLOWER) });
+
+    const result = await rankAndExplain({ candidates, constraints }, client);
+
+    expect(result.ok && result.dropped).toEqual([]);
+  });
+
+  it("names each id the model invented alongside the ranking it kept", async () => {
+    const { client } = stub({
+      stop_reason: "end_turn",
+      parsed_output: ranked(CAULIFLOWER, INVENTED, TRAYBAKE),
+    });
+
+    expect(await rankAndExplain({ candidates, constraints }, client)).toEqual({
+      ok: true,
+      ranking: [
+        { id: CAULIFLOWER, rationale: expect.any(String) },
+        { id: TRAYBAKE, rationale: expect.any(String) },
+      ],
+      dropped: [INVENTED],
+    });
+  });
+
+  it("records an invented id as the model wrote it", async () => {
+    const written = `  ${INVENTED.toUpperCase()}`;
+    const { client } = stub({ stop_reason: "end_turn", parsed_output: ranked(STEW, written) });
+
+    const result = await rankAndExplain({ candidates, constraints }, client);
+
+    expect(result.ok && result.dropped).toEqual([written]);
+  });
+
+  it("counts one invention once, however many times the model repeats it", async () => {
+    const { client } = stub({
+      stop_reason: "end_turn",
+      parsed_output: ranked(INVENTED, STEW, `  ${INVENTED.toUpperCase()}`, INVENTED),
+    });
+
+    const result = await rankAndExplain({ candidates, constraints }, client);
+
+    expect(result.ok && result.ranking.map((entry) => entry.id)).toEqual([STEW]);
+    expect(result.ok && result.dropped).toEqual([INVENTED]);
+  });
+
+  it("records an invented id the model listed past the shortlist cut", async () => {
+    const many = Array.from({ length: MAX_RESULTS }, (_, i) =>
+      candidate(`5555555${i}-eeee-4555-8555-55555555abcd`, `Recipe ${i}`),
+    );
+    const { client } = stub({
+      stop_reason: "end_turn",
+      parsed_output: ranked(...many.map((row) => row.id), INVENTED),
+    });
+
+    const result = await rankAndExplain({ candidates: many, constraints }, client);
+
+    expect(result.ok && result.ranking.map((entry) => entry.id)).toEqual(
+      many.map((row) => row.id),
+    );
+    expect(result.ok && result.dropped).toEqual([INVENTED]);
+  });
+
+  it("doesn't record a duplicate, or a real id cut by MAX_RESULTS, as invented", async () => {
+    const many = Array.from({ length: MAX_RESULTS + 1 }, (_, i) =>
+      candidate(`6666666${i}-ffff-4666-8666-66666666abcd`, `Recipe ${i}`),
+    );
+    const ids = many.map((row) => row.id);
+    const { client } = stub({
+      stop_reason: "end_turn",
+      parsed_output: ranked(ids[0], ...ids),
+    });
+
+    const result = await rankAndExplain({ candidates: many, constraints }, client);
+
+    expect(result.ok && result.ranking).toHaveLength(MAX_RESULTS);
+    expect(result.ok && result.dropped).toEqual([]);
   });
 
   it("matches ids case-insensitively and re-emits the candidate's own spelling", async () => {
