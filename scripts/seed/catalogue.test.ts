@@ -263,3 +263,85 @@ describe("scripts/seed/recipes.json", () => {
     expect(found).toEqual([]);
   });
 });
+
+// Missing rather than thrown: a moved document should fail the case that looks for it,
+// not take every other assertion in this file down with it at import.
+const docLines = (file: string) => {
+  const path = resolve(__dirname, "../..", file);
+  return existsSync(path) ? readFileSync(path, "utf8").split("\n") : [];
+};
+
+const readmeRow = (gate: string) =>
+  docLines("README.md").find((line) => line.trimStart().startsWith(`| ${gate} |`)) ?? "";
+
+/** The README's gate 2 row — the one sentence a reviewer is most likely to read. */
+const readmeGate2 = readmeRow("2 — Query");
+
+/** Its gate 1 row, which now carries the other half of the pair: the term that resolves to nothing. */
+const readmeGate1 = readmeRow("1 — Resolution");
+
+/** ADR 0002's numbered item 2: the same claim, in the document that defends it. */
+const adrGate2 = (() => {
+  const lines = docLines("docs/decisions/0002-exclusion-is-a-database-constraint.md");
+  const start = lines.findIndex((line) => line.startsWith("2. SQL produces the candidate set"));
+  if (start < 0) return "";
+  const end = lines.findIndex((line, i) => i > start && !line.startsWith("   "));
+  return lines.slice(start, end < 0 ? undefined : end).join(" ");
+})();
+
+/**
+ * The row says "dairy-free search", so the root's own terms can't be what it
+ * demonstrates — the claim is that the query reaches a *descendant*. Aliases included,
+ * so giving `dairy` one later can't quietly satisfy the assertion.
+ */
+const dairyRootTerms = new Set(termsOf(["dairy"]));
+const dairyDescendants = dairyTerms.filter((term) => !dairyRootTerms.has(term));
+
+// A claim about this catalogue is pinned against this catalogue, like every other
+// property here. Both documents explained the tree with a term the catalogue is
+// generated never to know, so both described a lookup that doesn't happen — and a
+// reader who tried the worked example got the opposite of what it promised.
+describe.each([
+  ["README's gate 2 row", readmeGate2],
+  ["ADR 0002's gate 2 claim", adrGate2],
+])("%s", (_where, claim) => {
+  it("is still where the test looks for it", () => {
+    expect(claim).not.toBe("");
+  });
+
+  it("names no term the catalogue deliberately can't resolve", () => {
+    expect(DELIBERATELY_UNRESOLVED.filter((term) => containsWord(claim, term))).toEqual([]);
+  });
+
+  it("explains the filter with a dairy descendant", () => {
+    expect(dairyDescendants.filter((term) => containsWord(claim, term))).not.toEqual([]);
+  });
+});
+
+describe("README's gate 2 recipe", () => {
+  it("is published and actually contains the term the row explains", () => {
+    // The row names a dish by title so a reviewer can type it into the Cook box. Checking
+    // only the ingredient would leave the title free to drift when the catalogue is
+    // regenerated: many published recipes contain butter, so the word would still be
+    // there while the dish the README promises had gone.
+    const named = dairyDescendants.filter((term) => containsWord(readmeGate2, term));
+    const demonstrated = recipes.filter(
+      (r) =>
+        statusOf(r) === "published" &&
+        readmeGate2.toLowerCase().includes(r.title.toLowerCase()) &&
+        r.ingredients.some((i) => named.includes(i.name)),
+    );
+    expect(demonstrated.map((r) => r.title)).not.toEqual([]);
+  });
+});
+
+describe("README's gate 1 row", () => {
+  it("names a term the catalogue deliberately can't resolve", () => {
+    // The pair only holds while both halves do. Take option 1 from #69 later — add `ghee`
+    // under `dairy` — and `DELIBERATELY_UNRESOLVED` shrinks, this row quietly becomes
+    // false, and "no ghee" returns a filtered shortlist where the README promised a
+    // question. Guarding one row and not the other just moves the drift.
+    expect(readmeGate1).not.toBe("");
+    expect(DELIBERATELY_UNRESOLVED.filter((term) => containsWord(readmeGate1, term))).not.toEqual([]);
+  });
+});
