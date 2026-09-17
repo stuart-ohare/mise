@@ -26,7 +26,6 @@ step pnpm test
 
 git fetch -q origin main
 base=$(git merge-base origin/main HEAD)
-changed=$(git diff --name-only --diff-filter=ACMR "$base" HEAD)
 gates=$(gh issue view "$issue" --json labels -q '[.labels[].name | select(startswith("gate:"))] | join(" ")')
 
 read -ra gate_names <<<"${gates//gate:/}"
@@ -37,15 +36,16 @@ echo "▶ Checking gate tags on changed tests and fixtures"
 scripts/workflow/gate-fixtures.sh "$base" ${gate_names[@]+"${gate_names[@]}"}
 
 if [[ -n $gates ]]; then
-  echo "▶ #$issue touches $gates — checking §4.2 fixture rule"
-  if ! grep -qx 'evals/latest.md' <<<"$changed"; then
-    echo "✗ evals/latest.md not regenerated. Run pnpm eval (costs money — §4.6) and commit the report (§4.4)" >&2
-    exit 1
-  fi
-  echo "✓ each gate has a tagged test or fixture, and evals/latest.md is regenerated"
+  echo "✓ #$issue touches $gates — each labelled gate has a tagged test or fixture (§4.2)"
 else
-  echo "▶ #$issue has no gate:* label — fixture rule not required"
+  echo "✓ #$issue has no gate:* label — no tagged test or fixture required"
 fi
+
+echo
+echo "▶ Checking whether this change can move an eval result"
+# Path-based, and deliberately not label-based: a gate label doesn't change what the
+# model does, and a prompt rewritten on an unlabelled issue changes the report (#66).
+scripts/workflow/eval-report.sh "$base"
 
 sha=$(git rev-parse HEAD)
 echo "$sha" > "$(git rev-parse --git-dir)/mise-verified"

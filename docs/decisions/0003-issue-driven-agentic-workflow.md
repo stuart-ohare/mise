@@ -117,6 +117,12 @@ merge    human, always; CI then relabels the closed issue               status:d
 - **`verify.sh` checks that `evals/latest.md` changed, not that it passes.** Any test
   file counts toward the fixture rule. Checking the eval report needs the eval runner
   to exist first (follow-up issue).
+- **That report requirement is path-based, not label-based** (#66). It fires when the
+  diff touches something `pnpm eval` loads, on any issue, rather than on every
+  `gate:*` label — otherwise a correct gate label costs a paid run whose report can't
+  differ, and the predictable result is an unlabelled gate change. The trigger list in
+  `scripts/workflow/eval-report.sh` is static; `eval-report.test.ts` walks the runner's
+  real import graph so the list can't drift behind an import.
 - **Some steps are enforced by instruction only:**
   - `/ship` checks that `verify.sh` passed for the commit, not that the reviewer ran.
   - The reviewer has Bash, so "read-only" is an instruction, not a tool restriction.

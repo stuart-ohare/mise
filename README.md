@@ -291,8 +291,8 @@ to measure, or an eval run on the same fixtures says another provider is better.
 
 `checks` runs typecheck, lint and test on every PR and holds no Anthropic secret. The
 `invariant-reviewer` runs locally inside `/verify`, and `pnpm eval` is run by hand —
-`verify.sh` only checks that a gate-labelled change committed a fresh `evals/latest.md`
-([ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md)).
+`verify.sh` only checks that a change touching the eval inputs committed a fresh
+`evals/latest.md` ([ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md)).
 
 **Cost.** The model-checked half of the definition of done is only as reliable as the
 person who ran it. A PR can be green with a stale `evals/latest.md`, and the reviewer's

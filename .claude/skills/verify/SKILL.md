@@ -13,9 +13,10 @@ description: Run Mise's definition of done on the current issue branch — deter
 scripts/workflow/verify.sh
 ```
 
-It refuses a dirty tree, then runs typecheck, lint and test, and — for `gate:*`
-issues — requires a changed test/fixture and a regenerated `evals/latest.md`. On success
-it records the verified commit for `/ship`.
+It refuses a dirty tree, then runs typecheck, lint and test. For `gate:*` issues it
+requires a changed test or fixture declaring each labelled gate; separately, and on every
+issue, it requires a regenerated `evals/latest.md` when the diff touches a path `pnpm
+eval` reads. On success it records the verified commit for `/ship`.
 
 If it fails: fix the cause and re-run. Never lower a threshold, skip a test, or relabel
 the issue to get past the gate check. If `evals/latest.md` is required, `pnpm eval` costs
