@@ -34,7 +34,7 @@ forget the rest — an unhandled `kind` is a type error.
 | `kind` | Means |
 |---|---|
 | `ranked` | Prose survived gate 3, and at least one row did. `attempts` is 1, or 2 when the retry was the clean one |
-| `cards` | Safe rows, no prose. `reason` is `output_violation` (gate 3 rejected both attempts) or `ranking_unavailable` (call 3 failed, or named no recipe that exists) |
+| `cards` | Safe rows, no prose. `reason` is `output_violation` (gate 3 rejected both attempts) or `ranking_unavailable` (call 3 failed, or named only ids gate 2 never returned) |
 | `needs_resolution` | An exclusion mapped to nothing. No rows and no model call — it's a question for the cook |
 | `no_candidates` | Nothing survived. `relaxTime` carries the stated limit and how many would match without it, when that is more than none |
 | `not_understood` | Constraint extraction itself failed |
