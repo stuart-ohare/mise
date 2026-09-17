@@ -3,16 +3,16 @@
 # fixture, added or modified since <base-ref>, that declares that gate —
 #   Vitest:       // @gate query output
 #   JSON fixture: "gates": ["output"]
-# Called by verify.sh with the issue's gate names; tested offline in gate-fixtures.test.ts.
+# Unknown gate names fail on every issue; tagged files are required only for the gates
+# passed in. Called by verify.sh; tested offline in gate-fixtures.test.ts.
 set -euo pipefail
 
 base=${1:?usage: gate-fixtures.sh <base-ref> [gate…]}
 shift
-(( $# )) || exit 0
 
 cd "$(git rev-parse --show-toplevel)"
 
-known=" resolution query output "
+is_known() { case $1 in resolution | query | output) return 0 ;; *) return 1 ;; esac; }
 declared=" "
 failed=0
 
@@ -21,7 +21,8 @@ changed=$(git diff --name-only --diff-filter=ACMR "$base" HEAD)
 while IFS= read -r file; do
   case $file in
     *.test.ts)
-      names=$(git show "HEAD:$file" | sed -nE 's#^[[:space:]]*//[[:space:]]*@gate[[:space:]]+(.*)$#\1#p') ;;
+      names=$(git show "HEAD:$file" | sed -nE 's#^[[:space:]]*//[[:space:]]*@gate[[:space:]]+(.*)$#\1#p' |
+        tr -s '[:space:]' '\n') ;;
     evals/fixtures/*.json)
       if ! names=$(git show "HEAD:$file" | jq -r '(.gates // []) | .[]' 2>/dev/null); then
         echo "✗ $file isn't valid JSON with a \"gates\" array" >&2
@@ -30,18 +31,20 @@ while IFS= read -r file; do
       fi ;;
     *) continue ;;
   esac
-  for name in $names; do
-    if [[ $known == *" $name "* ]]; then
+  # One name per line: a JSON entry like "query output" stays one (unknown) name.
+  while IFS= read -r name; do
+    [[ -n $name ]] || continue
+    if is_known "$name"; then
       declared+="$name "
     else
       echo "✗ $file declares unknown gate '$name' (expected resolution, query or output)" >&2
       failed=1
     fi
-  done
+  done <<<"$names"
 done <<<"$changed"
 
 for gate in "$@"; do
-  if [[ $known != *" $gate "* ]]; then
+  if ! is_known "$gate"; then
     echo "✗ unknown gate label gate:$gate (expected resolution, query or output)" >&2
     failed=1
   elif [[ $declared != *" $gate "* ]]; then

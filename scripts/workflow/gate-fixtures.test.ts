@@ -114,6 +114,34 @@ describe("gate-fixtures.sh", () => {
     expect(result.stderr).toMatch(/unknown gate.*querry/i);
   });
 
+  // Review finding: typos only failed on gate-labelled issues, so they surfaced one PR late.
+  it("fails on an unknown gate name even when the issue has no gate labels", () => {
+    write("lib/x.test.ts", tag("querry"));
+    commit("head");
+
+    const result = check(base);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/unknown gate.*querry/i);
+  });
+
+  it("fails on an unknown gate label", () => {
+    write("lib/x.test.ts", tag("query"));
+    commit("head");
+
+    const result = check(base, "foo");
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/gate:foo/);
+  });
+
+  it("reads each JSON gates entry as one name", () => {
+    write("evals/fixtures/a.json", JSON.stringify({ gates: ["query output"] }));
+    commit("head");
+
+    const result = check(base, "query");
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/unknown gate 'query output'/);
+  });
+
   it("passes untagged changes when the issue has no gate labels", () => {
     write("lib/x.test.ts", "it('x', () => {});\n");
     commit("head");

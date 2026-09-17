@@ -29,11 +29,15 @@ base=$(git merge-base origin/main HEAD)
 changed=$(git diff --name-only --diff-filter=ACMR "$base" HEAD)
 gates=$(gh issue view "$issue" --json labels -q '[.labels[].name | select(startswith("gate:"))] | join(" ")')
 
+read -ra gate_names <<<"${gates//gate:/}"
+
 echo
+echo "▶ Checking gate tags on changed tests and fixtures"
+# Always run: unknown gate names fail even on issues with no gate:* label.
+scripts/workflow/gate-fixtures.sh "$base" ${gate_names[@]+"${gate_names[@]}"}
+
 if [[ -n $gates ]]; then
   echo "▶ #$issue touches $gates — checking §4.2 fixture rule"
-  read -ra gate_names <<<"${gates//gate:/}"
-  scripts/workflow/gate-fixtures.sh "$base" "${gate_names[@]}"
   if ! grep -qx 'evals/latest.md' <<<"$changed"; then
     echo "✗ evals/latest.md not regenerated. Run pnpm eval (costs money — §4.6) and commit the report (§4.4)" >&2
     exit 1
