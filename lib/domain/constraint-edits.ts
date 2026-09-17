@@ -34,7 +34,7 @@ export function chipsFor(constraints: Constraints, unresolved: readonly string[]
     term,
     label: `✗ ${term}`,
     hard: true,
-    removable: true,
+    removable: !unresolved.includes(term),
   }));
 
   for (const term of constraints.avoid) {
@@ -59,16 +59,27 @@ export function chipsFor(constraints: Constraints, unresolved: readonly string[]
 /**
  * Trade a hard exclusion down to a soft preference — the first of the two deliberate
  * acts it takes to stop filtering on a food.
+ *
+ * Refuses an unresolved term, and refuses one that was never excluded. Gate 2 filters on
+ * a canonical id, so an exclusion gate 1 could not map has nothing behind it: demoting it
+ * would move the term to a list that only weights ranking, leaving the cook looking at a
+ * shortlist that was never filtered on the thing they asked to avoid. The refusal is here
+ * rather than only in the disabled ✕ so it holds for every caller.
+ *
+ * `unresolved` is required, not defaulted: an omitted argument would fail open, which is
+ * the one way this function can be wrong.
  */
 export function demoteExclusion(
   constraints: Constraints,
   term: string,
   unresolved: readonly string[],
 ): Constraints {
+  if (unresolved.includes(term) || !constraints.exclude.includes(term)) return constraints;
+
   return {
     ...constraints,
     exclude: constraints.exclude.filter((excluded) => excluded !== term),
-    avoid: [...constraints.avoid, term],
+    avoid: constraints.avoid.includes(term) ? constraints.avoid : [...constraints.avoid, term],
   };
 }
 
