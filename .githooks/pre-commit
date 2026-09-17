@@ -1,0 +1,9 @@
+#!/bin/sh
+# CLAUDE.md §4.1 — no issue, no branch. Git runs this with the real branch checked
+# out, so no spelling of the commit command gets work onto main.
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ "$branch" = main ]; then
+  echo "✗ Refusing to commit on main (CLAUDE.md §4.1: no issue, no branch)." >&2
+  echo "  Branch as <issue>-<kebab-summary>, or use /build." >&2
+  exit 1
+fi

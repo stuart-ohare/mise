@@ -1,22 +1,35 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-// The hooks are the only thing between an agent and a commit on main or a lowered
-// eval threshold, so they're tested as the harness calls them: JSON on stdin,
+// Claude Code PreToolUse hooks, tested as the harness calls them: JSON on stdin,
 // decision in the exit code (2 = deny) or a permissionDecision on stdout.
+// Git's own rules (branch, push target, message) live in .githooks — see
+// githooks.test.ts. These hooks cover what git can't see: file writes by tools,
+// dependency changes, and attempts to switch the git hooks off.
 
 const HOOKS = resolve(__dirname, "../../.claude/hooks");
 
 type HookResult = { status: number | null; stdout: string; stderr: string };
 
-function runHook(script: string, input: object): HookResult {
-  const result = spawnSync("bash", [join(HOOKS, script)], {
+let noTools: string;
+
+beforeAll(() => {
+  noTools = mkdtempSync(join(tmpdir(), "mise-no-tools-"));
+});
+
+afterAll(() => {
+  rmSync(noTools, { recursive: true, force: true });
+});
+
+function runHook(script: string, input: object, path = process.env.PATH): HookResult {
+  const result = spawnSync("/bin/bash", [join(HOOKS, script)], {
     input: JSON.stringify(input),
     encoding: "utf8",
+    env: { ...process.env, PATH: path },
   });
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
@@ -25,170 +38,156 @@ function asks(result: HookResult): boolean {
   return result.status === 0 && result.stdout.includes('"permissionDecision":"ask"');
 }
 
-function bash(command: string, cwd: string): HookResult {
-  return runHook("guard-bash.sh", {
-    hook_event_name: "PreToolUse",
-    tool_name: "Bash",
-    tool_input: { command },
-    cwd,
-  });
+function allows(result: HookResult): boolean {
+  return result.status === 0 && !asks(result);
 }
 
-function edit(tool_name: string, tool_input: object): HookResult {
-  return runHook("guard-edit.sh", {
-    hook_event_name: "PreToolUse",
-    tool_name,
-    tool_input,
-    cwd: "/repo",
-  });
+function bash(command: string, path?: string): HookResult {
+  return runHook(
+    "guard-bash.sh",
+    { hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command }, cwd: "/repo" },
+    path,
+  );
 }
 
-function heredocCommit(subject: string): string {
-  return `git commit -m "$(cat <<'EOF'\n${subject}\n\nWhy it changed.\nEOF\n)"`;
+function edit(tool_name: string, tool_input: object, path?: string): HookResult {
+  return runHook(
+    "guard-edit.sh",
+    { hook_event_name: "PreToolUse", tool_name, tool_input, cwd: "/repo" },
+    path,
+  );
 }
 
-let onMain: string;
-let onBranch: string;
-
-beforeAll(() => {
-  const git = (cwd: string, ...args: string[]) =>
-    execFileSync("git", args, { cwd, stdio: "ignore" });
-  onMain = mkdtempSync(join(tmpdir(), "mise-hook-main-"));
-  git(onMain, "init", "-q", "-b", "main");
-  onBranch = mkdtempSync(join(tmpdir(), "mise-hook-branch-"));
-  git(onBranch, "init", "-q", "-b", "7-some-work");
-});
-
-afterAll(() => {
-  rmSync(onMain, { recursive: true, force: true });
-  rmSync(onBranch, { recursive: true, force: true });
-});
-
-describe("guard-bash: no commits or pushes on main", () => {
-  it("denies git commit on main", () => {
-    const result = bash('git commit -m "Fix thing (#7)"', onMain);
+describe("fail closed without jq", () => {
+  it("guard-bash denies everything", () => {
+    const result = bash("ls", noTools);
     expect(result.status).toBe(2);
-    expect(result.stderr).toMatch(/main/);
+    expect(result.stderr).toMatch(/jq/);
   });
 
-  it("denies git push on main", () => {
-    expect(bash("git push", onMain).status).toBe(2);
-  });
-
-  it("denies pushing a branch onto main from elsewhere", () => {
-    expect(bash("git push origin HEAD:main", onBranch).status).toBe(2);
-  });
-
-  it("follows git -C into a repo on main", () => {
-    expect(bash(`git -C ${onMain} commit -m "Fix thing (#7)"`, onBranch).status).toBe(2);
-  });
-
-  // Found live: `git -C $d commit` got through because $d can't be expanded before the
-  // command runs, so the branch was unknown. Unknown must fail closed.
-  it("denies when the target repo's branch can't be determined", () => {
-    const result = bash('git -C $d commit -m "Probe (#3)"', onBranch);
-    expect(result.status).toBe(2);
-    expect(result.stderr).toMatch(/branch/);
-  });
-
-  it("allows commit and push on an issue branch", () => {
-    expect(bash('git commit -m "Fix thing (#7)"', onBranch).status).toBe(0);
-    expect(bash("git push -u origin 7-some-work", onBranch).status).toBe(0);
-  });
-
-  it("ignores non-git commands on main", () => {
-    expect(bash("pnpm test", onMain).status).toBe(0);
+  it("guard-edit denies everything", () => {
+    expect(edit("Write", { file_path: "/repo/evals/thresholds.ts" }, noTools).status).toBe(2);
   });
 });
 
-describe("guard-bash: commit subject format", () => {
-  it("allows a 72-char subject with an issue reference", () => {
-    const subject = `${"a".repeat(67)} (#7)`;
-    expect(subject).toHaveLength(72);
-    expect(bash(`git commit -m "${subject}"`, onBranch).status).toBe(0);
+describe("guard-bash: git hooks can't be switched off", () => {
+  it.each([
+    'git commit --no-verify -m "Fix (#7)"',
+    'git commit -n -m "Fix (#7)"',
+    "git push --no-verify origin main",
+    'git -c core.hooksPath=/dev/null commit -m "Fix (#7)"',
+    "git config core.hooksPath /tmp/none",
+    "git config --unset core.hooksPath",
+    "rm -rf .githooks",
+  ])("denies %s", (command) => {
+    expect(bash(command).status).toBe(2);
   });
 
-  it("denies a 73-char subject", () => {
-    const subject = `${"a".repeat(68)} (#7)`;
-    const result = bash(`git commit -m "${subject}"`, onBranch);
-    expect(result.status).toBe(2);
-    expect(result.stderr).toMatch(/72/);
+  it("allows installing the repo's own hooks", () => {
+    expect(allows(bash("git config core.hooksPath .githooks"))).toBe(true);
   });
 
-  it("denies a subject with no issue reference", () => {
-    const result = bash('git commit -m "Fix thing"', onBranch);
-    expect(result.status).toBe(2);
-    expect(result.stderr).toMatch(/#n/);
+  // Found live: reading the setting inside a chained command was denied.
+  it("allows reading the hooks path", () => {
+    expect(allows(bash("pnpm i && git config core.hooksPath"))).toBe(true);
+    expect(allows(bash("git config --get core.hooksPath"))).toBe(true);
   });
 
-  it("reads the subject from a heredoc message", () => {
-    expect(bash(heredocCommit("Add gate 3 validator (#14)"), onBranch).status).toBe(0);
-    expect(bash(heredocCommit("Add gate 3 validator"), onBranch).status).toBe(2);
-  });
+  it.each(['git commit -m "Fix (#7)"', "git push -u origin 7-some-work", "git log -n 5"])(
+    "allows %s",
+    (command) => {
+      expect(allows(bash(command))).toBe(true);
+    },
+  );
 
-  // Found live: a message body mentioning "git -C path" was parsed as the -C target.
-  it("ignores git syntax quoted inside a heredoc message body", () => {
-    const command = `git commit -m "$(cat <<'EOF'\nFix hook (#3)\n\nAn unresolvable git -C path failed open.\nEOF\n)"`;
-    expect(bash(command, onBranch).status).toBe(0);
-  });
-
-  it("reads the subject from single-quoted -m", () => {
-    expect(bash("git commit -m 'Fix thing (#7)'", onBranch).status).toBe(0);
-  });
-
-  it("leaves amend --no-edit alone", () => {
-    expect(bash("git commit --amend --no-edit", onBranch).status).toBe(0);
+  it("doesn't mistake message text for a flag", () => {
+    const command = `git commit -m "$(cat <<'EOF'\nGuard --no-verify (#3)\nEOF\n)"`;
+    expect(allows(bash(command))).toBe(true);
   });
 });
 
 describe("guard-bash: dependency changes ask first", () => {
-  it.each(["pnpm add zod", "pnpm remove zod", "pnpm add -D vitest", "npm install left-pad"])(
-    "asks on %s",
-    (command) => {
-      expect(asks(bash(command, onBranch))).toBe(true);
-    },
-  );
+  it.each([
+    "pnpm add zod",
+    "pnpm remove zod",
+    "pnpm add -D vitest",
+    "pnpm -D add zod",
+    "pnpm --filter web add zod",
+    "pnpm update zod",
+    "npm install left-pad",
+    "npm i -D left-pad",
+    "npm install --save-dev left-pad",
+  ])("asks on %s", (command) => {
+    expect(asks(bash(command))).toBe(true);
+  });
 
   it.each(["pnpm i", "pnpm install", "pnpm install --frozen-lockfile", "pnpm test"])(
     "allows %s",
     (command) => {
-      const result = bash(command, onBranch);
-      expect(result.status).toBe(0);
-      expect(asks(result)).toBe(false);
+      expect(allows(bash(command))).toBe(true);
     },
   );
 
   it("asks when package.json is rewritten from the shell", () => {
-    expect(asks(bash("sed -i '' 's/zod/zed/' package.json", onBranch))).toBe(true);
+    expect(asks(bash("sed -i '' 's/zod/zed/' package.json"))).toBe(true);
+  });
+
+  it("allows copying package.json elsewhere", () => {
+    expect(allows(bash("cp package.json /tmp/package.backup.json"))).toBe(true);
   });
 });
 
-describe("guard-bash: eval thresholds are read-only", () => {
-  it("denies writing thresholds from the shell", () => {
-    expect(bash("sed -i '' 's/1.0/0.9/' evals/thresholds.ts", onBranch).status).toBe(2);
-    expect(bash("echo x > evals/thresholds.ts", onBranch).status).toBe(2);
+describe("guard-bash: protected files", () => {
+  it.each([
+    "sed -i '' 's/1.0/0.9/' evals/thresholds.ts",
+    "sed -E -i '' 's/1.0/0.9/' evals/thresholds.ts",
+    "echo x > evals/thresholds.ts",
+    "cd evals && echo x > thresholds.ts",
+    "echo x > Evals/Thresholds.ts",
+    "cat new.ts | tee -a evals/thresholds.ts",
+    "cp /tmp/lower.ts evals/thresholds.ts",
+    "git checkout main -- evals/thresholds.ts",
+  ])("denies threshold write: %s", (command) => {
+    expect(bash(command).status).toBe(2);
   });
 
-  it("denies other write shapes aimed at thresholds", () => {
-    expect(bash("cat new.ts | tee -a evals/thresholds.ts", onBranch).status).toBe(2);
-    expect(bash("cp /tmp/lower.ts evals/thresholds.ts", onBranch).status).toBe(2);
-    expect(bash("git checkout main -- evals/thresholds.ts", onBranch).status).toBe(2);
+  it.each([
+    "echo abc123 > .git/mise-verified",
+    "git rev-parse HEAD > $(git rev-parse --git-dir)/mise-verified",
+  ])("denies forging the verified record: %s", (command) => {
+    expect(bash(command).status).toBe(2);
   });
 
-  it("allows reading thresholds", () => {
-    expect(bash("cat evals/thresholds.ts", onBranch).status).toBe(0);
-    expect(bash("git diff evals/thresholds.ts 2>&1 | head", onBranch).status).toBe(0);
+  it.each([
+    "cat evals/thresholds.ts",
+    "git diff evals/thresholds.ts 2>&1 | head",
+    "cp evals/thresholds.ts /tmp/backup.ts",
+    "cat .git/mise-verified",
+  ])("allows reading: %s", (command) => {
+    expect(allows(bash(command))).toBe(true);
   });
 
-  // Found live: a heredoc writing docs that *mention* the file was denied.
   it("allows writing a different file whose content mentions thresholds", () => {
     const command = "cat > docs/adr.md <<'EOF'\nWrites to `evals/thresholds.ts` are denied.\nEOF";
-    expect(bash(command, onBranch).status).toBe(0);
+    expect(allows(bash(command))).toBe(true);
   });
 
   it("allows writing a different file whose content mentions package.json", () => {
     const command = "cat > README.md <<'EOF'\nDependencies live in package.json.\nEOF";
-    expect(asks(bash(command, onBranch))).toBe(false);
+    expect(allows(bash(command))).toBe(true);
+  });
+
+  it("doesn't treat a here-string as a heredoc", () => {
+    expect(bash("cat <<< hi\necho x > evals/thresholds.ts").status).toBe(2);
+  });
+
+  it("handles heredoc delimiters with hyphens", () => {
+    const command = "cat > a.md <<'END-OF'\ntext\nEND-OF\necho x > evals/thresholds.ts";
+    expect(bash(command).status).toBe(2);
+  });
+
+  it("asks before rewriting the guards themselves", () => {
+    expect(asks(bash("sed -i '' 's/exit 2/exit 0/' .claude/hooks/guard-bash.sh"))).toBe(true);
   });
 });
 
@@ -197,6 +196,22 @@ describe("guard-edit", () => {
     const result = edit(tool, { file_path: "/repo/evals/thresholds.ts" });
     expect(result.status).toBe(2);
     expect(result.stderr).toMatch(/100%/);
+  });
+
+  it("denies a case-variant thresholds path", () => {
+    expect(edit("Write", { file_path: "/repo/Evals/Thresholds.ts" }).status).toBe(2);
+  });
+
+  it("denies writing the verified record", () => {
+    expect(edit("Write", { file_path: "/repo/.git/mise-verified", content: "abc" }).status).toBe(2);
+  });
+
+  it.each([
+    "/repo/.githooks/pre-commit",
+    "/repo/.claude/hooks/guard-bash.sh",
+    "/repo/.claude/settings.json",
+  ])("asks before editing guard file %s", (file_path) => {
+    expect(asks(edit("Edit", { file_path, old_string: "a", new_string: "b" }))).toBe(true);
   });
 
   it("asks when an edit touches package.json dependencies", () => {
@@ -214,8 +229,7 @@ describe("guard-edit", () => {
       old_string: '"lint": "eslint"',
       new_string: '"lint": "eslint --max-warnings 0"',
     });
-    expect(result.status).toBe(0);
-    expect(asks(result)).toBe(false);
+    expect(allows(result)).toBe(true);
   });
 
   it("asks on a whole-file Write of package.json", () => {
@@ -223,6 +237,6 @@ describe("guard-edit", () => {
   });
 
   it("allows unrelated edits", () => {
-    expect(edit("Edit", { file_path: "/repo/lib/domain/constraints.ts" }).status).toBe(0);
+    expect(allows(edit("Edit", { file_path: "/repo/lib/domain/constraints.ts" }))).toBe(true);
   });
 });

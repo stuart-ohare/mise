@@ -26,7 +26,7 @@ step pnpm test
 
 git fetch -q origin main
 base=$(git merge-base origin/main HEAD)
-changed=$(git diff --name-only "$base" HEAD)
+changed=$(git diff --name-only --diff-filter=ACMR "$base" HEAD)
 gates=$(gh issue view "$issue" --json labels -q '[.labels[].name | select(startswith("gate:"))] | join(",")')
 
 echo
