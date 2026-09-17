@@ -71,7 +71,39 @@ const INTENDED_NODE: Record<string, string> = {
 const REVIEWED_PROSE_PHRASES: Record<string, string> = {
   "peanut butter": "the smooth peanut butter ingredient, not dairy butter",
   "resembles breadcrumbs": "a crumble's texture, not an ingredient",
+  "pasta water": "the pan's cooking water, not an ingredient",
 };
+
+const byName = new Map(allNodes.map((n) => [n.name, n]));
+const chain = (name: string | null) => {
+  const names: string[] = [];
+  for (let n = name; n; n = byName.get(n)?.parent ?? null) names.push(n);
+  return names;
+};
+const handNames = new Set(taxonomy.nodes.map((n) => n.name));
+/** Nodes that are, or hang under, a hand-authored node: where an allergen can be. */
+const scanned = allNodes.filter((n) => chain(n.name).some((c) => handNames.has(c)));
+const safeNames = allNodes.filter((n) => !scanned.includes(n)).map((n) => n.name);
+const termsOf = (names: Iterable<string>) =>
+  [...names].flatMap((name) => [name, ...(byName.get(name)?.aliases ?? [])]);
+
+/**
+ * The allergen-bearing terms in `text` that `carried` doesn't account for. Carried terms,
+ * safe leaf names and reviewed phrases are removed first, longest first, so "egg pasta"
+ * is gone before "egg" is looked for and "coconut milk" isn't read as milk.
+ */
+function uncarriedTerms(text: string, carried: ReadonlySet<string>): string[] {
+  const remaining = [...Object.keys(REVIEWED_PROSE_PHRASES), ...termsOf(carried), ...safeNames]
+    .sort((a, b) => b.length - a.length)
+    .reduce(
+      (t, term) => t.replace(new RegExp(`(^|[^\\p{L}])${escape(term)}(?=$|[^\\p{L}])`, "gu"), "$1 "),
+      text.toLowerCase(),
+    );
+  return scanned
+    .filter((node) => !carried.has(node.name))
+    .flatMap((node) => termsOf([node.name]))
+    .filter((term) => containsWord(remaining, term));
+}
 
 const statusOf = (recipe: (typeof recipes)[number]) =>
   deriveRecipeStatus(
@@ -205,42 +237,26 @@ describe("scripts/seed/recipes.json", () => {
     // Gate 2 filters on resolved ingredient rows and never reads the prose. "Serve with
     // crusty bread" in a recipe with no bread passes a gluten-free search and then tells
     // the reader to eat bread.
-    const byName = new Map(allNodes.map((n) => [n.name, n]));
-    const chain = (name: string | null) => {
-      const names: string[] = [];
-      for (let n = name; n; n = byName.get(n)?.parent ?? null) names.push(n);
-      return names;
-    };
-    const handNames = new Set(taxonomy.nodes.map((n) => n.name));
-    // A node is allergen-bearing if it or an ancestor is hand-authored.
-    const scanned = allNodes.filter((n) => chain(n.name).some((c) => handNames.has(c)));
-    const termsOf = (names: Iterable<string>) =>
-      [...names].flatMap((name) => [name, ...(byName.get(name)?.aliases ?? [])]);
-    const strip = (text: string, terms: string[]) =>
-      [...terms]
-        .sort((a, b) => b.length - a.length)
-        .reduce(
-          (t, term) => t.replace(new RegExp(`(^|[^\\p{L}])${escape(term)}(?=$|[^\\p{L}])`, "gu"), "$1 "),
-          text,
-        );
-
     const found: string[] = [];
     for (const r of recipes) {
       const carried = new Set(
         r.ingredients.flatMap((i) => chain(resolveTerm(i.name, index) ?? INTENDED_NODE[i.name] ?? null)),
       );
-      const safe = allNodes.filter((n) => !scanned.includes(n)).map((n) => n.name);
+      const prose = [r.title, r.summary, ...r.steps].join("\n");
+      for (const term of uncarriedTerms(prose, carried)) found.push(`${r.title}: "${term}"`);
+    }
+    expect(found).toEqual([]);
+  });
 
-      // Longest first, so "egg pasta" is gone before "egg" is looked for.
-      const prose = strip([r.title, r.summary, ...r.steps].join("\n").toLowerCase(), [
-        ...Object.keys(REVIEWED_PROSE_PHRASES),
-        ...termsOf(carried),
-        ...safe,
-      ]);
-      for (const node of scanned) {
-        if (carried.has(node.name)) continue;
-        for (const term of termsOf([node.name])) {
-          if (containsWord(prose, term)) found.push(`${r.title}: "${term}"`);
+  it("carries every allergen-bearing word in an ingredient line through that line's own name", () => {
+    // Seeding resolves `name`, not the line: "1 tbsp butter or olive oil" named olive oil
+    // would publish with no dairy row.
+    const found: string[] = [];
+    for (const r of recipes) {
+      for (const i of r.ingredients) {
+        const carried = new Set(chain(resolveTerm(i.name, index) ?? INTENDED_NODE[i.name] ?? null));
+        for (const term of uncarriedTerms(i.rawText, carried)) {
+          found.push(`${r.title}: "${i.rawText}" named ${i.name} has "${term}"`);
         }
       }
     }
