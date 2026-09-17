@@ -221,6 +221,18 @@ describe("findCandidateRecipes", () => {
       await expect(findCandidateRecipes(tx, [randomUUID()])).rejects.toThrow(/unknown/i);
     });
   });
+
+  it("accepts an excluded id in uppercase, which is still a valid UUID", async () => {
+    await inRollback(async (tx) => {
+      const t = await buildTree(tx);
+      const butter = await addRecipe(tx, "published", [{ id: t.cauliflower }, { id: t.butter }]);
+      const control = await addRecipe(tx, "published", [{ id: t.cauliflower }]);
+
+      const found = idsOf(await findCandidateRecipes(tx, [t.dairy.toUpperCase()]));
+      expect(found.has(control)).toBe(true);
+      expect(found.has(butter)).toBe(false);
+    });
+  });
 });
 
 describe("excludedIngredientIds", () => {
@@ -251,6 +263,17 @@ describe("excludedIngredientIds", () => {
     await inRollback(async (tx) => {
       await buildTree(tx);
       await expect(excludedIngredientIds(tx, [randomUUID()])).rejects.toThrow(/unknown/i);
+    });
+  });
+
+  it("treats an uppercase excluded id as the same ingredient", async () => {
+    await inRollback(async (tx) => {
+      const t = await buildTree(tx);
+      const nodes = await allNodes(tx);
+
+      expect(await excludedIngredientIds(tx, [t["soy sauce"].toUpperCase()])).toEqual(
+        exclusionIds(nodes, t["soy sauce"]),
+      );
     });
   });
 });
