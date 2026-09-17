@@ -16,8 +16,10 @@ tree, the alias table, the allergen hierarchy — all of it is prep work done be
 single query arrives. At request time the system looks things up and explains them. It
 does not ask a model to be careful at the moment carefulness is hardest to verify.
 
-> **Status: scaffold.** The structure, domain model and working agreements are in
-> place; the three screens are not built yet. Progress is tracked in
+> **Status: Cook works end to end.** The structure, domain model and working
+> agreements are in place, and `POST /api/cook` plus the Cook screen run the full
+> path — constraints out of free text, gate 2's filter, ranked prose behind gate 3.
+> Intake and Review are still placeholders. Progress is tracked in
 > [Issues](../../issues).
 
 ## Two surfaces

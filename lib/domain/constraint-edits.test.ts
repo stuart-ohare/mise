@@ -1,3 +1,4 @@
+// @gate resolution
 import { describe, expect, it } from "vitest";
 
 import { cookRequestSchema } from "@/app/api/cook/schema";

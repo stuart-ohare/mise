@@ -1,3 +1,4 @@
+// @gate resolution
 import { describe, expect, it } from "vitest";
 
 import type { Constraints } from "@/lib/domain/constraints";

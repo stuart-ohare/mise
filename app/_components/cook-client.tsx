@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type ReactElement } from "react";
+import { useRef, useState, type ReactElement, type ReactNode } from "react";
 
 import {
   chipsFor,
@@ -55,8 +55,22 @@ export default function CookClient() {
   // request may write state: a superseded response rendered beside corrected chips would
   // show a shortlist that was filtered on constraints the chips no longer state.
   const latest = useRef(0);
+  // The last set the server actually accepted. A failed edit rolls back to it, so chips
+  // never describe a correction the route rejected.
+  const confirmed = useRef<Understood | null>(null);
 
   const chips = understood ? chipsFor(understood.constraints, understood.unresolved) : [];
+
+  /**
+   * Every failure branch. Shows no rows, and puts the chips back to the last set the
+   * route accepted — an optimistic edit that survived a rejection would have the chips
+   * claiming a correction the server never took.
+   */
+  function reject(message: string): void {
+    setResponse(null);
+    setUnderstood(confirmed.current);
+    setFailure(message);
+  }
 
   async function post(body: unknown, optimistic: Understood | null): Promise<void> {
     const id = ++latest.current;
@@ -73,8 +87,7 @@ export default function CookClient() {
       if (id !== latest.current) return;
 
       if (!res.ok) {
-        setResponse(null);
-        setFailure(
+        reject(
           res.status === 400
             ? "Mise couldn't read that request. This is a bug, not something you did."
             : "Something broke on the way to the kitchen. Nothing was shown rather than something unchecked.",
@@ -88,18 +101,16 @@ export default function CookClient() {
       if (id !== latest.current) return;
 
       if (!parsed.success) {
-        setResponse(null);
-        setFailure("Mise got an answer it didn't recognise, so it isn't showing it.");
+        reject("Mise got an answer it didn't recognise, so it isn't showing it.");
         return;
       }
 
+      const next = understoodFrom(parsed.data);
+      confirmed.current = next;
       setResponse(parsed.data);
-      setUnderstood(understoodFrom(parsed.data));
+      setUnderstood(next);
     } catch {
-      if (id === latest.current) {
-        setResponse(null);
-        setFailure("Couldn't reach Mise. Check the connection and try again.");
-      }
+      if (id === latest.current) reject("Couldn't reach Mise. Check the connection and try again.");
     } finally {
       if (id === latest.current) setPending(false);
     }
@@ -234,7 +245,14 @@ function Outcome({
 }): ReactElement {
   switch (response.kind) {
     case "ranked":
-      return (
+      // `results` has no minimum: call 3 naming only ids the candidate set didn't
+      // contain leaves every row dropped. Say so rather than render an empty list.
+      return response.results.length === 0 ? (
+        <Nothing>
+          Mise filtered the recipes but couldn&rsquo;t put a shortlist together. Try
+          again.
+        </Nothing>
+      ) : (
         <ul className="space-y-3">
           {response.results.map(({ recipe, rationale }) => (
             <li key={recipe.id}>
@@ -250,13 +268,17 @@ function Outcome({
           <p className="rounded border border-black/20 px-4 py-3 text-sm opacity-80 dark:border-white/20">
             {cardsReason[response.reason]}
           </p>
-          <ul className="space-y-3">
-            {response.results.map((recipe) => (
-              <li key={recipe.id}>
-                <Card recipe={recipe} rationale={null} />
-              </li>
-            ))}
-          </ul>
+          {response.results.length === 0 ? (
+            <Nothing>No recipes left to show.</Nothing>
+          ) : (
+            <ul className="space-y-3">
+              {response.results.map((recipe) => (
+                <li key={recipe.id}>
+                  <Card recipe={recipe} rationale={null} />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       );
 
@@ -290,7 +312,11 @@ function Outcome({
           <p>
             Nothing matches
             {response.constraints.exclude.length > 0 && (
-              <> once {response.constraints.exclude.join(", ")} are out</>
+              <>
+                {" "}
+                once {response.constraints.exclude.join(", ")}{" "}
+                {response.constraints.exclude.length === 1 ? "is" : "are"} out
+              </>
             )}
             .
           </p>
@@ -322,6 +348,14 @@ function Outcome({
         </p>
       );
   }
+}
+
+function Nothing({ children }: { children: ReactNode }) {
+  return (
+    <p className="rounded border border-black/20 px-4 py-3 text-sm dark:border-white/20">
+      {children}
+    </p>
+  );
 }
 
 function Card({
