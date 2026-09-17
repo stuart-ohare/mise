@@ -140,5 +140,35 @@ export async function rankAndExplain(
   const parsed = rankingSchema.safeParse(message.parsed_output);
   if (!parsed.success) return { ok: false, reason: "parse_failed" };
 
-  return { ok: true, ranking: parsed.data.ranking };
+  const ranking = keepKnownIds(parsed.data.ranking, input.candidates);
+  if (ranking.length === 0) return { ok: false, reason: "no_valid_ids" };
+  return { ok: true, ranking };
+}
+
+/**
+ * The drop, in code rather than in the prompt, because the prompt is a request and this
+ * is the guarantee: gate 2 decided what exists, so a recipe it never returned cannot
+ * reach render however convincingly the model names it.
+ *
+ * Ids are matched case-insensitively and re-emitted in the candidate's own spelling, so
+ * a mangled id can't reach render either. Truncation happens after the drop, so invented
+ * ids never push a real recipe out of the shortlist.
+ */
+function keepKnownIds(
+  ranking: readonly RankedRecipe[],
+  candidates: readonly RankingCandidate[],
+): RankedRecipe[] {
+  const known = new Map(candidates.map((row) => [row.id.toLowerCase(), row.id]));
+  const seen = new Set<string>();
+  const kept: RankedRecipe[] = [];
+
+  for (const entry of ranking) {
+    const key = entry.id.trim().toLowerCase();
+    const id = known.get(key);
+    if (id === undefined || seen.has(key)) continue;
+    seen.add(key);
+    kept.push({ id, rationale: entry.rationale });
+    if (kept.length === MAX_RESULTS) break;
+  }
+  return kept;
 }
