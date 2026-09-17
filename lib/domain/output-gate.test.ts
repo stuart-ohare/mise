@@ -194,6 +194,12 @@ describe("scanProse", () => {
     }
   });
 
+  it.each(["-", "\u2014", " "])("throws rather than scan for nothing: %j", (term) => {
+    // outputTerms guarantees a term per exclusion; this is the other half of that
+    // guarantee — a term it hands over is always actually scanned for.
+    expect(() => scanProse("anything at all", [term])).toThrow(/nothing to scan for/);
+  });
+
   it("reports an index into the caller's string, not the folded one", () => {
     // Folding drops the combining acute, so the folded text is a character shorter and
     // a raw offset into it would point at the wrong place. It matters the moment an

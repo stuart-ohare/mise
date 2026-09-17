@@ -126,7 +126,10 @@ export function scanProse(text: string, terms: readonly string[]): ScanHit[] {
   for (const term of new Set(terms.map(normaliseTerm))) {
     const words = fold(term).text.split(/[\s-]+/).filter((word) => word.length > 0);
     const last = words.pop();
-    if (last === undefined) continue;
+    // A term that folds to nothing scannable is a bad catalogue row, not a clean scan.
+    // Skipping it would let every sentence past for that exclusion, so it fails loudly:
+    // the caller sees an error and no prose, which is the direction this gate errs in.
+    if (last === undefined) throw new Error(`Term has nothing to scan for: ${JSON.stringify(term)}`);
     const pattern = new RegExp(
       `(?<![\\p{L}\\p{N}])${[...words, stem(last)].map(escapeRegex).join("[\\s-]+")}\\p{L}*`,
       "giu",
