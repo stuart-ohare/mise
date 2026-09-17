@@ -61,8 +61,8 @@ straight into the database.
 
 | Gate | Where | What it does |
 |---|---|---|
-| 1 — Resolution | Constraint extraction | An exclusion that can't be mapped to a canonical ingredient is asked about, never silently dropped |
-| 2 — Query | SQL | The exclusion becomes a `NOT EXISTS` over `recipe_ingredient` joined through the canonical tree. Recipes containing ghee vanish from a dairy-free search because ghee's parent is dairy — not because anyone tagged the recipe |
+| 1 — Resolution | Constraint extraction | An exclusion that can't be mapped to a canonical ingredient is asked about, never silently dropped. The seeded catalogue deliberately doesn't know `ghee`, so *no ghee* is a question, not a filter |
+| 2 — Query | SQL | The exclusion becomes a `NOT EXISTS` over `recipe_ingredient` joined through the canonical tree. *Garlic butter mushrooms on toast* vanishes from a dairy-free search because butter's parent is dairy — not because anyone tagged the recipe |
 | 3 — Output | Pre-render | Generated prose is scanned for aliases of anything excluded. A hit is rejected, logged and retried once; a second failure returns cards without prose rather than unverified text |
 
 Gate 2 already guarantees the rows. Gate 3 exists because the model writes sentences,
