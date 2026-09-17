@@ -30,8 +30,9 @@ export type OutputGateResult<T> =
  * The names and aliases of every id gate 2 excludes, so the prose is held to the same
  * widened set as the rows: ancestors and cross-tree tagged nodes included.
  *
- * Throws on an id that isn't in `nodes`. Gate 2 fails closed on a bad id — the row
- * stays excluded — so gate 3 must not answer the same mistake with an empty term set,
+ * Throws when an exclusion contributes no term — an id missing from `nodes`, or one
+ * whose names all normalise to nothing. Gate 2 fails closed on a bad id, since the row
+ * stays excluded, so gate 3 must not answer the same mistake with an empty term set,
  * which would scan for nothing and pass everything. An empty result therefore only
  * ever means nothing was excluded.
  */
@@ -40,18 +41,24 @@ export function outputTerms(
   aliases: readonly { canonicalId: string; alias: string }[],
   excludedIds: readonly string[],
 ): string[] {
-  const known = new Set(nodes.map((node) => node.id));
-  const missing = [...new Set(excludedIds.filter((id) => !known.has(id)))].sort();
-  if (missing.length > 0) {
-    throw new Error(`Excluded ingredient not in the node list: ${missing.join(", ")}`);
+  const terms = new Set<string>();
+  const empty: string[] = [];
+
+  for (const excludedId of excludedIds) {
+    const ids = exclusionIds(nodes, excludedId);
+    const raw = [
+      ...nodes.filter((node) => ids.has(node.id)).map((node) => node.name),
+      ...aliases.filter((entry) => ids.has(entry.canonicalId)).map((entry) => entry.alias),
+    ];
+    const found = raw.map(normaliseTerm).filter((term) => term.length > 0);
+    if (found.length === 0) empty.push(excludedId);
+    for (const term of found) terms.add(term);
   }
 
-  const ids = new Set(excludedIds.flatMap((id) => [...exclusionIds(nodes, id)]));
-  const raw = [
-    ...nodes.filter((node) => ids.has(node.id)).map((node) => node.name),
-    ...aliases.filter((entry) => ids.has(entry.canonicalId)).map((entry) => entry.alias),
-  ];
-  const terms = new Set(raw.map(normaliseTerm).filter((term) => term.length > 0));
+  if (empty.length > 0) {
+    const ids = [...new Set(empty)].sort().join(", ");
+    throw new Error(`Excluded ingredient contributed no term to scan for: ${ids}`);
+  }
   return [...terms].sort();
 }
 
