@@ -48,12 +48,18 @@ export type RankedRecipe = z.infer<typeof rankingSchema>["ranking"][number];
 /**
  * `no_valid_ids` is a failure rather than an empty shortlist: a model that invented
  * every id must not read as "nothing here suits you".
+ *
+ * `dropped` carries the ids gate 2 never handed the model, so a fabrication is a
+ * counted event and not a silently shorter list (CLAUDE.md §6). It appears only where
+ * a response existed to fabricate in: `dropped: []` on an `api_error` would read as
+ * "the model invented nothing" rather than "the model never answered".
  */
 export type RankingResult =
-  | { ok: true; ranking: RankedRecipe[] }
+  | { ok: true; ranking: RankedRecipe[]; dropped: string[] }
+  | { ok: false; reason: "no_valid_ids"; dropped: string[] }
   | {
       ok: false;
-      reason: "no_candidates" | "no_valid_ids" | "refused" | "parse_failed" | "api_error";
+      reason: "no_candidates" | "refused" | "parse_failed" | "api_error";
     };
 
 /**
@@ -140,9 +146,9 @@ export async function rankAndExplain(
   const parsed = rankingSchema.safeParse(message.parsed_output);
   if (!parsed.success) return { ok: false, reason: "parse_failed" };
 
-  const ranking = keepKnownIds(parsed.data.ranking, input.candidates);
-  if (ranking.length === 0) return { ok: false, reason: "no_valid_ids" };
-  return { ok: true, ranking };
+  const { kept, dropped } = keepKnownIds(parsed.data.ranking, input.candidates);
+  if (kept.length === 0) return { ok: false, reason: "no_valid_ids", dropped };
+  return { ok: true, ranking: kept, dropped };
 }
 
 /**
@@ -153,22 +159,31 @@ export async function rankAndExplain(
  * Ids are matched case-insensitively and re-emitted in the candidate's own spelling, so
  * a mangled id can't reach render either. Truncation happens after the drop, so invented
  * ids never push a real recipe out of the shortlist.
+ *
+ * `dropped` names only the invented ids, in the model's own spelling. A duplicate and a
+ * real id past `MAX_RESULTS` are dropped too, and neither is a fabrication — counting
+ * them would inflate the number that is the evidence. The whole response is examined for
+ * the same reason: the count must not depend on where in the list the invention sat.
  */
 function keepKnownIds(
   ranking: readonly RankedRecipe[],
   candidates: readonly RankingCandidate[],
-): RankedRecipe[] {
+): { kept: RankedRecipe[]; dropped: string[] } {
   const known = new Map(candidates.map((row) => [row.id.toLowerCase(), row.id]));
   const seen = new Set<string>();
   const kept: RankedRecipe[] = [];
+  const dropped: string[] = [];
 
   for (const entry of ranking) {
     const key = entry.id.trim().toLowerCase();
     const id = known.get(key);
-    if (id === undefined || seen.has(key)) continue;
+    if (id === undefined) {
+      dropped.push(entry.id);
+      continue;
+    }
+    if (seen.has(key)) continue;
     seen.add(key);
-    kept.push({ id, rationale: entry.rationale });
-    if (kept.length === MAX_RESULTS) break;
+    if (kept.length < MAX_RESULTS) kept.push({ id, rationale: entry.rationale });
   }
-  return kept;
+  return { kept, dropped };
 }
