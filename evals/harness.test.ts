@@ -138,6 +138,33 @@ describe("runEval", () => {
     expect(calls).toEqual([]);
   });
 
+  it.each([
+    ["no thresholds entry", {}],
+    ["an empty thresholds entry", { constraints: {} }],
+  ])("fails a suite with %s before any suite runs", async (_label, thresholds: Thresholds) => {
+    fixture("constraints", "a.json", { gates: ["resolution"], query: "no dairy" });
+    // A suite returning no metrics against no thresholds would otherwise pass vacuously.
+    const code = await run([stub("constraints", {})], thresholds);
+
+    expect(code).not.toBe(0);
+    expect(calls).toEqual([]);
+    expect(logs.join("\n")).toContain("constraints");
+    expect(existsSync(reportPath())).toBe(false);
+  });
+
+  it("fails thresholds for a suite that isn't registered before any suite runs", async () => {
+    fixture("safety", "a.json", { gates: ["output"], query: "something rich" });
+    const code = await run([stub("safety", { m: 1 })], {
+      safety: { m: 1 },
+      constraints: { exclude: 1 },
+    });
+
+    expect(code).not.toBe(0);
+    expect(calls).toEqual([]);
+    expect(logs.join("\n")).toContain("constraints");
+    expect(existsSync(reportPath())).toBe(false);
+  });
+
   it("fails a reported metric that has no threshold", async () => {
     fixture("constraints", "a.json", { gates: ["resolution"], query: "no dairy" });
     const code = await run([stub("constraints", { exclude: 1, extra: 1 })], {
