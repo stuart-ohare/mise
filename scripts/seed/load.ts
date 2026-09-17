@@ -66,10 +66,16 @@ async function main(): Promise<number> {
           console.error(`  "${term}" is claimed by ${quoted.slice(0, -1).join(", ")} and ${quoted.at(-1)}`);
         }
       }
-      if (result.treeChanges.length > 0 && !applyTreeChanges) {
+      // Listed even when the flag was passed and a collision refused the run: otherwise the
+      // run after fixing the collision would apply changes nobody was shown first.
+      if (result.treeChanges.length > 0) {
         console.error("Nothing written: existing ingredients differ from the files.");
         for (const change of result.treeChanges) console.error(describe(change));
-        console.error("Re-run with --apply-tree-changes to apply them.");
+        console.error(
+          applyTreeChanges
+            ? "--apply-tree-changes will apply them once the collisions above are fixed."
+            : "Re-run with --apply-tree-changes to apply them.",
+        );
       }
       return 1;
     }
