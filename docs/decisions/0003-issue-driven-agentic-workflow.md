@@ -29,9 +29,19 @@ merge    human, always
 - **What can be a script is a script.** `verify.sh` runs the definition of done and the
   §4.2 fixture rule for `gate:*` issues, and records the verified commit; `/ship`
   refuses any other commit.
-- **What must never happen is a hook.** PreToolUse hooks deny commits/pushes on `main`,
-  writes to `evals/thresholds.ts`, and malformed commit subjects, and put dependency
-  changes to the human. They're tested in `scripts/workflow/hooks.test.ts`.
+- **What must never happen is a hook, and each rule is enforced where the real state is
+  visible.**
+  - **Git hooks** (`.githooks/`, installed by `pnpm i` via `prepare`): `pre-commit`
+    rejects commits on `main`, `pre-push` rejects any update to `refs/heads/main`, and
+    `commit-msg` enforces ≤ 72 chars with `(#n)`. Git hands them the real branch, refs
+    and message, so they don't depend on how a command was spelled, and they cover
+    humans too.
+  - **Claude Code hooks** (`.claude/hooks/`) cover what git can't see:
+    - They deny `--no-verify`, `commit -n`, and retargeting or unsetting `core.hooksPath`.
+    - They deny writes to `evals/thresholds.ts` and to the `/verify` record.
+    - They ask the human before dependency changes and before edits to the guards
+      themselves.
+  - Both sets run real inputs in `scripts/workflow/{githooks,hooks}.test.ts`.
 - **Review comes from fresh context.** `invariant-reviewer` sees the diff, the issue and
   CLAUDE.md — never the building conversation. The CI review (#4) uses the same definition.
 - **Gate labels** (`gate:resolution|query|output`) make the fixture rule mechanical, and
@@ -54,9 +64,17 @@ merge    human, always
 - **Approval is honour-system at the identity level.** The agent's `gh` runs as the same
   account as the human, so GitHub can't distinguish who moved `status:planned`. The skills
   forbid it; nothing technically prevents it. A separate bot identity would close this.
-- **Hooks parse shell, best-effort.** A sufficiently indirect command (a script that
-  writes the thresholds file) gets past them, and a heredoc body is deliberately ignored.
-  They stop the obvious route; the reviewer and the human merge are the backstop.
+- **Claude Code hooks parse shell text, so they're best-effort.** An indirect write gets
+  past them (a script or `python -c` that opens the thresholds file), and heredoc bodies
+  are deliberately ignored. The first build tried to enforce the git rules this way too.
+  An independent review found six bypasses (`git -c x commit`, `push -u origin main`,
+  `checkout main && commit`, `commit -am`, …), which is why those rules moved into git
+  hooks.
+- **Local hooks are not a guarantee.** Anyone with a shell can skip them. Branch
+  protection on `main` (#4) is the guarantee; the hooks make the right path the easy one.
+- **Some steps are enforced by instruction only:**
+  - `/ship` checks that `verify.sh` passed for the commit, not that the reviewer ran.
+  - The reviewer has Bash, so "read-only" is an instruction, not a tool restriction.
 - **`jq` is a prerequisite** for the hooks. No new package dependency.
 - Skills are prose the model follows. Where a step matters enough, it has been moved into
   a script or hook rather than trusted.

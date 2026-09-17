@@ -106,9 +106,10 @@ issues:
 The issue is the spec. The plan is an issue comment the human approves by moving a
 label. The build happens in its own worktree with the failing test written first.
 `/verify` runs the definition of done plus an independent `invariant-reviewer` agent,
-and the PR ticks each acceptance criterion against evidence. Hooks stop commits on
-`main`, edits to the eval thresholds, and unapproved dependency changes; they need
-[`jq`](https://jqlang.org). Why it's built this way is in
+and the PR ticks each acceptance criterion against evidence. Git hooks (installed by
+`pnpm i`) stop commits and pushes on `main` and enforce the commit format. Claude Code
+hooks stop agents skipping those git hooks, editing the eval thresholds, or changing
+dependencies without approval; they need [`jq`](https://jqlang.org). Why it's built this way is in
 [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 
 ## Trade-offs

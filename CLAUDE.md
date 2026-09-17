@@ -83,7 +83,8 @@ lib/
   domain/             Pure functions: constraint types, exclusion logic, validation
 scripts/seed/         One-off generation script + committed JSON catalogue
 scripts/workflow/     verify.sh (definition of done) + hook tests
-.claude/              Workflow skills, invariant-reviewer agent, guard hooks
+.claude/              Workflow skills, invariant-reviewer agent, Claude Code guard hooks
+.githooks/            pre-commit, commit-msg, pre-push (installed by pnpm i)
 .github/              Issue and PR templates
 evals/                Fixtures, runner, and latest.md (the last committed run)
 docs/decisions/       ADRs — one file per decision worth defending
@@ -129,9 +130,13 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 - **Gate labels** — `gate:resolution`, `gate:query`, `gate:output` — are set at `/spec`.
   A gate-labelled issue doesn't pass `/verify` without a changed test or fixture and a
   regenerated `evals/latest.md`.
-- **Hooks** (`.claude/hooks/`, need `jq`) deny commits and pushes on `main`, writes to
-  `evals/thresholds.ts`, and commit subjects over 72 chars or without `(#n)`; they put
-  dependency changes to the human. A hook block is a rule, not an obstacle — don't route
+- **Git hooks** (`.githooks/`, installed by `pnpm i`) reject commits on `main`, pushes
+  to `main`, and commit subjects over 72 chars or without `(#n)`.
+- **Claude Code hooks** (`.claude/hooks/`, need `jq`):
+  - They deny `--no-verify`, changes to `core.hooksPath`, and writes to
+    `evals/thresholds.ts` or the verified record.
+  - They put dependency changes and edits to the guards to the human.
+- A hook rejection is a rule, not an obstacle. Fix what it rejected; don't route
   around it.
 
 - **Write the failing thing first.** For domain logic that's a Vitest case. For model
