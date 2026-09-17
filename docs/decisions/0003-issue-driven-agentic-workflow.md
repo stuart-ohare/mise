@@ -43,15 +43,27 @@ merge    human, always
       themselves.
   - Both sets run real inputs in `scripts/workflow/{githooks,hooks}.test.ts`.
 - **Review comes from fresh context.** `invariant-reviewer` sees the diff, the issue and
-  CLAUDE.md — never the building conversation. The CI review (#4) uses the same definition.
+  CLAUDE.md — never the building conversation. It runs only locally, in `/verify`, and
+  its report goes in the PR body.
+- **CI is deterministic only** (#4). `checks` runs typecheck, lint and test and is
+  required on `main`. No workflow calls a model or holds an Anthropic secret.
 - **Gate labels** (`gate:resolution|query|output`) make the fixture rule mechanical, and
   the reviewer flags gate-path changes without one.
 
 ## Alternatives considered
 
 - **Fully CI-driven loop** (label an issue, an Action builds and opens a PR). Most
-  hands-off, but opaque, expensive, and impossible to steer mid-task. Rejected; CI gets
-  checks and review only (#4).
+  hands-off, but opaque, expensive, and impossible to steer mid-task.
+- **Claude review and `@claude` in CI** (claude-code-action). This was built in #4 and
+  removed before merge.
+  - **For:** a second review visible on GitHub.
+  - **Against:**
+    - It duplicates the local reviewer.
+    - It spends money on events nobody chose to pay for. The app installer's own
+      workflow ran a review on its setup PR before anyone approved it.
+    - It needs API secrets in the repo.
+    - It opens a second path where Claude acts outside the plan approval and the
+      local guards.
 - **GitHub Projects board for state.** Better-looking for a reviewer, but needs extra
   token scopes and project IDs to script. Labels are visible from the issue list and
   one `gh` call to move.
@@ -94,9 +106,9 @@ merge    human, always
   to exist first (follow-up issue).
 - **Some steps are enforced by instruction only:**
   - `/ship` checks that `verify.sh` passed for the commit, not that the reviewer ran.
-  - Locally, the reviewer has Bash, so "read-only" is an instruction, not a tool
-    restriction. In CI (#4) it is a restriction: `claude-review` allows only read
-    tools, `git diff/log/show`, `gh … view/diff` and `gh pr comment`.
+  - The reviewer has Bash, so "read-only" is an instruction, not a tool restriction.
+  - The *Invariant review* section of a PR body is written by the agent that ran it.
+    Nothing on GitHub re-runs or verifies it.
 - **`jq` is a prerequisite** for the hooks. No new package dependency.
 - Skills are prose the model follows. Where a step matters enough, it has been moved into
   a script or hook rather than trusted.

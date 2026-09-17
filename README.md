@@ -116,21 +116,15 @@ dependencies without approval; they need [`jq`](https://jqlang.org). Why it's bu
 
 ### CI
 
-| Workflow | Runs on | Costs | Merge-blocking |
-|---|---|---|---|
-| `checks` | Every PR and push to `main` | Nothing (typecheck, lint, test) | **Yes**, required on `main` |
-| `claude-review` | PR opened ready, or a draft marked ready. **Not** on later pushes | One Opus run, capped at 30 turns | No. It posts the `invariant-reviewer` report as one advisory comment |
-| `claude` | `@claude` in an issue or PR comment, from users with write access | One run, capped at 15 turns | No. Read and comment only; building happens through the local loop |
+GitHub Actions runs one workflow, `checks` (typecheck, lint, test), on every PR and
+push to `main`. It needs no secrets and calls no model. `pnpm eval` never runs in CI,
+because it costs money and isn't deterministic.
 
 `main` is protected: changes arrive by PR, `checks` must pass, force-pushes are blocked,
-and the rules apply to admins too. `pnpm eval` is never run in CI (it costs money and
-isn't deterministic).
+and the rules apply to admins too.
 
-One-time setup for the Claude workflows. Forks and clones without it still get `checks`:
-
-1. Add an `ANTHROPIC_API_KEY` repository secret (Settings → Secrets and variables → Actions).
-2. Install the Claude GitHub App on the repository: run `/install-github-app` in Claude
-   Code, or go to <https://github.com/apps/claude>.
+Claude doesn't run on GitHub. The `invariant-reviewer` runs locally in `/verify`, and
+its report goes in the PR body.
 
 ## Trade-offs
 
