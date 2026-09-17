@@ -43,7 +43,8 @@ async function main(): Promise<number> {
     if (!result.ok) {
       console.error("Nothing written: a term would belong to more than one ingredient.");
       for (const { term, ingredients } of result.collisions) {
-        console.error(`  "${term}" is claimed by ${ingredients.map((i) => `"${i}"`).join(" and ")}`);
+        const quoted = ingredients.map((i) => `"${i}"`);
+        console.error(`  "${term}" is claimed by ${quoted.slice(0, -1).join(", ")} and ${quoted.at(-1)}`);
       }
       return 1;
     }

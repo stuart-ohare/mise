@@ -23,7 +23,7 @@ export function findTermCollisions(claims: readonly TermClaim[]): TermCollision[
   return [...claimants]
     .filter(([, ingredients]) => ingredients.size > 1)
     .map(([term, ingredients]) => ({ term, ingredients: [...ingredients].sort() }))
-    .sort((a, b) => a.term.localeCompare(b.term));
+    .sort((a, b) => (a.term < b.term ? -1 : a.term > b.term ? 1 : 0));
 }
 
 /** Each node claims its own name and each of its aliases. */
