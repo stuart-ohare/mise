@@ -21,8 +21,8 @@ The model parses intent and writes prose. It never decides what exists.
 1. Constraint extraction returns a typed object. An exclusion that cannot be resolved
    to a canonical ingredient is asked about, never dropped.
 2. SQL produces the candidate set — a `NOT EXISTS` over `recipe_ingredient` joined
-   through the canonical ingredient tree, so ghee is excluded by a `no dairy` query
-   because ghee's parent chain reaches dairy.
+   through the canonical ingredient tree, so butter is excluded by a `no dairy` query
+   because butter's parent chain reaches dairy.
 3. Generated prose is validated against the exclusion set before it renders. A
    violation is rejected, logged and retried once.
 

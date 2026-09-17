@@ -264,11 +264,19 @@ describe("scripts/seed/recipes.json", () => {
   });
 });
 
+const docLines = (file: string) => readFileSync(resolve(__dirname, "../..", file), "utf8").split("\n");
+
 /** The README's gate 2 row — the one sentence a reviewer is most likely to read. */
-const readmeGate2 =
-  readFileSync(resolve(__dirname, "../../README.md"), "utf8")
-    .split("\n")
-    .find((line) => line.trimStart().startsWith("| 2 — Query |")) ?? "";
+const readmeGate2 = docLines("README.md").find((line) => line.trimStart().startsWith("| 2 — Query |")) ?? "";
+
+/** ADR 0002's numbered item 2: the same claim, in the document that defends it. */
+const adrGate2 = (() => {
+  const lines = docLines("docs/decisions/0002-exclusion-is-a-database-constraint.md");
+  const start = lines.findIndex((line) => line.startsWith("2. SQL produces the candidate set"));
+  if (start < 0) return "";
+  const end = lines.findIndex((line, i) => i > start && !line.startsWith("   "));
+  return lines.slice(start, end < 0 ? undefined : end).join(" ");
+})();
 
 /**
  * The row says "dairy-free search", so the root's own terms can't be what it
@@ -278,23 +286,28 @@ const readmeGate2 =
 const dairyRootTerms = new Set(termsOf(["dairy"]));
 const dairyDescendants = dairyTerms.filter((term) => !dairyRootTerms.has(term));
 
-describe("README's gate 2 example", () => {
-  // A claim about this catalogue is pinned against this catalogue, like every other
-  // property here. The row explained the tree with a term the catalogue is generated
-  // never to know, so it described a lookup that doesn't happen.
-
-  it("is still in the README", () => {
-    expect(readmeGate2).not.toBe("");
+// A claim about this catalogue is pinned against this catalogue, like every other
+// property here. Both documents explained the tree with a term the catalogue is
+// generated never to know, so both described a lookup that doesn't happen — and a
+// reader who tried the worked example got the opposite of what it promised.
+describe.each([
+  ["README's gate 2 row", readmeGate2],
+  ["ADR 0002's gate 2 claim", adrGate2],
+])("%s", (_where, claim) => {
+  it("is still where the test looks for it", () => {
+    expect(claim).not.toBe("");
   });
 
   it("names no term the catalogue deliberately can't resolve", () => {
-    expect(DELIBERATELY_UNRESOLVED.filter((term) => containsWord(readmeGate2, term))).toEqual([]);
+    expect(DELIBERATELY_UNRESOLVED.filter((term) => containsWord(claim, term))).toEqual([]);
   });
 
   it("explains the filter with a dairy descendant", () => {
-    expect(dairyDescendants.filter((term) => containsWord(readmeGate2, term))).not.toEqual([]);
+    expect(dairyDescendants.filter((term) => containsWord(claim, term))).not.toEqual([]);
   });
+});
 
+describe("README's gate 2 row", () => {
   it("names a published recipe that actually contains one", () => {
     // The row names a dish by title so a reviewer can type it into the Cook box. Checking
     // only the ingredient would leave the title free to drift when the catalogue is
