@@ -1,11 +1,11 @@
 // @gate query
 import { describe, expect, it } from "vitest";
 
-import { taxonomySchema, validateTaxonomy, type TaxonomyNode } from "./taxonomy";
+import { ALLERGENS, taxonomySchema, validateTaxonomy, type TaxonomyNode } from "./taxonomy";
 
 function node(name: string, parent: string | null, aliases: string[] = []): TaxonomyNode {
-  // Roots are tagged "dairy" regardless of name: these cases test structure, not tags.
-  return { name, parent, allergenTags: parent === null ? ["dairy"] : [], aliases };
+  const allergenTags = parent === null ? ALLERGENS.filter((a) => a === name) : [];
+  return { name, parent, allergenTags, aliases };
 }
 
 function errorsOf(nodes: TaxonomyNode[]): string[] {
@@ -70,6 +70,25 @@ describe("validateTaxonomy", () => {
       expect(position.get(n.parent)).toBeLessThan(position.get(n.name) ?? -1);
     }
     expect(result.nodes).toHaveLength(3);
+  });
+
+  it("rejects an allergen root that doesn't carry its own tag", () => {
+    // exclusionIds widens an exclusion by the root's own tag; an untagged root
+    // would silently stop soy sauce leaving a gluten-free search.
+    const errors = errorsOf([{ name: "gluten", parent: null, allergenTags: [], aliases: [] }]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain("gluten");
+  });
+
+  it("rejects a root that carries a tag it isn't named for", () => {
+    // Excluding a tagged "sauces" root would otherwise remove every gluten ingredient.
+    const errors = errorsOf([{ name: "sauces", parent: null, allergenTags: ["gluten"], aliases: [] }]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain("sauces");
+  });
+
+  it("accepts an untagged root that isn't an allergen", () => {
+    expect(errorsOf([node("vegetable", null), node("leek", "vegetable")])).toEqual([]);
   });
 });
 

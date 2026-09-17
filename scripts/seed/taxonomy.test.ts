@@ -51,8 +51,9 @@ describe("scripts/seed/taxonomy.json", () => {
     expect(effectiveAllergenTags(nodes, "soy sauce")).toEqual(new Set(["soy", "gluten"]));
   });
 
-  it("excludes soy sauce from a gluten-free search", () => {
-    expect(exclusionIds(nodes, "gluten")).toContain("soy sauce");
+  it.each(["soy sauce", "miso"])("excludes %s from a gluten-free search", (name) => {
+    // Both sit under soy and are commonly made with wheat or barley.
+    expect(exclusionIds(nodes, "gluten")).toContain(name);
   });
 
   it.each(ALLERGENS)("excludes every node whose tags include %s", (allergen) => {
