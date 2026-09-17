@@ -238,9 +238,9 @@ the extraction better, never by making the test weaker.
 The 53 nodes of the allergen hierarchy are written by hand; the 125 leaves and 60 recipes
 were generated once and committed as JSON. Only 11 of those leaves hang under a
 hand-authored node — `parmesan` under `cheese`, `linguine` under `pasta` — and the other
-114 stand outside the tree, where no allergen is at stake. A generated leaf can never
-carry a tag of its own, so every allergen in the catalogue traces to a node a human
-placed ([`scripts/seed/README.md`](scripts/seed/README.md)).
+114 stand outside the tree, where no allergen it models is at stake. A generated leaf
+can never carry a tag of its own, so every allergen in the catalogue traces to a node a
+human placed ([`scripts/seed/README.md`](scripts/seed/README.md)).
 
 **Cost.** The tree does not grow at the speed of the catalogue. Every new allergen,
 cuisine or awkward ingredient needs a human to decide where it hangs, and until someone
