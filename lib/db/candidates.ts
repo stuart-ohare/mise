@@ -167,16 +167,23 @@ export async function loadCandidateIngredients(
     sql`, `,
   );
 
+  // The join drops a line whose canonical_id is null. That is only reachable with no
+  // exclusions — gate 2 removes such a recipe whenever anything is excluded — so no
+  // exclusion promise rests on the omission, and inventing a name from raw_text would
+  // hand the model wording the canonical tree never vouched for.
   const rows = await db.execute(sql`
     SELECT ri.recipe_id AS "recipeId", ci.name AS "name"
     FROM recipe_ingredient ri
     JOIN canonical_ingredient ci ON ci.id = ri.canonical_id
     WHERE ri.recipe_id IN (${ids})
+    ORDER BY ri.recipe_id, ci.name
   `);
 
   const byRecipe = new Map<string, string[]>();
   for (const row of z.array(ingredientRowSchema).parse(rows)) {
-    byRecipe.set(row.recipeId, [row.name]);
+    const names = byRecipe.get(row.recipeId);
+    if (names) names.push(row.name);
+    else byRecipe.set(row.recipeId, [row.name]);
   }
   return byRecipe;
 }

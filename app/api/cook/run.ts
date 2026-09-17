@@ -1,6 +1,7 @@
 import type { ExtractionResult } from "@/lib/ai/prompts/extract-constraints";
 import {
   MAX_RESULTS,
+  VERSION as RANKING_VERSION,
   type RankingCandidate,
   type RankingInput,
   type RankingResult,
@@ -9,6 +10,13 @@ import type { CandidateRecipe } from "@/lib/db/candidates";
 import type { IngredientTree } from "@/lib/db/ingredients";
 import type { ResolutionTerm } from "@/lib/db/terms";
 import type { Constraints } from "@/lib/domain/constraints";
+import {
+  collectStrings,
+  outputTerms,
+  runOutputGate,
+  scanProse,
+  type ViolationRecord,
+} from "@/lib/domain/output-gate";
 import { buildResolutionIndex, resolveExclusions } from "@/lib/domain/resolve-exclusions";
 
 import type { CookRequest, CookResponse } from "./schema";
@@ -21,14 +29,11 @@ import type { CookRequest, CookResponse } from "./schema";
  * returned alongside an exclusion nothing resolved — so every branch here is tested.
  */
 
-/** What gate 3 hands the sink for each rejected attempt. Mirrors `output_violation`. */
-export type ViolationSinkRecord = {
-  attempt: 1 | 2;
-  matchedTerms: string[];
-  generated: string;
-  retrySucceeded: boolean;
+/** What the sink is handed per rejected attempt. Mirrors `output_violation`'s columns. */
+export type ViolationSinkRecord = ViolationRecord & {
   constraints: Constraints;
   query: string;
+  promptVersion: string;
 };
 
 /**
@@ -62,13 +67,57 @@ async function constraintsFor(
     : { ok: false, response: { kind: "not_understood", reason: extracted.reason } };
 }
 
+/** Deterministic order for a list nothing ranked: soonest first, unknown times last. */
+function bySoonest(a: CandidateRecipe, b: CandidateRecipe): number {
+  if (a.minutes !== b.minutes) {
+    if (a.minutes === null) return 1;
+    if (b.minutes === null) return -1;
+    return a.minutes - b.minutes;
+  }
+  return a.title.localeCompare(b.title);
+}
+
+/** Explicit rather than a rest-spread: what crosses the boundary is listed, not implied. */
+const withoutIngredients = (row: RankingCandidate): CandidateRecipe => ({
+  id: row.id,
+  title: row.title,
+  summary: row.summary,
+  minutes: row.minutes,
+  serves: row.serves,
+});
+
+/**
+ * The prose to scan: every field of every entry except the id.
+ *
+ * Ids are not generated text — call 3 has already replaced them with the candidate row's
+ * own spelling, and an id it invented is gone before this runs. Scanning them would also
+ * fail closed for nothing: `scanProse` matches at a word start and treats `-` as a
+ * boundary, so a uuid segment beginning "beef" is a hit for a beef exclusion.
+ */
+function generatedProse(result: RankingResult): string[] {
+  if (!result.ok) return [];
+  // `collectStrings` rather than reading `rationale` directly, so a field that grows
+  // nested strings is scanned whole — but the pick stays explicit, because a new
+  // generated field has to be a deliberate decision to scan, not an accident.
+  return collectStrings(result.ranking.map((entry) => ({ rationale: entry.rationale })));
+}
+
 export async function runCook(input: CookRequest, deps: CookDeps): Promise<CookResponse> {
   const step = await constraintsFor(input, deps);
   if (!step.ok) return step.response;
   const { constraints } = step;
 
-  const index = buildResolutionIndex(await deps.loadTerms());
-  const resolutions = resolveExclusions(constraints.exclude, index);
+  // Gate 1's terms and gate 3's tree are two reads of the same tables; neither depends
+  // on the other, so the round trips overlap rather than add up.
+  const [termRows, tree] = await Promise.all([deps.loadTerms(), deps.loadTree()]);
+
+  const resolutions = resolveExclusions(constraints.exclude, buildResolutionIndex(termRows));
+  const unresolved = resolutions.flatMap((r) => (r.kind === "unresolved" ? [r.term] : []));
+  if (unresolved.length > 0) {
+    // No query and no model call. An exclusion nothing could map is a question for the
+    // cook, and any rows returned here would be filtered on less than they asked for.
+    return { kind: "needs_resolution", constraints, unresolved };
+  }
   const excludedIds = resolutions.flatMap((r) => (r.kind === "resolved" ? [r.canonicalId] : []));
 
   const rows = await deps.findCandidates(excludedIds);
@@ -78,24 +127,57 @@ export async function runCook(input: CookRequest, deps: CookDeps): Promise<CookR
     ingredients: ingredients.get(row.id) ?? [],
   }));
 
-  const ranked = await deps.rank({ candidates, constraints });
-  if (!ranked.ok) {
+  // Time is the one soft constraint that eliminates rather than ranks: a 90-minute
+  // braise at position five is not an answer to "twenty-five minutes". An unstated
+  // cooking time counts as over the limit, because it is not a promise that it fits.
+  const limit = constraints.maxMinutes;
+  const within =
+    limit === null
+      ? candidates
+      : candidates.filter((row) => row.minutes !== null && row.minutes <= limit);
+
+  if (within.length === 0) {
+    const wouldMatch = candidates.length;
     return {
-      kind: "cards",
+      kind: "no_candidates",
       constraints,
-      results: candidates.slice(0, MAX_RESULTS),
-      reason: "ranking_unavailable",
+      relaxTime: limit !== null && wouldMatch > 0 ? { limit, wouldMatch } : null,
     };
   }
 
-  const byId = new Map(candidates.map((row) => [row.id, row]));
+  const terms = outputTerms(tree.nodes, tree.aliases, excludedIds);
+  const gate = await runOutputGate<RankingResult>({
+    generate: (violatedTerms) => deps.rank({ candidates: within, constraints }, violatedTerms),
+    scan: (result) => generatedProse(result).flatMap((text) => scanProse(text, terms)),
+    onViolation: (record) =>
+      deps.recordViolation({
+        ...record,
+        constraints,
+        query: input.kind === "query" ? input.query : JSON.stringify(constraints),
+        promptVersion: RANKING_VERSION,
+      }),
+  });
+
+  const cards = (reason: "output_violation" | "ranking_unavailable"): CookResponse => ({
+    kind: "cards",
+    constraints,
+    results: [...within].sort(bySoonest).slice(0, MAX_RESULTS).map(withoutIngredients),
+    reason,
+  });
+
+  if (gate.kind === "downgraded") return cards("output_violation");
+  // Call 3 failing is not a gate event: the rows are still correct, so they still go
+  // out, and the retry is not spent on an API error.
+  if (!gate.output.ok) return cards("ranking_unavailable");
+
+  const byId = new Map(within.map((row) => [row.id, row]));
   return {
     kind: "ranked",
     constraints,
-    attempts: 1,
-    results: ranked.ranking.flatMap((entry) => {
-      const recipe = byId.get(entry.id);
-      return recipe ? [{ recipe, rationale: entry.rationale }] : [];
+    attempts: gate.attempts,
+    results: gate.output.ranking.flatMap((entry) => {
+      const row = byId.get(entry.id);
+      return row ? [{ recipe: withoutIngredients(row), rationale: entry.rationale }] : [];
     }),
   };
 }
