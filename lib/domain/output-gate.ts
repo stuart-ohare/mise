@@ -140,9 +140,10 @@ export function scanProse(text: string, terms: readonly string[]): ScanHit[] {
     );
     for (const found of haystack.text.matchAll(pattern)) {
       // Every code unit of the folded text has an offset, and one past its end, so both
-      // ends resolve; the fallbacks are unreachable.
-      const start = haystack.offsets[found.index] ?? found.index;
-      const end = haystack.offsets[found.index + found[0].length] ?? text.length;
+      // ends resolve. No fallback: a folded offset substituted into the caller's
+      // coordinates would be a plausible wrong answer, which is worse than a crash.
+      const start = haystack.offsets[found.index];
+      const end = haystack.offsets[found.index + found[0].length];
       hits.push({ term, index: start, match: text.slice(start, end) });
     }
   }

@@ -58,8 +58,9 @@ export async function POST(request: Request): Promise<Response> {
   } catch (error) {
     // Gates 2 and 3 both fail loudly by design — `assertKnownIds` on an id that isn't a
     // canonical ingredient, `outputTerms` on an exclusion that contributes no term to
-    // scan for. Both mean the catalogue and the request disagree, and both must stay
-    // visible rather than becoming an anonymous 500 (§6). No rows go out either way.
+    // scan for, `scanProse` on a term with nothing scannable left in it. All three mean
+    // the catalogue and the request disagree, and all three must stay visible rather
+    // than becoming an anonymous 500 (§6). No rows go out either way.
     console.error("[cook] request failed before a response could be validated", error);
     return Response.json({ error: "cook_failed" }, { status: 500 });
   }
