@@ -1,8 +1,8 @@
 # Eval report
 
 - **Result:** pass
-- **Run at:** 2026-09-17T17:40:29.615Z
-- **Commit:** 038790007a5b0d1375131e0609f7e7a7af6eae20
+- **Run at:** 2026-09-17T18:26:45.621Z
+- **Commit:** 790d310015d1a25ef50365cc8556c4fb8f1e839f
 
 ## Prompts
 
@@ -13,14 +13,14 @@
 | Metric | Value | Threshold | Result |
 |---|---|---|---|
 | exclude_exact | 1 | 1 | pass |
-| avoid_f1 | 0.8 | 0.8 | pass |
+| avoid_f1 | 1 | 0.8 | pass |
 | have_f1 | 1 | 0.8 | pass |
 | max_minutes_exact | 1 | 0.8 | pass |
 
 ```json
 {
-  "runAt": "2026-09-17T17:40:29.615Z",
-  "gitSha": "038790007a5b0d1375131e0609f7e7a7af6eae20",
+  "runAt": "2026-09-17T18:26:45.621Z",
+  "gitSha": "790d310015d1a25ef50365cc8556c4fb8f1e839f",
   "passed": true,
   "suites": [
     {
@@ -41,7 +41,7 @@
         },
         {
           "name": "avoid_f1",
-          "value": 0.8,
+          "value": 1,
           "threshold": 0.8,
           "passed": true
         },
