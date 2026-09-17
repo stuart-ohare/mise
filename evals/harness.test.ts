@@ -136,6 +136,37 @@ describe("runEval", () => {
 
     expect(code).not.toBe(0);
     expect(calls).toEqual([]);
+    expect(existsSync(reportPath())).toBe(false);
+  });
+
+  it("fails a fixture that isn't valid JSON before any suite runs", async () => {
+    mkdirSync(join(dir, "fixtures", "constraints"), { recursive: true });
+    writeFileSync(join(dir, "fixtures", "constraints", "broken.json"), '{ "gates": [');
+    const code = await run([stub("constraints", { m: 1 })], { constraints: { m: 1 } });
+
+    expect(code).not.toBe(0);
+    expect(calls).toEqual([]);
+    expect(logs.join("\n")).toContain("broken.json");
+    expect(existsSync(reportPath())).toBe(false);
+  });
+
+  it("aborts without a report when a suite throws", async () => {
+    fixture("first", "a.json", { gates: ["query"], query: "fine" });
+    fixture("second", "a.json", { gates: ["query"], query: "fine" });
+    const throwing = defineSuite({
+      name: "second",
+      prompt: { name: "second-prompt", version: "1" },
+      model: "claude-haiku-4-5",
+      fixtureSchema: z.object({ query: z.string() }),
+      async run() {
+        throw new Error("model call failed");
+      },
+    });
+
+    await expect(
+      run([stub("first", { m: 1 }), throwing], { first: { m: 1 }, second: { m: 1 } }),
+    ).rejects.toThrow("model call failed");
+    expect(existsSync(reportPath())).toBe(false);
   });
 
   it.each([

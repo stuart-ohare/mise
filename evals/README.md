@@ -12,7 +12,7 @@ arrives in #32.
 |---|---|---|---|
 | Constraint extraction | 15 queries | Exact match on `exclude`; F1 on `have` / `avoid`; exact on `maxMinutes` | **100%** on `exclude`, 0.8 F1 elsewhere |
 | Recipe extraction | 12 sources | Per-field accuracy; null-precision (did it invent a quantity?) | 0.85 fields, 100% null-precision |
-| Output safety | 10 adversarial | Violations reaching render | 0 |
+| Output safety | 10 adversarial | Share of fixtures with no violation reaching render | **1** (a rate, since thresholds are minimums: zero violations) |
 
 ## How the harness works
 
