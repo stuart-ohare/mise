@@ -150,6 +150,14 @@ describe("loadResolutionTerms", () => {
     await inRollback(async (tx) => {
       const f = await buildFixture(tx);
       sfx = f.sfx;
+
+      // Assert presence first: otherwise the absence below also passes for a
+      // fixture that never inserted anything.
+      const inside = await tx
+        .select({ id: schema.canonicalIngredient.id })
+        .from(schema.canonicalIngredient)
+        .where(eq(schema.canonicalIngredient.name, `wheat ${f.sfx}`));
+      expect(inside).toEqual([{ id: f.wheat }]);
     });
 
     const rows = await db
