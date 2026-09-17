@@ -26,8 +26,11 @@ Three calls, each with one narrow job:
 - **If in doubt, exclude.** Any statement that a named food shouldn't be eaten goes in
   `exclude`, hedged or not, including dislikes. `avoid` is only for fatigue, mood or
   history.
-- **Exclude wins.** A food that is excluded anywhere in the request goes in `exclude`
-  only, even when the same request also says the cook is tired of it or has it in.
+- **Exclude wins, in code.** A food that is excluded anywhere in the request belongs in
+  `exclude` only, even when the request also says the cook is tired of it or has it in.
+  The prompt asks for this and the model doesn't always comply — on the salmon fixture it
+  listed the food in both fields in three runs of three — so after parsing, any term that
+  is also excluded is removed from `avoid` and `have`. `exclude` itself is never touched.
 - **Carve-outs never narrow an exclusion.** "No dairy but butter is fine" is
   `exclude: ["dairy"]`, and butter appears nowhere.
 - **Output is parsed twice.** The SDK checks a plain model schema, because structured

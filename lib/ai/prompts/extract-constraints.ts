@@ -4,6 +4,7 @@ import type { MessageCreateParamsNonStreaming } from "@anthropic-ai/sdk/resource
 import { z } from "zod";
 
 import { anthropic, MODELS } from "@/lib/ai/client";
+import { normaliseTerm } from "@/lib/domain/resolve-exclusions";
 import { constraintsSchema, type Constraints } from "@/lib/domain/constraints";
 import { ALLERGENS } from "@/lib/domain/taxonomy";
 
@@ -97,5 +98,19 @@ export async function extractConstraints(
   if (message.stop_reason !== "end_turn") return { ok: false, reason: "parse_failed" };
 
   const parsed = constraintsSchema.safeParse(message.parsed_output);
-  return parsed.success ? { ok: true, constraints: parsed.data } : { ok: false, reason: "parse_failed" };
+  return parsed.success
+    ? { ok: true, constraints: excludeWins(parsed.data) }
+    : { ok: false, reason: "parse_failed" };
+}
+
+/**
+ * The prompt asks for an excluded food to appear only in `exclude`; this makes it true
+ * whatever the model returns. Only the soft fields are touched, never `exclude`: a food
+ * that is both excluded and merely disliked is excluded, and a ranking weight must not
+ * restate a hard constraint.
+ */
+function excludeWins(constraints: Constraints): Constraints {
+  const excluded = new Set(constraints.exclude.map(normaliseTerm));
+  const keep = (terms: string[]) => terms.filter((term) => !excluded.has(normaliseTerm(term)));
+  return { ...constraints, avoid: keep(constraints.avoid), have: keep(constraints.have) };
 }
