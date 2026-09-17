@@ -2052,7 +2052,7 @@
         },
         {
           "rawText": "300g shrimp, peeled",
-          "name": "prawn",
+          "name": "shrimp",
           "qty": 300,
           "unit": "g",
           "optional": false

@@ -10,6 +10,7 @@
     { "name": "buttermilk", "parent": "dairy", "allergenTags": [], "aliases": [] },
     { "name": "crème fraîche", "parent": "dairy", "allergenTags": [], "aliases": ["creme fraiche"] },
     { "name": "whey", "parent": "dairy", "allergenTags": [], "aliases": [] },
+    { "name": "dark chocolate", "parent": "dairy", "allergenTags": ["soy"], "aliases": [] },
     { "name": "gluten", "parent": null, "allergenTags": ["gluten"], "aliases": [] },
     { "name": "wheat flour", "parent": "gluten", "allergenTags": [], "aliases": ["flour", "plain flour", "self-raising flour"] },
     { "name": "bread", "parent": "gluten", "allergenTags": [], "aliases": [] },
@@ -21,6 +22,7 @@
     { "name": "barley", "parent": "gluten", "allergenTags": [], "aliases": [] },
     { "name": "rye", "parent": "gluten", "allergenTags": [], "aliases": [] },
     { "name": "oats", "parent": "gluten", "allergenTags": [], "aliases": [] },
+    { "name": "worcestershire sauce", "parent": "gluten", "allergenTags": [], "aliases": [] },
     { "name": "nuts", "parent": null, "allergenTags": ["nuts"], "aliases": ["nut"] },
     { "name": "almond", "parent": "nuts", "allergenTags": [], "aliases": ["almonds"] },
     { "name": "walnut", "parent": "nuts", "allergenTags": [], "aliases": ["walnuts"] },
@@ -37,6 +39,8 @@
     { "name": "clam", "parent": "shellfish", "allergenTags": [], "aliases": ["clams"] },
     { "name": "scallop", "parent": "shellfish", "allergenTags": [], "aliases": ["scallops"] },
     { "name": "squid", "parent": "shellfish", "allergenTags": [], "aliases": ["calamari"] },
+    { "name": "oyster sauce", "parent": "shellfish", "allergenTags": ["gluten"], "aliases": [] },
+    { "name": "green curry paste", "parent": "shellfish", "allergenTags": [], "aliases": [] },
     { "name": "egg", "parent": null, "allergenTags": ["egg"], "aliases": ["eggs"] },
     { "name": "egg yolk", "parent": "egg", "allergenTags": [], "aliases": [] },
     { "name": "egg white", "parent": "egg", "allergenTags": [], "aliases": [] },
@@ -46,6 +50,7 @@
     { "name": "soy sauce", "parent": "soy", "allergenTags": ["gluten"], "aliases": ["soya sauce"] },
     { "name": "edamame", "parent": "soy", "allergenTags": [], "aliases": [] },
     { "name": "miso", "parent": "soy", "allergenTags": ["gluten"], "aliases": [] },
-    { "name": "soy milk", "parent": "soy", "allergenTags": [], "aliases": [] }
+    { "name": "soy milk", "parent": "soy", "allergenTags": [], "aliases": [] },
+    { "name": "hoisin sauce", "parent": "soy", "allergenTags": ["gluten"], "aliases": [] }
   ]
 }

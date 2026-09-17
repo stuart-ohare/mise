@@ -235,12 +235,6 @@
       "aliases": []
     },
     {
-      "name": "oyster sauce",
-      "parent": null,
-      "allergenTags": [],
-      "aliases": []
-    },
-    {
       "name": "cornflour",
       "parent": null,
       "allergenTags": [],
@@ -272,12 +266,6 @@
     },
     {
       "name": "chicken breast",
-      "parent": null,
-      "allergenTags": [],
-      "aliases": []
-    },
-    {
-      "name": "green curry paste",
       "parent": null,
       "allergenTags": [],
       "aliases": []
@@ -517,12 +505,6 @@
       "aliases": []
     },
     {
-      "name": "hoisin sauce",
-      "parent": null,
-      "allergenTags": [],
-      "aliases": []
-    },
-    {
       "name": "pork belly",
       "parent": null,
       "allergenTags": [],
@@ -572,12 +554,6 @@
     },
     {
       "name": "halibut",
-      "parent": null,
-      "allergenTags": [],
-      "aliases": []
-    },
-    {
-      "name": "dark chocolate",
       "parent": null,
       "allergenTags": [],
       "aliases": []
@@ -662,7 +638,7 @@
     },
     {
       "name": "dark chocolate chips",
-      "parent": null,
+      "parent": "dark chocolate",
       "allergenTags": [],
       "aliases": []
     },
@@ -704,12 +680,6 @@
     },
     {
       "name": "beef mince",
-      "parent": null,
-      "allergenTags": [],
-      "aliases": []
-    },
-    {
-      "name": "worcestershire sauce",
       "parent": null,
       "allergenTags": [],
       "aliases": []

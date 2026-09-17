@@ -49,7 +49,14 @@ const containsWord = (text: string, word: string) =>
  * silently miss its second allergen. Every such name has to be on this list, with the
  * reason it is safe, before the catalogue passes.
  */
-const REVIEWED_COMPOUND_LEAVES: Record<string, string> = {};
+const REVIEWED_COMPOUND_LEAVES: Record<string, string> = {
+  "coconut milk": "a plant milk, not dairy",
+  "almond flour": "ground almonds only; under almond, so nuts",
+  "smooth peanut butter": "peanuts and oil; under peanut, so nuts",
+  "squid ink": "under squid, so shellfish",
+  "crusty bread": "under bread, so gluten; bread's possible milk is the taxonomy's decision",
+  "dark chocolate chips": "under dark chocolate, so dairy and soy",
+};
 
 const statusOf = (recipe: (typeof recipes)[number]) =>
   deriveRecipeStatus(
