@@ -10,7 +10,7 @@ import type { Db } from "./client";
 
 type Executor = Pick<Db, "execute">;
 
-const candidateRecipeSchema = z.object({
+export const candidateRecipeSchema = z.object({
   id: z.string(),
   title: z.string(),
   summary: z.string().nullable(),
