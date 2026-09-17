@@ -26,11 +26,18 @@ recipe extraction and ranking. The model IDs live there, not here.
    local `invariant-reviewer`, so the build has one key, one bill and one set of model
    quirks. This is a practical reason, not a claim about quality.
 
-None of reasons 1–3 is unique to Anthropic. What makes the choice defensible without a
-benchmark is [ADR 0002](0002-exclusion-is-a-database-constraint.md): the model never
-decides what is excluded. SQL filters the rows and the output check scans the prose, so
-a weaker model shows up as more retries and more cards without prose, not as an allergen
-reaching the screen. The provider affects quality and cost. It does not affect safety.
+None of reasons 1–3 is unique to Anthropic. What narrows the stakes is
+[ADR 0002](0002-exclusion-is-a-database-constraint.md): the model never decides which
+recipes an exclusion removes. Once an exclusion is extracted, SQL filters the rows and
+the output check scans the prose, so a weaker model at ranking shows up as more retries
+and more cards without prose, not as an allergen reaching the screen.
+
+The provider still matters for safety in two places. **Constraint extraction** is the
+first: an exclusion the model never extracts is one no gate enforces. *"Cooking for Sam,
+they can't do gluten"* read as nothing to exclude filters nothing. That is why exclusion
+accuracy is held at 100%, and why it is the first threshold any provider has to meet.
+**Recipe extraction** is the second: a confident wrong ingredient mapping is only caught
+when a human checks it against its `raw_text` in `/review` before publishing.
 
 ## Alternative considered
 
@@ -54,12 +61,13 @@ It lost for three reasons:
 **The provider was chosen by reasoning, not measurement.** No other provider has been run
 against Mise's fixtures, and the eval suite that would do it is defined in
 [`evals/README.md`](../../evals/README.md) but not yet built. The decision should change
-if another provider, on the same fixtures, meets every hard threshold and is cheaper or
-better on the rest:
+if another provider, on the same fixtures, meets every hard threshold and is cheaper or better on the rest:
 
 - exclusion accuracy on constraint extraction — 100%;
 - null-precision on recipe extraction — 100%;
 - violations reaching render on output safety — 0.
+
+A provider that misses the first threshold isn't just worse here, it's unsafe.
 
 Only a provider that meets all three gets compared on F1, field accuracy and cost per
 Cook request.
