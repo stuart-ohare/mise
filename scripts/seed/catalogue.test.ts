@@ -270,8 +270,13 @@ const readmeGate2 =
     .split("\n")
     .find((line) => line.trimStart().startsWith("| 2 — Query |")) ?? "";
 
-/** The row says "dairy-free search", so the root itself can't be what it demonstrates. */
-const dairyDescendants = dairyTerms.filter((term) => term !== "dairy");
+/**
+ * The row says "dairy-free search", so the root's own terms can't be what it
+ * demonstrates — the claim is that the query reaches a *descendant*. Aliases included,
+ * so giving `dairy` one later can't quietly satisfy the assertion.
+ */
+const dairyRootTerms = new Set(termsOf(["dairy"]));
+const dairyDescendants = dairyTerms.filter((term) => !dairyRootTerms.has(term));
 
 describe("README's gate 2 example", () => {
   // A claim about this catalogue is pinned against this catalogue, like every other
@@ -286,13 +291,22 @@ describe("README's gate 2 example", () => {
     expect(DELIBERATELY_UNRESOLVED.filter((term) => containsWord(readmeGate2, term))).toEqual([]);
   });
 
-  it("names a dairy descendant a published recipe actually contains", () => {
-    const named = dairyDescendants.filter((term) => containsWord(readmeGate2, term));
-    expect(named).not.toEqual([]);
+  it("explains the filter with a dairy descendant", () => {
+    expect(dairyDescendants.filter((term) => containsWord(readmeGate2, term))).not.toEqual([]);
+  });
 
-    const demonstrated = named.filter((term) =>
-      recipes.some((r) => statusOf(r) === "published" && r.ingredients.some((i) => i.name === term)),
+  it("names a published recipe that actually contains one", () => {
+    // The row names a dish by title so a reviewer can type it into the Cook box. Checking
+    // only the ingredient would leave the title free to drift when the catalogue is
+    // regenerated: twelve published recipes contain butter, so the word would still be
+    // there while the dish the README promises had gone.
+    const named = dairyDescendants.filter((term) => containsWord(readmeGate2, term));
+    const demonstrated = recipes.filter(
+      (r) =>
+        statusOf(r) === "published" &&
+        readmeGate2.toLowerCase().includes(r.title.toLowerCase()) &&
+        r.ingredients.some((i) => named.includes(i.name)),
     );
-    expect(demonstrated).not.toEqual([]);
+    expect(demonstrated.map((r) => r.title)).not.toEqual([]);
   });
 });
