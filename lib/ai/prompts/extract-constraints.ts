@@ -15,7 +15,7 @@ import { ALLERGENS } from "@/lib/domain/taxonomy";
  * errors toward over-exclusion, and every failure returns no constraints at all.
  */
 
-export const VERSION = "3";
+export const VERSION = "4";
 
 // Structured output can't express `.min(1)` or `.positive()`, so the model gets a plain
 // shape and every response is then parsed with `constraintsSchema`.
@@ -39,7 +39,7 @@ exclude: foods that must not be in the dish. Hard constraints.
 - When the user names one food, exclude that food by its own name, as a bare lowercase noun in their words, even if it belongs to a group: "allergic to walnuts" → "walnuts", not "nuts"; "no mussels" → "mussels", not "shellfish"; "allergic to celery" → "celery". No qualifiers, no "free", no "no".
 - An exception never narrows an exclusion, and never removes it. When a request excludes something and then allows part of it ("no nuts, except almonds are OK", "nothing with egg, though mayo is fine"), the exclusion still goes in exclude exactly as if the exception had not been said, and the allowed food goes in no field at all: not in have, not in avoid. An allowed food is not an ingredient the cook has.
 
-avoid: soft preferences that are about fatigue, mood or recent history rather than a food being unsafe or unwanted ("bored of stir-fries" → "stir-fry", "we had fish last night" → "fish"). A bare lowercase noun for the dish or food.
+avoid: soft preferences that are about fatigue, mood or recent history rather than a food being unsafe or unwanted ("bored of stir-fries" → "stir-fry", "we had fish last night" → "fish", "sick of risotto" → "risotto", "not in the mood for soup" → "soup"). Being tired of a dish is avoid, never exclude, however it is phrased. A bare lowercase noun for the dish or food.
 
 have: ingredients the cook says they have or want to use, as bare lowercase nouns without quantities ("a couple of courgettes" → "courgettes").
 
@@ -50,7 +50,7 @@ Rules for every field:
 - Only foods and dishes go in any field. Descriptions of a meal ("something light", "nothing too rich", "nothing fancy") go in no field; do not turn their adjectives into terms.
 - Each food appears once, in one field. An empty list is a correct answer.
 
-Before answering, check exclude against the request: a request can mix several constraints in one sentence (what the cook has, a time limit, what they are tired of), and every "no …", "… -free", "can't", "allergic", "without …" or similar phrase in it must still produce its own exclude term. If the request says any food or group must not be eaten, exclude is not empty.`;
+Before answering, check exclude against the request: a request can mix several constraints in one sentence (what the cook has, a time limit, what they are tired of), and every phrase saying a food must not be eaten ("no …", "… -free", "can't have", "allergic to", "without …") must still produce its own exclude term. A phrase about being tired of or bored with a dish is avoid, not exclude. If the request says any food or group must not be eaten, exclude is not empty.`;
 
 export type ExtractionResult =
   | { ok: true; constraints: Constraints }
