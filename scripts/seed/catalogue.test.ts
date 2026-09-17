@@ -263,3 +263,36 @@ describe("scripts/seed/recipes.json", () => {
     expect(found).toEqual([]);
   });
 });
+
+/** The README's gate 2 row — the one sentence a reviewer is most likely to read. */
+const readmeGate2 =
+  readFileSync(resolve(__dirname, "../../README.md"), "utf8")
+    .split("\n")
+    .find((line) => line.trimStart().startsWith("| 2 — Query |")) ?? "";
+
+/** The row says "dairy-free search", so the root itself can't be what it demonstrates. */
+const dairyDescendants = dairyTerms.filter((term) => term !== "dairy");
+
+describe("README's gate 2 example", () => {
+  // A claim about this catalogue is pinned against this catalogue, like every other
+  // property here. The row explained the tree with a term the catalogue is generated
+  // never to know, so it described a lookup that doesn't happen.
+
+  it("is still in the README", () => {
+    expect(readmeGate2).not.toBe("");
+  });
+
+  it("names no term the catalogue deliberately can't resolve", () => {
+    expect(DELIBERATELY_UNRESOLVED.filter((term) => containsWord(readmeGate2, term))).toEqual([]);
+  });
+
+  it("names a dairy descendant a published recipe actually contains", () => {
+    const named = dairyDescendants.filter((term) => containsWord(readmeGate2, term));
+    expect(named).not.toEqual([]);
+
+    const demonstrated = named.filter((term) =>
+      recipes.some((r) => statusOf(r) === "published" && r.ingredients.some((i) => i.name === term)),
+    );
+    expect(demonstrated).not.toEqual([]);
+  });
+});
