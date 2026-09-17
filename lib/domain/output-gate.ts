@@ -7,7 +7,11 @@ import { normaliseTerm } from "./resolve-exclusions";
  * closed: a false positive costs some prose, a false negative costs an allergen.
  */
 
-/** `index` is into the text as the caller passed it; `match` is that text folded. */
+/**
+ * `index` and `match` are both in the caller's own string: `match` is exactly
+ * `text.slice(index, index + match.length)`, so a logged violation quotes the prose as
+ * it was written rather than a folded approximation of it.
+ */
 export type ScanHit = { term: string; index: number; match: string };
 
 /** Mirrors `output_violation`. `generated` is the parsed output as JSON. */
@@ -135,8 +139,11 @@ export function scanProse(text: string, terms: readonly string[]): ScanHit[] {
       "giu",
     );
     for (const found of haystack.text.matchAll(pattern)) {
-      // Every code unit of the folded text has an offset, so the fallback is unreachable.
-      hits.push({ term, index: haystack.offsets[found.index] ?? found.index, match: found[0] });
+      // Every code unit of the folded text has an offset, and one past its end, so both
+      // ends resolve; the fallbacks are unreachable.
+      const start = haystack.offsets[found.index] ?? found.index;
+      const end = haystack.offsets[found.index + found[0].length] ?? text.length;
+      hits.push({ term, index: start, match: text.slice(start, end) });
     }
   }
   return hits.sort((a, b) => a.index - b.index || (a.term < b.term ? -1 : 1));

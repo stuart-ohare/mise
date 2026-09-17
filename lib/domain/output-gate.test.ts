@@ -155,7 +155,7 @@ describe("scanProse", () => {
 
   it("reports the term, where it matched and the matched text", () => {
     expect(scanProse("Add the Buttery crumbs", ["butter"])).toEqual([
-      { term: "butter", index: 8, match: "buttery" },
+      { term: "butter", index: 8, match: "Buttery" },
     ]);
   });
 
@@ -198,6 +198,17 @@ describe("scanProse", () => {
     // outputTerms guarantees a term per exclusion; this is the other half of that
     // guarantee — a term it hands over is always actually scanned for.
     expect(() => scanProse("anything at all", [term])).toThrow(/nothing to scan for/);
+  });
+
+  it("reports a match that slices out of the caller's string", () => {
+    // index and match have to share one coordinate system, or a logged violation quotes
+    // the wrong span: folding changes both the length and the case of what it matched.
+    const text = "Serve with CR\u00c8ME FRA\u00ceCHE on the side";
+    const [hit] = scanProse(text, ["creme fraiche"]);
+    expect(hit?.match).toBe("CR\u00c8ME FRA\u00ceCHE");
+    expect(text.slice(hit?.index ?? 0, (hit?.index ?? 0) + (hit?.match.length ?? 0))).toBe(
+      hit?.match,
+    );
   });
 
   it("reports an index into the caller's string, not the folded one", () => {
