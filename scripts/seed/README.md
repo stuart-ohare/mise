@@ -66,8 +66,15 @@ Decisions worth knowing:
   generated leaves never carry a tag.
 - **Hand aliases include common plurals** (`eggs`, `prawns`). Gate 1 matches exactly, so
   a missing plural becomes a question to the user rather than a match.
-- **An existing alias is never re-pointed.** If an alias in the database already points
-  at a different ingredient — added during review, say — the seed aborts and rolls back.
+- **One term, one ingredient, across the database and the files.** Gate 1 resolves a
+  term against names and aliases alike, so before writing anything the seed checks every
+  name and alias already in the database together with the files
+  (`lib/domain/term-namespace.ts`). If a term would belong to two ingredients (an alias
+  that is already another ingredient's name, a node named after an existing alias, or
+  an existing alias pointing somewhere other than the file says), it lists each
+  collision with both ingredients, writes nothing and exits 1. Terms are compared the
+  way gate 1 normalises them: Unicode NFC, lowercase, trimmed, runs of whitespace
+  collapsed. So an existing alias is never re-pointed.
 - **Removing a node from the file doesn't delete it** from the database.
 
 ## Deliberately missing aliases
