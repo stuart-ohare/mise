@@ -15,6 +15,10 @@ describe("resolveTerm", () => {
     expect(resolveTerm(" BUTTER ", index)).toBe("butter-id");
   });
 
+  it("collapses internal whitespace as gate 1 does", () => {
+    expect(resolveTerm("king  prawn", buildNameIndex([{ term: "king prawn", id: "p" }]))).toBe("p");
+  });
+
   it("matches an alias to its canonical id", () => {
     expect(resolveTerm("Eggs", index)).toBe("egg-id");
   });
