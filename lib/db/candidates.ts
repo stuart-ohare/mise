@@ -22,6 +22,11 @@ export type CandidateRecipe = z.infer<typeof candidateRecipeSchema>;
 
 const idRowSchema = z.object({ id: z.string() });
 
+// Postgres returns uuid text lowercase; compare like with like.
+function normalizeIds(ids: readonly string[]): string[] {
+  return ids.map((id) => id.toLowerCase());
+}
+
 /**
  * The ids the exclusions remove, as a CTE named `exclusion`. It must equal the union
  * of `exclusionIds` in lib/domain/ingredient-tree.ts, which states the rule:
@@ -99,8 +104,9 @@ async function assertKnownIds(db: Executor, excludedIds: readonly string[]): Pro
 /** The exclusion set as SQL computes it. Exported so parity with the domain rule is tested. */
 export async function excludedIngredientIds(
   db: Executor,
-  excludedIds: readonly string[],
+  rawExcludedIds: readonly string[],
 ): Promise<Set<string>> {
+  const excludedIds = normalizeIds(rawExcludedIds);
   if (excludedIds.length === 0) return new Set();
   await assertKnownIds(db, excludedIds);
 
@@ -115,8 +121,9 @@ export async function excludedIngredientIds(
  */
 export async function findCandidateRecipes(
   db: Executor,
-  excludedIds: readonly string[],
+  rawExcludedIds: readonly string[],
 ): Promise<CandidateRecipe[]> {
+  const excludedIds = normalizeIds(rawExcludedIds);
   const columns = sql`r.id, r.title, r.summary, r.minutes, r.serves`;
 
   if (excludedIds.length === 0) {
