@@ -206,9 +206,10 @@ streamed one, and it is the version of this idea worth building.
 
 ### Two models, not one
 
-Constraint extraction runs on `claude-haiku-4-5`; recipe extraction and ranking run on
-`claude-sonnet-4-5`. Short frequent input with a small schema and long messy input where
-a mistake is expensive are different jobs, and `lib/ai/client.ts` names them separately
+Constraint extraction runs on `claude-haiku-4-5`. Recipe extraction and ranking are
+reserved for `claude-sonnet-4-5`, which so far only the one-off catalogue generator
+calls. Short frequent input with a small schema and long messy input where a mistake is
+expensive are different jobs, and `lib/ai/client.ts` names the two tiers separately
 ([ADR 0004](docs/decisions/0004-model-provider.md)).
 
 **Cost.** Two sets of model quirks to learn and two eval baselines to keep honest — and
@@ -234,10 +235,12 @@ the extraction better, never by making the test weaker.
 
 ### Hand-authored tree, generated leaves
 
-The 53 nodes of the allergen hierarchy are written by hand. The 125 leaves under them and
-all 60 recipes were generated once and committed as JSON, and a generated leaf can never
-carry an allergen tag of its own — only inherit one from the node it hangs under
-([`scripts/seed/README.md`](scripts/seed/README.md)).
+The 53 nodes of the allergen hierarchy are written by hand; the 125 leaves and 60 recipes
+were generated once and committed as JSON. Only 11 of those leaves hang under a
+hand-authored node — `parmesan` under `cheese`, `linguine` under `pasta` — and the other
+114 stand outside the tree, where no allergen is at stake. A generated leaf can never
+carry a tag of its own, so every allergen in the catalogue traces to a node a human
+placed ([`scripts/seed/README.md`](scripts/seed/README.md)).
 
 **Cost.** The tree does not grow at the speed of the catalogue. Every new allergen,
 cuisine or awkward ingredient needs a human to decide where it hangs, and until someone
@@ -262,7 +265,8 @@ to measure, or an eval run on the same fixtures says another provider is better.
 ### No model in CI
 
 `checks` runs typecheck, lint and test on every PR and holds no Anthropic secret. The
-`invariant-reviewer` and `pnpm eval` run on the machine of whoever ran `/verify`
+`invariant-reviewer` runs locally inside `/verify`, and `pnpm eval` is run by hand —
+`verify.sh` only checks that a gate-labelled change committed a fresh `evals/latest.md`
 ([ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md)).
 
 **Cost.** The model-checked half of the definition of done is only as reliable as the
