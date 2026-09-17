@@ -6,8 +6,9 @@ need, and a generated catalogue can be designed to contain the adversarial cases
 
 The canonical ingredient taxonomy — specifically the allergen hierarchy, its top two
 levels — is **written by hand**, because a generated allergen tree is the one part of
-this dataset a model shouldn't be trusted with. Generation fills the leaves, where
-being wrong costs nothing.
+this dataset a model shouldn't be trusted with. Generation fills the leaves, and a leaf
+can never carry an allergen tag of its own — only inherit one from the hand-authored node
+it hangs under.
 
 Hand-authored where wrong answers matter, generated where they don't.
 
@@ -48,8 +49,9 @@ Decisions worth knowing:
   peanuts" removes one that says "nuts". Their other children are unaffected.
 - **Pasta and bread carry no extra tags,** though fresh pasta often has egg and bread can
   have milk. Tagging them would empty egg-free and dairy-free searches of every pasta and
-  bread dish. Egg pasta belongs in the catalogue as its own leaf under `pasta`, tagged
-  `egg` (#16).
+  bread dish. `egg pasta` is its own hand-authored node under `pasta`, tagged `egg`, so an
+  egg-free search can tell the two apart. It is hand-written rather than generated because
+  generated leaves never carry a tag.
 - **Hand aliases include common plurals** (`eggs`, `prawns`). Gate 1 matches exactly, so
   a missing plural becomes a question to the user rather than a match.
 - **An existing alias is never re-pointed.** If an alias in the database already points
@@ -66,7 +68,67 @@ fix then has a real before-and-after.
 |---|---|---|
 | `ghee` | `clarified butter` → `butter` → `dairy` | The review demo: add the alias, and the recipe vanishes from a dairy-free search |
 | `panko` | `japanese breadcrumbs` → `breadcrumbs` → `gluten` | The same story for gluten |
+| `brinjal` | `aubergine` (a generated leaf, no allergen) | The regional name: South Asian and South African English for aubergine. An unknown word holds a recipe in draft even when it hides no allergen |
 
-The node exists; only the word doesn't. A test over the committed file fails if either
-term is added as a name or alias. The third unresolved term, a regional ingredient name,
-arrives with the recipe catalogue (#16).
+The node exists; only the word doesn't. Tests over the committed files fail if any of the
+three is added as a name or alias, or if any other ingredient in the catalogue fails to
+resolve.
+
+## The recipe catalogue — `recipes.json` and `leaves.json`
+
+60 recipes and the leaf ingredients they use, generated once by `generate.ts` with
+**`claude-sonnet-4-5`** and the `seed-catalogue` prompt at **`VERSION` 1**
+(`lib/ai/prompts/seed-catalogue.ts`). Regenerating costs money and is never part of
+`pnpm seed`:
+
+```bash
+pnpm tsx scripts/seed/generate.ts   # needs ANTHROPIC_API_KEY
+pnpm vitest run scripts/seed/catalogue.test.ts
+```
+
+Each batch is parsed with the committed file schemas and validated against the whole
+tree before it is kept; nothing is written unless all four pass. The files carry no
+recipe status. `pnpm seed` resolves every ingredient's `name` exactly (case-insensitive)
+against the names and aliases in the database, keeps `raw_text` always, and publishes a
+recipe only if every ingredient — optional ones included — resolved. A recipe whose
+title already exists is skipped, so re-seeding never undoes a promotion made in review.
+
+The adversarial cases, each marked with `adversarialCase` for tests and reviewers:
+
+- **Optional butter** — *Tomato and chickpea stew*. Its only dairy is a knob of butter
+  in an optional finishing step, under a title that says nothing about dairy. It is
+  published, so it's reachable by a dairy-free search: the gate 2 and gate 3 fixture.
+- **Near-duplicate** — *Shrimp linguine with garlic and chilli* duplicates *Prawn
+  linguine…*, naming the same ingredient by its alias `shrimp`.
+- **Unresolved** — one recipe each for `ghee`, `panko` and `brinjal`, left in draft.
+
+### Hand corrections after generation
+
+The generated files were committed untouched first, so the commit after them is the
+whole record of what review changed:
+
+- **Five generated roots hid an allergen** and passed every schema check. They moved into
+  `taxonomy.json` as hand-authored nodes: `oyster sauce` (shellfish, tagged gluten),
+  `hoisin sauce` (soy, tagged gluten — the prompt forbade it, and it was generated
+  anyway), `green curry paste` (shellfish: shrimp paste), `worcestershire sauce` (gluten:
+  UK versions use barley malt vinegar) and `dark chocolate` (dairy, tagged soy: commonly
+  milk fat or made on milk lines, with soy lecithin). `dark chocolate chips` now hangs
+  under `dark chocolate`.
+- **Considered and left alone:** stock, baking powder and curry powder, which some brands
+  make with wheat. Over-excluding stock would empty most risottos and soups from a
+  gluten-free search for a risk the recipe line doesn't carry.
+- **Two recipes mentioned an allergen their ingredients don't carry.** *Garlic and chilli
+  king prawns* ended "serve with crusty bread", and *Pistachio and lemon biscotti* was
+  summarised as "almond biscuits". Gate 2 never reads prose, so both would pass an
+  exclusion and then name the excluded food. Both lines were cut, and
+  `catalogue.test.ts` now fails if a title, summary or step names a hand-authored
+  ingredient, or anything under one, that the recipe doesn't carry.
+- **The near-duplicate** had resolved `shrimp` to `prawn` itself; its `name` became
+  `shrimp`, so the duplicate actually exercises the alias.
+- **`cannelloni`, `linguine` and `penne` sit under `pasta` untagged,** following the
+  taxonomy's decision for pasta: some dried tubes contain egg, and a recipe that means egg
+  pasta names `egg pasta`.
+
+A leaf whose name contains a hand-authored term (`smooth peanut butter`, `coconut milk`)
+is the likeliest place for a second allergen to hide, so `catalogue.test.ts` fails until
+each one is on a reviewed list with the reason it's safe.

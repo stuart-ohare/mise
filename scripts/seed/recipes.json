@@ -1,0 +1,5586 @@
+{
+  "recipes": [
+    {
+      "title": "Tomato and chickpea stew",
+      "summary": "A warming one-pot stew with tomatoes, chickpeas and spinach, finished with fragrant spices.",
+      "minutes": 35,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin",
+          "name": "cumin",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp smoked paprika",
+          "name": "smoked paprika",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "400g tinned tomatoes",
+          "name": "tinned tomato",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "400g tinned chickpeas, drained",
+          "name": "chickpea",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "200ml vegetable stock",
+          "name": "vegetable stock",
+          "qty": 200,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "100g spinach",
+          "name": "spinach",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "knob of butter, if you like",
+          "name": "butter",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Heat the olive oil in a large pan over medium heat.",
+        "Add the onion and cook for 5 minutes until softened.",
+        "Stir in the garlic, cumin and smoked paprika and cook for 1 minute.",
+        "Add the tinned tomatoes, chickpeas and vegetable stock. Bring to a simmer.",
+        "Cook for 20 minutes, stirring occasionally, until thickened.",
+        "Stir through the spinach until wilted.",
+        "Season with salt and pepper.",
+        "Finish with a knob of butter, if you like, stirring until melted."
+      ],
+      "adversarialCase": "optional-butter",
+      "duplicateOf": null
+    },
+    {
+      "title": "Spiced lentil dal with ghee",
+      "summary": "A creamy red lentil dal infused with aromatic spices and finished with ghee.",
+      "minutes": 40,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "200g red lentils",
+          "name": "red lentil",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "800ml water",
+          "name": "water",
+          "qty": 800,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp turmeric",
+          "name": "turmeric",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp ghee",
+          "name": "ghee",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, finely chopped",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 inch ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "inch",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin seeds",
+          "name": "cumin seed",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp garam masala",
+          "name": "garam masala",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "fresh coriander, chopped",
+          "name": "coriander",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Rinse the red lentils and place in a pot with water and turmeric.",
+        "Bring to a boil, then reduce heat and simmer for 25 minutes until soft and creamy.",
+        "Meanwhile, heat the ghee in a frying pan over medium heat.",
+        "Add the cumin seeds and cook for 30 seconds until fragrant.",
+        "Add the onion and cook for 5 minutes until golden.",
+        "Stir in the garlic and ginger and cook for 1 minute.",
+        "Add the garam masala and cook for 30 seconds.",
+        "Pour the spiced mixture into the cooked lentils and stir well.",
+        "Season with salt and simmer for 5 minutes.",
+        "Garnish with fresh coriander if desired."
+      ],
+      "adversarialCase": "unresolved",
+      "duplicateOf": null
+    },
+    {
+      "title": "Crispy panko fish fillets",
+      "summary": "Golden fish fillets coated in crispy panko breadcrumbs, baked until crunchy.",
+      "minutes": 25,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "4 white fish fillets",
+          "name": "white fish",
+          "qty": 4,
+          "unit": "fillet",
+          "optional": false
+        },
+        {
+          "rawText": "100g panko",
+          "name": "panko",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "50g wheat flour",
+          "name": "wheat flour",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 eggs, beaten",
+          "name": "egg",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp garlic powder",
+          "name": "garlic powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp paprika",
+          "name": "paprika",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "lemon wedges, to serve",
+          "name": "lemon",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 200°C.",
+        "Set up three shallow bowls: one with flour, one with beaten eggs, and one with panko mixed with garlic powder and paprika.",
+        "Season the fish fillets with salt and pepper.",
+        "Coat each fillet in flour, then dip in egg, then press into the panko mixture.",
+        "Place the coated fillets on a baking tray drizzled with vegetable oil.",
+        "Bake for 15-18 minutes until golden and crispy.",
+        "Serve with lemon wedges."
+      ],
+      "adversarialCase": "unresolved",
+      "duplicateOf": null
+    },
+    {
+      "title": "Brinjal and tomato curry",
+      "summary": "A rich South Indian curry with tender brinjal in a spiced tomato gravy.",
+      "minutes": 45,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "2 large brinjal, cubed",
+          "name": "brinjal",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp mustard seeds",
+          "name": "mustard seed",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, sliced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 inch ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "inch",
+          "optional": false
+        },
+        {
+          "rawText": "2 tomatoes, chopped",
+          "name": "tomato",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp turmeric",
+          "name": "turmeric",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp chilli powder",
+          "name": "chilli powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp coriander powder",
+          "name": "coriander powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "200ml water",
+          "name": "water",
+          "qty": 200,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "curry leaves",
+          "name": "curry leaf",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Heat 2 tablespoons of oil in a large pan and fry the brinjal cubes until lightly browned. Set aside.",
+        "Heat the remaining oil in the same pan and add mustard seeds until they pop.",
+        "Add curry leaves, onion and cook for 5 minutes.",
+        "Stir in garlic and ginger and cook for 1 minute.",
+        "Add tomatoes, turmeric, chilli powder and coriander powder. Cook for 5 minutes until tomatoes soften.",
+        "Return the brinjal to the pan and add water.",
+        "Simmer for 20 minutes until the brinjal is tender and the gravy has thickened.",
+        "Season with salt and serve."
+      ],
+      "adversarialCase": "unresolved",
+      "duplicateOf": null
+    },
+    {
+      "title": "Honey garlic chicken thighs",
+      "summary": "Tender chicken thighs glazed with a sticky honey garlic sauce.",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "8 chicken thighs, bone-in",
+          "name": "chicken thigh",
+          "qty": 8,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp honey",
+          "name": "honey",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp rice vinegar",
+          "name": "rice vinegar",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp sesame oil",
+          "name": "sesame oil",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "sesame seeds, to garnish",
+          "name": "sesame seed",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        },
+        {
+          "rawText": "spring onions, sliced",
+          "name": "spring onion",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Season the chicken thighs with salt and pepper.",
+        "Heat vegetable oil in a large pan over medium-high heat.",
+        "Add the chicken thighs skin-side down and cook for 6 minutes until golden.",
+        "Flip and cook for another 5 minutes.",
+        "Meanwhile, mix honey, soy sauce, garlic, rice vinegar and sesame oil in a bowl.",
+        "Pour the sauce over the chicken and reduce heat to medium.",
+        "Simmer for 12-15 minutes, turning occasionally, until the sauce is thick and glossy.",
+        "Garnish with sesame seeds and spring onions if desired."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Baked salmon with lemon and dill",
+      "summary": "Simple baked salmon fillets with fresh lemon and dill.",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "4 salmon fillets",
+          "name": "salmon",
+          "qty": 4,
+          "unit": "fillet",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 lemon, sliced",
+          "name": "lemon",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "fresh dill",
+          "name": "dill",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 200°C.",
+        "Place salmon fillets on a baking tray lined with parchment.",
+        "Drizzle with olive oil and season with salt and pepper.",
+        "Top each fillet with lemon slices and fresh dill.",
+        "Bake for 12-15 minutes until the salmon is cooked through.",
+        "Serve immediately."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Beef and vegetable stir-fry",
+      "summary": "Quick beef stir-fry with crisp vegetables in a savoury sauce.",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g beef sirloin, thinly sliced",
+          "name": "beef",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper, sliced",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 broccoli head, cut into florets",
+          "name": "broccoli",
+          "qty": 1,
+          "unit": "head",
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 inch ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "inch",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp oyster sauce",
+          "name": "oyster sauce",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cornflour",
+          "name": "cornflour",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp water",
+          "name": "water",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Mix cornflour with water to make a slurry.",
+        "Heat 1 tablespoon of oil in a wok over high heat.",
+        "Add the beef and stir-fry for 3 minutes until browned. Remove and set aside.",
+        "Heat the remaining oil and add garlic and ginger. Cook for 30 seconds.",
+        "Add red pepper and broccoli and stir-fry for 4 minutes.",
+        "Return the beef to the wok.",
+        "Add soy sauce, oyster sauce and cornflour slurry. Stir well.",
+        "Cook for 2 minutes until the sauce thickens and coats everything."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Mushroom risotto",
+      "summary": "Creamy risotto with sautéed mushrooms and parmesan cheese.",
+      "minutes": 35,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "300g arborio rice",
+          "name": "arborio rice",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 litre vegetable stock, hot",
+          "name": "vegetable stock",
+          "qty": 1,
+          "unit": "litre",
+          "optional": false
+        },
+        {
+          "rawText": "250g mushrooms, sliced",
+          "name": "mushroom",
+          "qty": 250,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, finely chopped",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "100ml white wine",
+          "name": "white wine",
+          "qty": 100,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "50g butter",
+          "name": "butter",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "50g parmesan, grated",
+          "name": "parmesan",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Heat olive oil in a large pan and sauté the mushrooms for 5 minutes. Set aside.",
+        "In the same pan, melt half the butter and cook the onion for 5 minutes.",
+        "Add garlic and cook for 1 minute.",
+        "Stir in the rice and cook for 2 minutes until translucent.",
+        "Pour in the white wine and stir until absorbed.",
+        "Add the hot stock one ladle at a time, stirring constantly, allowing each addition to be absorbed before adding more.",
+        "Continue for 18-20 minutes until the rice is creamy and al dente.",
+        "Stir in the cooked mushrooms, remaining butter and parmesan.",
+        "Season with salt and pepper and serve immediately."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Thai green curry with chicken",
+      "summary": "Fragrant green curry with chicken, vegetables and coconut milk.",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g chicken breast, diced",
+          "name": "chicken breast",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp green curry paste",
+          "name": "green curry paste",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "400ml coconut milk",
+          "name": "coconut milk",
+          "qty": 400,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper, sliced",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "100g green beans, trimmed",
+          "name": "green bean",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp fish sauce",
+          "name": "fish sauce",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp palm sugar",
+          "name": "palm sugar",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "Thai basil leaves",
+          "name": "thai basil",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "lime wedges, to serve",
+          "name": "lime",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Heat oil in a large pan over medium heat.",
+        "Add the green curry paste and cook for 1 minute until fragrant.",
+        "Add the chicken and cook for 5 minutes until sealed.",
+        "Pour in the coconut milk and bring to a simmer.",
+        "Add red pepper and green beans and cook for 10 minutes.",
+        "Stir in fish sauce and palm sugar.",
+        "Simmer for 5 more minutes until the chicken is cooked through.",
+        "Tear in Thai basil leaves and stir.",
+        "Serve with lime wedges."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Spaghetti carbonara",
+      "summary": "Classic Roman pasta with egg, cheese and crispy pancetta.",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "400g egg pasta",
+          "name": "egg pasta",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "150g pancetta, diced",
+          "name": "pancetta",
+          "qty": 150,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 egg yolks",
+          "name": "egg yolk",
+          "qty": 3,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 whole egg",
+          "name": "egg",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "80g parmesan, grated",
+          "name": "parmesan",
+          "qty": 80,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "salt, for pasta water",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Bring a large pot of salted water to a boil and cook the pasta according to package instructions.",
+        "Meanwhile, fry the pancetta in a large pan over medium heat until crispy, about 5 minutes.",
+        "In a bowl, whisk together egg yolks, whole egg, parmesan and plenty of black pepper.",
+        "Drain the pasta, reserving 1 cup of pasta water.",
+        "Remove the pan from heat and add the hot pasta to the pancetta.",
+        "Pour the egg mixture over the pasta and toss quickly, adding pasta water a little at a time until creamy.",
+        "Serve immediately with extra parmesan and black pepper."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Lamb kofta with mint yoghurt",
+      "summary": "Spiced lamb meatballs served with cooling mint yoghurt sauce.",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g lamb mince",
+          "name": "lamb mince",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, grated",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin",
+          "name": "cumin",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp coriander powder",
+          "name": "coriander powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp paprika",
+          "name": "paprika",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "fresh parsley, chopped",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "200g yoghurt",
+          "name": "yoghurt",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "fresh mint, chopped",
+          "name": "mint",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "lemon juice",
+          "name": "lemon juice",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Mix lamb mince, onion, garlic, cumin, coriander powder, paprika, parsley, salt and pepper in a bowl.",
+        "Form into 12 small kofta shapes.",
+        "Heat olive oil in a frying pan over medium heat.",
+        "Cook the kofta for 12-15 minutes, turning occasionally, until browned and cooked through.",
+        "Meanwhile, mix yoghurt with chopped mint and a squeeze of lemon juice.",
+        "Season the yoghurt sauce with salt.",
+        "Serve the kofta with the mint yoghurt sauce."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Roasted vegetable couscous",
+      "summary": "Warm couscous salad with roasted Mediterranean vegetables and herbs.",
+      "minutes": 35,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "250g couscous",
+          "name": "couscous",
+          "qty": 250,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "300ml vegetable stock, hot",
+          "name": "vegetable stock",
+          "qty": 300,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "1 courgette, diced",
+          "name": "courgette",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper, diced",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 aubergine, diced",
+          "name": "aubergine",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 red onion, cut into wedges",
+          "name": "red onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin",
+          "name": "cumin",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "fresh coriander, chopped",
+          "name": "coriander",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "lemon juice",
+          "name": "lemon juice",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 200°C.",
+        "Toss courgette, red pepper, aubergine and red onion with 2 tablespoons olive oil, cumin, salt and pepper.",
+        "Spread on a baking tray and roast for 25 minutes until tender and golden.",
+        "Meanwhile, place couscous in a large bowl and pour over the hot vegetable stock.",
+        "Cover and leave for 5 minutes, then fluff with a fork.",
+        "Stir in the remaining olive oil and roasted vegetables.",
+        "Add chopped coriander and a squeeze of lemon juice.",
+        "Season and serve warm or at room temperature."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Pork chops with apple sauce",
+      "summary": "Pan-fried pork chops served with homemade apple sauce.",
+      "minutes": 25,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "4 pork chops",
+          "name": "pork chop",
+          "qty": 4,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 apples, peeled and diced",
+          "name": "apple",
+          "qty": 3,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp water",
+          "name": "water",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp sugar",
+          "name": "sugar",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cinnamon",
+          "name": "cinnamon",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Season the pork chops with salt and pepper.",
+        "Heat olive oil in a large frying pan over medium-high heat.",
+        "Cook the pork chops for 5-6 minutes on each side until golden and cooked through. Set aside.",
+        "In a small saucepan, combine apples, water, sugar and cinnamon.",
+        "Cook over medium heat for 10 minutes, stirring occasionally, until the apples break down into a sauce.",
+        "Mash with a fork to desired consistency.",
+        "Serve the pork chops with the warm apple sauce."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Miso glazed aubergine",
+      "summary": "Tender aubergine with a sweet and savoury miso glaze.",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "2 aubergines, halved lengthways",
+          "name": "aubergine",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp miso",
+          "name": "miso",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp mirin",
+          "name": "mirin",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp sugar",
+          "name": "sugar",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp sesame oil",
+          "name": "sesame oil",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "sesame seeds, to garnish",
+          "name": "sesame seed",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        },
+        {
+          "rawText": "spring onions, sliced",
+          "name": "spring onion",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 200°C.",
+        "Score the flesh of the aubergine halves in a criss-cross pattern.",
+        "Brush with vegetable oil and place cut-side down on a baking tray.",
+        "Bake for 15 minutes.",
+        "Meanwhile, mix miso, mirin, sugar and sesame oil in a small bowl.",
+        "Remove aubergines from oven and turn cut-side up.",
+        "Brush generously with the miso glaze.",
+        "Return to oven and bake for 10 more minutes until golden and caramelised.",
+        "Garnish with sesame seeds and spring onions if desired."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Prawn linguine with garlic and chilli",
+      "summary": "Quick pasta with prawns, garlic, chilli and fresh parsley.",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "400g linguine",
+          "name": "linguine",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "300g prawns, peeled",
+          "name": "prawn",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic, sliced",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 red chilli, sliced",
+          "name": "red chilli",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "4 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 4,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "100ml white wine",
+          "name": "white wine",
+          "qty": 100,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "fresh parsley, chopped",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "lemon zest",
+          "name": "lemon zest",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "salt and pepper, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Cook the linguine in salted boiling water according to package instructions. Drain, reserving 1 cup of pasta water.",
+        "Heat olive oil in a large pan over medium heat.",
+        "Add garlic and chilli and cook for 1 minute until fragrant.",
+        "Add the prawns and cook for 3 minutes until pink.",
+        "Pour in the white wine and simmer for 2 minutes.",
+        "Add the cooked linguine to the pan with a splash of pasta water.",
+        "Toss everything together, adding more pasta water if needed.",
+        "Stir in parsley and lemon zest.",
+        "Season with salt and pepper and serve immediately."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Roasted cauliflower steaks with tahini drizzle",
+      "summary": "Thick slices of cauliflower roasted until golden and drizzled with a lemon tahini sauce",
+      "minutes": 25,
+      "serves": 2,
+      "ingredients": [
+        {
+          "rawText": "1 large cauliflower",
+          "name": "cauliflower",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin",
+          "name": "cumin",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp smoked paprika",
+          "name": "smoked paprika",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp tahini",
+          "name": "tahini",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp lemon juice",
+          "name": "lemon juice",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp water",
+          "name": "water",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 clove garlic, minced",
+          "name": "garlic",
+          "qty": 1,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "fresh parsley, chopped",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Preheat oven to 220°C",
+        "Cut cauliflower vertically into 2cm thick steaks",
+        "Brush both sides with olive oil and season with cumin, smoked paprika, salt and black pepper",
+        "Roast on a baking tray for 20-25 minutes, flipping halfway, until golden and tender",
+        "Meanwhile, whisk together tahini, lemon juice, water and garlic until smooth",
+        "Drizzle tahini sauce over cauliflower steaks and garnish with parsley"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Spiced cauliflower rice with chickpeas",
+      "summary": "Quick stir-fried cauliflower rice with warming spices and chickpeas",
+      "minutes": 15,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "1 medium cauliflower, riced",
+          "name": "cauliflower",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin seed",
+          "name": "cumin seed",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp turmeric",
+          "name": "turmeric",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "400g tinned chickpeas, drained",
+          "name": "chickpea",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "fresh coriander, chopped",
+          "name": "coriander",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Heat oil in a large pan over medium-high heat",
+        "Add onion and cook for 3 minutes until softened",
+        "Add garlic and cumin seed, cook for 1 minute",
+        "Add cauliflower rice, turmeric and salt, stir-fry for 5 minutes",
+        "Add chickpeas and cook for 2 minutes until heated through",
+        "Garnish with coriander and serve"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Cauliflower and potato curry",
+      "summary": "A quick weeknight curry with tender cauliflower and potatoes in a spiced tomato sauce",
+      "minutes": 25,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin",
+          "name": "cumin",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp turmeric",
+          "name": "turmeric",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp garam masala",
+          "name": "garam masala",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "400g tinned tomatoes",
+          "name": "tinned tomato",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 small cauliflower, cut into florets",
+          "name": "cauliflower",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 medium potatoes, cubed",
+          "name": "potato",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "200ml water",
+          "name": "water",
+          "qty": 200,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Heat oil in a large pot over medium heat",
+        "Add onion and cook for 4 minutes until softened",
+        "Add garlic, ginger, cumin, turmeric and garam masala, cook for 1 minute",
+        "Add tinned tomatoes, cauliflower, potatoes, water and salt",
+        "Bring to a boil, then reduce heat and simmer for 15 minutes until vegetables are tender",
+        "Serve hot"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Teriyaki chicken with vegetables",
+      "summary": "Glazed chicken with crisp vegetables in a sweet and savoury sauce",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g chicken breast, sliced",
+          "name": "chicken breast",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper, sliced",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "200g broccoli florets",
+          "name": "broccoli",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp mirin",
+          "name": "mirin",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp sugar",
+          "name": "sugar",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cornflour",
+          "name": "cornflour",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp water",
+          "name": "water",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "sesame seeds",
+          "name": "sesame seed",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Heat 1 tbsp oil in a large pan over high heat",
+        "Add chicken and cook for 5 minutes until browned, then remove",
+        "Add remaining oil, red pepper and broccoli, stir-fry for 3 minutes",
+        "Mix soy sauce, mirin, sugar, garlic, ginger, cornflour and water",
+        "Return chicken to pan, add sauce and cook for 2 minutes until thickened",
+        "Garnish with sesame seeds"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Baked cod with tomatoes and olives",
+      "summary": "Mediterranean-style fish baked with cherry tomatoes, olives and herbs",
+      "minutes": 25,
+      "serves": 2,
+      "ingredients": [
+        {
+          "rawText": "2 cod fillets",
+          "name": "cod",
+          "qty": 2,
+          "unit": "fillet",
+          "optional": false
+        },
+        {
+          "rawText": "250g cherry tomatoes, halved",
+          "name": "cherry tomato",
+          "qty": 250,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g black olives, pitted",
+          "name": "black olive",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic, sliced",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp dried oregano",
+          "name": "dried oregano",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "fresh parsley, chopped",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Preheat oven to 200°C",
+        "Place cod fillets in a baking dish",
+        "Scatter cherry tomatoes, olives and garlic around the fish",
+        "Drizzle with olive oil and season with oregano, salt and black pepper",
+        "Bake for 15-18 minutes until fish is cooked through",
+        "Garnish with parsley and serve"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Sweet and sour pork",
+      "summary": "Crispy pork pieces in a tangy sauce with peppers and pineapple",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g pork loin, cubed",
+          "name": "pork loin",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp cornflour",
+          "name": "cornflour",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "vegetable oil for frying",
+          "name": "vegetable oil",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper, chopped",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 green pepper",
+          "name": "green pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, chopped",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "200g pineapple chunks",
+          "name": "pineapple",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp rice vinegar",
+          "name": "rice vinegar",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp sugar",
+          "name": "sugar",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp tomato ketchup",
+          "name": "tomato ketchup",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "100ml water",
+          "name": "water",
+          "qty": 100,
+          "unit": "ml",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Toss pork cubes in 2 tbsp cornflour until coated",
+        "Heat oil in a large pan and fry pork for 5 minutes until golden, then remove",
+        "Add peppers and onion to pan, stir-fry for 3 minutes",
+        "Mix rice vinegar, sugar, soy sauce, ketchup, water and remaining cornflour",
+        "Add sauce and pineapple to pan, cook for 2 minutes until thickened",
+        "Return pork to pan, toss to coat and heat through"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Lamb and spinach curry",
+      "summary": "Tender lamb in a rich spiced sauce with fresh spinach",
+      "minutes": 45,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g lamb shoulder, diced",
+          "name": "lamb shoulder",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin",
+          "name": "cumin",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp coriander powder",
+          "name": "coriander powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp turmeric",
+          "name": "turmeric",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp garam masala",
+          "name": "garam masala",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "400g tinned tomatoes",
+          "name": "tinned tomato",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "200ml water",
+          "name": "water",
+          "qty": 200,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "200g spinach",
+          "name": "spinach",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Heat oil in a large pot over high heat",
+        "Brown lamb pieces for 5 minutes, then remove",
+        "Add onion and cook for 4 minutes until softened",
+        "Add garlic, ginger, cumin, coriander powder, turmeric and garam masala, cook for 1 minute",
+        "Add tinned tomatoes, water, salt and lamb",
+        "Bring to a boil, reduce heat and simmer covered for 30 minutes",
+        "Stir in spinach and cook for 2 minutes until wilted"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Shrimp linguine with garlic and chilli",
+      "summary": "Quick pasta with succulent shrimp, garlic and a touch of heat",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "400g linguine",
+          "name": "linguine",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "300g shrimp, peeled",
+          "name": "shrimp",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic, sliced",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 red chilli, sliced",
+          "name": "red chilli",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "4 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 4,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "100ml white wine",
+          "name": "white wine",
+          "qty": 100,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "fresh parsley, chopped",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp lemon zest",
+          "name": "lemon zest",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Cook linguine in salted boiling water according to package instructions",
+        "Heat olive oil in a large pan over medium heat",
+        "Add garlic and chilli, cook for 1 minute",
+        "Add shrimp and cook for 2-3 minutes until pink",
+        "Add white wine and simmer for 2 minutes",
+        "Drain pasta and add to pan with parsley, lemon zest, salt and black pepper",
+        "Toss everything together and serve immediately"
+      ],
+      "adversarialCase": "near-duplicate",
+      "duplicateOf": "Prawn linguine with garlic and chilli"
+    },
+    {
+      "title": "Chicken and mushroom stir-fry",
+      "summary": "Quick weeknight stir-fry with tender chicken and earthy mushrooms",
+      "minutes": 18,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g chicken breast, sliced",
+          "name": "chicken breast",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "300g mushrooms, sliced",
+          "name": "mushroom",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper, sliced",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp oyster sauce",
+          "name": "oyster sauce",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cornflour",
+          "name": "cornflour",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp water",
+          "name": "water",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "spring onions, sliced",
+          "name": "spring onion",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Heat 1 tbsp oil in a large pan over high heat",
+        "Add chicken and stir-fry for 5 minutes until cooked through, then remove",
+        "Add remaining oil, mushrooms and red pepper, cook for 3 minutes",
+        "Add garlic and ginger, cook for 1 minute",
+        "Mix soy sauce, oyster sauce, cornflour and water",
+        "Return chicken to pan, add sauce and cook for 2 minutes until thickened",
+        "Garnish with spring onions"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Baked lemon herb chicken",
+      "summary": "Simple roasted chicken pieces with bright lemon and fresh herbs",
+      "minutes": 40,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "8 chicken thighs, bone-in",
+          "name": "chicken thigh",
+          "qty": 8,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 lemons, sliced",
+          "name": "lemon",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "4 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 4,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp dried oregano",
+          "name": "dried oregano",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp dried thyme",
+          "name": "dried thyme",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "fresh parsley, chopped",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Preheat oven to 200°C",
+        "Place chicken thighs in a baking dish",
+        "Mix olive oil, garlic, oregano, thyme, salt and black pepper",
+        "Rub mixture over chicken pieces",
+        "Arrange lemon slices around and on top of chicken",
+        "Bake for 35-40 minutes until chicken is cooked through and golden",
+        "Garnish with parsley and serve"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Vegetable fried rice",
+      "summary": "Classic fried rice loaded with colourful vegetables",
+      "minutes": 15,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "3 cups cooked rice, cold",
+          "name": "rice",
+          "qty": 3,
+          "unit": "cup",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 eggs, beaten",
+          "name": "egg",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper, diced",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "100g frozen peas",
+          "name": "pea",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g sweetcorn",
+          "name": "sweetcorn",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp sesame oil",
+          "name": "sesame oil",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "spring onions, sliced",
+          "name": "spring onion",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Heat 1 tbsp oil in a large pan or wok over high heat",
+        "Add beaten eggs and scramble, then remove and set aside",
+        "Add remaining oil, onion and garlic, cook for 2 minutes",
+        "Add red pepper, peas and sweetcorn, stir-fry for 2 minutes",
+        "Add cold rice and break up any clumps, stir-fry for 3 minutes",
+        "Add soy sauce, sesame oil and scrambled eggs, toss to combine",
+        "Garnish with spring onions and serve"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Pan-fried sea bass with ginger",
+      "summary": "Delicate fish with a fragrant ginger and spring onion dressing",
+      "minutes": 15,
+      "serves": 2,
+      "ingredients": [
+        {
+          "rawText": "2 sea bass fillets",
+          "name": "sea bass",
+          "qty": 2,
+          "unit": "fillet",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp ginger, julienned",
+          "name": "ginger",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 spring onions, sliced",
+          "name": "spring onion",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp rice vinegar",
+          "name": "rice vinegar",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp sesame oil",
+          "name": "sesame oil",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Pat sea bass fillets dry and season with salt",
+        "Heat vegetable oil in a non-stick pan over medium-high heat",
+        "Place fillets skin-side down and cook for 3-4 minutes until crispy",
+        "Flip and cook for another 2 minutes, then remove to plates",
+        "Add ginger to the hot pan and cook for 30 seconds",
+        "Add spring onions, soy sauce, rice vinegar and sesame oil, heat through",
+        "Pour dressing over fish and serve immediately"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Tomato and basil soup",
+      "summary": "Simple fresh tomato soup with aromatic basil",
+      "minutes": 25,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "800g tinned tomatoes",
+          "name": "tinned tomato",
+          "qty": 800,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "500ml vegetable stock",
+          "name": "vegetable stock",
+          "qty": 500,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp sugar",
+          "name": "sugar",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "fresh basil leaves",
+          "name": "basil",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Heat olive oil in a large pot over medium heat",
+        "Add onion and cook for 5 minutes until softened",
+        "Add garlic and cook for 1 minute",
+        "Add tinned tomatoes, vegetable stock, sugar, salt and black pepper",
+        "Bring to a boil, then reduce heat and simmer for 15 minutes",
+        "Tear in basil leaves and blend until smooth",
+        "Taste and adjust seasoning before serving"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Garlic and chilli king prawns",
+      "summary": "Quick tapas-style prawns with plenty of garlic and chilli heat",
+      "minutes": 10,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g king prawns, peeled",
+          "name": "prawn",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "4 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 4,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "6 cloves garlic, sliced",
+          "name": "garlic",
+          "qty": 6,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "2 red chillies, sliced",
+          "name": "red chilli",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp smoked paprika",
+          "name": "smoked paprika",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp lemon juice",
+          "name": "lemon juice",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "fresh parsley, chopped",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Heat olive oil in a large pan over medium-high heat",
+        "Add garlic and chillies, cook for 1 minute until fragrant",
+        "Add prawns and smoked paprika, cook for 3-4 minutes until prawns are pink",
+        "Season with salt and add lemon juice",
+        "Garnish with parsley and serve immediately"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Sticky glazed pork belly",
+      "summary": "Tender pork belly with a sweet and savoury glaze",
+      "minutes": 90,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "800g pork belly, scored",
+          "name": "pork belly",
+          "qty": 800,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp honey",
+          "name": "honey",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp rice vinegar",
+          "name": "rice vinegar",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp hoisin sauce",
+          "name": "hoisin sauce",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp chinese five spice",
+          "name": "chinese five spice",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 160°C",
+        "Rub pork belly skin with salt and place in a roasting tin",
+        "Roast for 60 minutes",
+        "Mix soy sauce, honey, rice vinegar, hoisin sauce, garlic, ginger and five spice",
+        "Increase oven to 200°C",
+        "Brush glaze over pork and roast for 20 minutes",
+        "Brush with more glaze and roast for another 10 minutes until sticky and caramelised",
+        "Rest for 5 minutes before slicing"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Almond-crusted chicken tenders",
+      "summary": "Juicy chicken strips coated in almond flour and herbs, baked until golden and crispy",
+      "minutes": 35,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "600g chicken breast",
+          "name": "chicken breast",
+          "qty": 600,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g almond flour",
+          "name": "almond flour",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 eggs",
+          "name": "egg",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp garlic powder",
+          "name": "garlic powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp smoked paprika",
+          "name": "smoked paprika",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp salt",
+          "name": "salt",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "½ tsp black pepper",
+          "name": "black pepper",
+          "qty": 0.5,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 200°C and line a baking tray with parchment",
+        "Cut chicken breasts into strips about 2cm wide",
+        "Beat eggs in a shallow bowl",
+        "In another bowl, mix almond flour, garlic powder, smoked paprika, salt and black pepper",
+        "Dip each chicken strip in egg, then coat thoroughly in almond mixture",
+        "Arrange on baking tray and drizzle with olive oil",
+        "Bake for 25 minutes until golden and cooked through, turning halfway"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Crispy sesame tofu with stir-fried vegetables",
+      "summary": "Golden pan-fried tofu cubes tossed with colourful vegetables in a savoury sesame sauce",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "400g firm tofu",
+          "name": "tofu",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp cornflour",
+          "name": "cornflour",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "200g broccoli",
+          "name": "broccoli",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp rice vinegar",
+          "name": "rice vinegar",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp sesame oil",
+          "name": "sesame oil",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp honey",
+          "name": "honey",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp sesame seeds",
+          "name": "sesame seed",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 spring onions",
+          "name": "spring onion",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Press tofu to remove excess water, then cut into 2cm cubes",
+        "Toss tofu cubes in cornflour until evenly coated",
+        "Heat 2 tbsp vegetable oil in a large pan over medium-high heat",
+        "Fry tofu until golden on all sides, about 8 minutes, then remove",
+        "Cut red pepper into chunks and broccoli into small florets",
+        "Add remaining oil to pan, stir-fry vegetables for 4 minutes",
+        "Mince garlic and add to pan, cook 1 minute",
+        "Mix soy sauce, rice vinegar, sesame oil and honey, pour into pan",
+        "Return tofu to pan and toss everything together for 2 minutes",
+        "Sprinkle with sesame seeds and sliced spring onions"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Crab and sweetcorn soup",
+      "summary": "A silky Chinese-style soup with tender crab meat and sweet corn in a ginger-scented broth",
+      "minutes": 25,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "200g white crab meat",
+          "name": "crab",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "300g sweetcorn",
+          "name": "sweetcorn",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 litre vegetable stock",
+          "name": "vegetable stock",
+          "qty": 1,
+          "unit": "litre",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp ginger",
+          "name": "ginger",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "2 eggs",
+          "name": "egg",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp cornflour",
+          "name": "cornflour",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp water",
+          "name": "water",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp sesame oil",
+          "name": "sesame oil",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 spring onions",
+          "name": "spring onion",
+          "qty": 2,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Finely grate ginger and mince garlic",
+        "Bring vegetable stock to a simmer in a large pot",
+        "Add ginger, garlic and sweetcorn, simmer for 8 minutes",
+        "Mix cornflour with water to make a slurry",
+        "Stir slurry into soup and simmer for 2 minutes until slightly thickened",
+        "Beat eggs lightly, then pour slowly into soup while stirring to create ribbons",
+        "Gently fold in crab meat and sesame oil",
+        "Season with salt to taste",
+        "Garnish with sliced spring onions if desired"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Walnut and mushroom bolognese with egg pasta",
+      "summary": "A rich, earthy meat-free sauce with walnuts and mushrooms served over fresh egg pasta",
+      "minutes": 40,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "300g egg pasta",
+          "name": "egg pasta",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g walnuts",
+          "name": "walnut",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "300g mushrooms",
+          "name": "mushroom",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "400g tinned tomatoes",
+          "name": "tinned tomato",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp tomato ketchup",
+          "name": "tomato ketchup",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp dried oregano",
+          "name": "dried oregano",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "parmesan, to serve",
+          "name": "parmesan",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Pulse walnuts in a food processor until finely chopped but not paste",
+        "Finely dice onion and mince garlic",
+        "Chop mushrooms into small pieces",
+        "Heat olive oil in a large pan, sauté onion for 5 minutes",
+        "Add garlic and mushrooms, cook until mushrooms release their liquid, about 8 minutes",
+        "Add chopped walnuts and cook for 2 minutes",
+        "Add tinned tomatoes, tomato ketchup and oregano",
+        "Simmer sauce for 20 minutes, stirring occasionally",
+        "Season with salt and black pepper",
+        "Cook egg pasta according to package instructions, drain",
+        "Serve sauce over pasta, with parmesan if desired"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Grilled scallops with lemon butter",
+      "summary": "Sweet, tender scallops seared to perfection and finished with a bright lemon butter sauce",
+      "minutes": 15,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "16 large scallops",
+          "name": "scallop",
+          "qty": 16,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "50g butter",
+          "name": "butter",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "1 lemon",
+          "name": "lemon",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp parsley",
+          "name": "parsley",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Pat scallops dry with paper towel and season both sides with salt and black pepper",
+        "Heat olive oil in a large pan over high heat until very hot",
+        "Sear scallops for 2 minutes on each side until golden, then remove to a plate",
+        "Reduce heat to medium, add butter to the pan",
+        "Mince garlic and add to melted butter, cook for 1 minute",
+        "Juice the lemon and add to the butter sauce",
+        "Chop parsley and stir into sauce",
+        "Return scallops to pan, spoon sauce over them",
+        "Serve immediately"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Spicy peanut noodles with vegetables",
+      "summary": "Quick and satisfying noodles tossed in a creamy peanut sauce with crisp vegetables",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "300g rice noodles",
+          "name": "rice noodles",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g smooth peanut butter",
+          "name": "smooth peanut butter",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp rice vinegar",
+          "name": "rice vinegar",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp honey",
+          "name": "honey",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 carrot",
+          "name": "carrot",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp ginger",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp water",
+          "name": "water",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp chilli powder",
+          "name": "chilli powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 spring onions",
+          "name": "spring onion",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "crushed peanuts, to garnish",
+          "name": "peanut",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Cook rice noodles according to package instructions, drain and set aside",
+        "Slice red pepper thinly and julienne carrot",
+        "Mince garlic and grate ginger",
+        "Mix peanut butter, soy sauce, rice vinegar, honey, water and chilli powder in a bowl",
+        "Heat vegetable oil in a wok over high heat",
+        "Stir-fry red pepper and carrot for 3 minutes",
+        "Add garlic and ginger, cook for 1 minute",
+        "Add cooked noodles and peanut sauce, toss everything together for 2 minutes",
+        "Slice spring onions and scatter over noodles",
+        "Garnish with crushed peanuts if desired"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Squid ink risotto",
+      "summary": "A dramatic black risotto infused with squid ink and tender pieces of squid",
+      "minutes": 45,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "300g arborio rice",
+          "name": "arborio rice",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "400g squid",
+          "name": "squid",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "4g squid ink",
+          "name": "squid ink",
+          "qty": 4,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 litre vegetable stock",
+          "name": "vegetable stock",
+          "qty": 1,
+          "unit": "litre",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "100ml white wine",
+          "name": "white wine",
+          "qty": 100,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "lemon juice, to serve",
+          "name": "lemon juice",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        },
+        {
+          "rawText": "parsley, to garnish",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Clean squid and cut bodies into rings, chop tentacles",
+        "Heat vegetable stock in a pot and keep warm",
+        "Finely dice onion and mince garlic",
+        "Heat 2 tbsp olive oil in a large pan, sauté onion for 5 minutes",
+        "Add garlic and rice, stir for 2 minutes until rice is translucent at edges",
+        "Pour in white wine and stir until absorbed",
+        "Begin adding stock one ladle at a time, stirring frequently, adding more as each addition is absorbed",
+        "After 15 minutes, stir in squid ink",
+        "Continue adding stock and stirring for another 10 minutes",
+        "Heat remaining oil in a separate pan, quickly sear squid for 2 minutes",
+        "Fold cooked squid into risotto",
+        "Season with salt and black pepper",
+        "Serve with a squeeze of lemon juice and parsley if desired"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Pecan-crusted pork chops",
+      "summary": "Tender pork chops with a crunchy pecan and herb coating, pan-fried until golden",
+      "minutes": 25,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "4 pork chops",
+          "name": "pork chop",
+          "qty": 4,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "80g pecans",
+          "name": "pecan",
+          "qty": 80,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 egg",
+          "name": "egg",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp dried thyme",
+          "name": "dried thyme",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp garlic powder",
+          "name": "garlic powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Finely chop pecans or pulse in a food processor",
+        "Mix chopped pecans with dried thyme, garlic powder, salt and black pepper in a shallow dish",
+        "Beat egg in another shallow dish",
+        "Pat pork chops dry and season both sides with salt and black pepper",
+        "Dip each pork chop in egg, then press into pecan mixture to coat both sides",
+        "Heat olive oil in a large pan over medium heat",
+        "Cook pork chops for 5-6 minutes each side until golden and cooked through",
+        "Let rest for 3 minutes before serving"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Clam and tomato linguine",
+      "summary": "A coastal Italian classic with clams in a light tomato and white wine sauce",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "400g linguine",
+          "name": "linguine",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "800g fresh clams",
+          "name": "clam",
+          "qty": 800,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "400g tinned tomatoes",
+          "name": "tinned tomato",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "1 red chilli",
+          "name": "red chilli",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "150ml white wine",
+          "name": "white wine",
+          "qty": 150,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "4 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 4,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp parsley",
+          "name": "parsley",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Scrub clams under cold water and discard any that are open",
+        "Thinly slice garlic and finely chop red chilli",
+        "Heat olive oil in a large pan, add garlic and chilli, cook for 1 minute",
+        "Add tinned tomatoes and simmer for 10 minutes",
+        "Pour in white wine and bring to a boil",
+        "Add clams, cover the pan and cook for 5 minutes until clams open",
+        "Discard any clams that remain closed",
+        "Meanwhile, cook linguine according to package instructions, drain",
+        "Add drained pasta to the pan with clams and sauce, toss together",
+        "Season with salt and chopped parsley"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Cashew chicken stir-fry",
+      "summary": "A classic Chinese restaurant dish with tender chicken, vegetables and toasted cashews",
+      "minutes": 25,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "500g chicken breast",
+          "name": "chicken breast",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g cashews",
+          "name": "cashew",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 green pepper",
+          "name": "green pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp ginger",
+          "name": "ginger",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp oyster sauce",
+          "name": "oyster sauce",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp cornflour",
+          "name": "cornflour",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp water",
+          "name": "water",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 spring onions",
+          "name": "spring onion",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Cut chicken breast into bite-sized pieces",
+        "Toast cashews in a dry pan for 3 minutes, then set aside",
+        "Cut red and green peppers into chunks",
+        "Mince garlic and grate ginger",
+        "Mix soy sauce, oyster sauce, cornflour and water in a small bowl",
+        "Heat 2 tbsp vegetable oil in a wok over high heat",
+        "Stir-fry chicken for 5 minutes until cooked through, remove to a plate",
+        "Add remaining oil, stir-fry peppers for 3 minutes",
+        "Add garlic and ginger, cook for 1 minute",
+        "Return chicken to wok, add sauce mixture and cook for 2 minutes until thickened",
+        "Stir in toasted cashews and sliced spring onions"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Baked halibut with herb butter",
+      "summary": "Flaky white fish baked with a rich herb and butter topping",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "4 halibut fillets",
+          "name": "halibut",
+          "qty": 4,
+          "unit": "fillets",
+          "optional": false
+        },
+        {
+          "rawText": "60g butter",
+          "name": "butter",
+          "qty": 60,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp parsley",
+          "name": "parsley",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp dill",
+          "name": "dill",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 lemon",
+          "name": "lemon",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 200°C",
+        "Soften butter and mix with minced garlic, chopped parsley, chopped dill, and lemon zest",
+        "Season halibut fillets with salt and black pepper",
+        "Place fillets in a baking dish and spread herb butter over each one",
+        "Bake for 12-15 minutes until fish flakes easily",
+        "Serve with lemon wedges"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Hazelnut and chocolate brownies",
+      "summary": "Rich, fudgy brownies studded with toasted hazelnuts and dark chocolate chunks",
+      "minutes": 40,
+      "serves": 12,
+      "ingredients": [
+        {
+          "rawText": "200g butter",
+          "name": "butter",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "300g dark chocolate",
+          "name": "dark chocolate",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 eggs",
+          "name": "egg",
+          "qty": 3,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "250g sugar",
+          "name": "sugar",
+          "qty": 250,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g wheat flour",
+          "name": "wheat flour",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g hazelnuts",
+          "name": "hazelnut",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp vanilla extract",
+          "name": "vanilla extract",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "½ tsp salt",
+          "name": "salt",
+          "qty": 0.5,
+          "unit": "tsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C and line a 20x30cm baking tin with parchment",
+        "Roughly chop hazelnuts and toast in a dry pan for 4 minutes",
+        "Melt butter and 200g dark chocolate together in a heatproof bowl over simmering water",
+        "Chop remaining 100g chocolate into chunks",
+        "Beat eggs and sugar together until pale and thick",
+        "Fold melted chocolate mixture into eggs",
+        "Sift in wheat flour and salt, fold gently",
+        "Stir in vanilla extract, chocolate chunks and toasted hazelnuts",
+        "Pour into prepared tin and bake for 25 minutes",
+        "Let cool completely before cutting into squares"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Pistachio and lemon biscotti",
+      "summary": "Twice-baked Italian biscuits with pistachios and bright lemon zest",
+      "minutes": 60,
+      "serves": 20,
+      "ingredients": [
+        {
+          "rawText": "250g wheat flour",
+          "name": "wheat flour",
+          "qty": 250,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "150g sugar",
+          "name": "sugar",
+          "qty": 150,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g pistachios",
+          "name": "pistachio",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 eggs",
+          "name": "egg",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 lemon",
+          "name": "lemon",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp vanilla extract",
+          "name": "vanilla extract",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp baking powder",
+          "name": "baking powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "¼ tsp salt",
+          "name": "salt",
+          "qty": 0.25,
+          "unit": "tsp",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C and line a baking tray with parchment",
+        "Roughly chop pistachios",
+        "Mix wheat flour, baking powder and salt in a large bowl",
+        "In another bowl, beat eggs, sugar, lemon zest and vanilla extract",
+        "Combine wet and dry ingredients to form a dough",
+        "Fold in chopped pistachios",
+        "Divide dough in half and shape each into a log about 30cm long and 5cm wide on the baking tray",
+        "Bake for 25 minutes until golden and firm",
+        "Remove from oven and let cool for 10 minutes",
+        "Using a serrated knife, cut logs diagonally into 1cm thick slices",
+        "Lay slices flat on the tray and bake for another 15 minutes, turning halfway, until crisp and golden"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Mussels in white wine and garlic",
+      "summary": "Plump mussels steamed in a fragrant white wine broth with plenty of garlic and herbs",
+      "minutes": 20,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "1.5kg fresh mussels",
+          "name": "mussel",
+          "qty": 1.5,
+          "unit": "kg",
+          "optional": false
+        },
+        {
+          "rawText": "6 cloves garlic",
+          "name": "garlic",
+          "qty": 6,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "200ml white wine",
+          "name": "white wine",
+          "qty": 200,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp parsley",
+          "name": "parsley",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "crusty bread, to serve",
+          "name": "crusty bread",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Scrub mussels under cold water, remove beards, and discard any that are open",
+        "Finely dice onion and thinly slice garlic",
+        "Heat olive oil in a large pot with a lid",
+        "Sauté onion for 4 minutes until softened",
+        "Add garlic and cook for 1 minute",
+        "Pour in white wine and bring to a boil",
+        "Add mussels, cover pot and steam for 5 minutes, shaking occasionally",
+        "Discard any mussels that have not opened",
+        "Season with salt, black pepper and chopped parsley",
+        "Serve immediately with crusty bread to mop up the broth"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Lobster thermidor",
+      "summary": "A luxurious French classic with lobster in a rich, creamy mustard sauce topped with cheese",
+      "minutes": 45,
+      "serves": 2,
+      "ingredients": [
+        {
+          "rawText": "2 whole cooked lobsters",
+          "name": "lobster",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "40g butter",
+          "name": "butter",
+          "qty": 40,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp wheat flour",
+          "name": "wheat flour",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "200ml milk",
+          "name": "milk",
+          "qty": 200,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "100ml cream",
+          "name": "cream",
+          "qty": 100,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp dijon mustard",
+          "name": "dijon mustard",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "50g parmesan",
+          "name": "parmesan",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 egg yolk",
+          "name": "egg yolk",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp white wine",
+          "name": "white wine",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "parsley, to garnish",
+          "name": "parsley",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Split cooked lobsters in half lengthwise, remove meat and chop into chunks, reserve shells",
+        "Melt butter in a saucepan, stir in wheat flour and cook for 1 minute",
+        "Gradually whisk in milk, stirring constantly until smooth",
+        "Add cream and simmer gently for 5 minutes until thickened",
+        "Stir in dijon mustard and white wine",
+        "Remove from heat and whisk in egg yolk",
+        "Fold in chopped lobster meat, season with salt and black pepper",
+        "Preheat grill to high",
+        "Spoon lobster mixture back into the shells",
+        "Grate parmesan over the top",
+        "Grill for 5 minutes until golden and bubbling",
+        "Garnish with parsley if desired"
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Sticky teriyaki salmon with pak choi",
+      "summary": "Pan-fried salmon glazed with homemade teriyaki sauce, served with tender pak choi",
+      "minutes": 20,
+      "serves": 2,
+      "ingredients": [
+        {
+          "rawText": "2 salmon fillets",
+          "name": "salmon",
+          "qty": 2,
+          "unit": "fillets",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp mirin",
+          "name": "mirin",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp honey",
+          "name": "honey",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp ginger, grated",
+          "name": "ginger",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 clove garlic, minced",
+          "name": "garlic",
+          "qty": 1,
+          "unit": "clove",
+          "optional": false
+        },
+        {
+          "rawText": "2 heads pak choi, halved",
+          "name": "pak choi",
+          "qty": 2,
+          "unit": "heads",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp sesame seed",
+          "name": "sesame seed",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Mix soy sauce, mirin, honey, ginger and garlic in a small bowl.",
+        "Heat vegetable oil in a large frying pan over medium-high heat.",
+        "Add salmon fillets skin-side down and cook for 4 minutes.",
+        "Flip salmon and cook for 2 minutes.",
+        "Pour teriyaki sauce over salmon and cook for 2 minutes, spooning sauce over fish.",
+        "Remove salmon and set aside.",
+        "Add pak choi to the pan cut-side down and cook in remaining sauce for 3 minutes until tender.",
+        "Serve salmon with pak choi, drizzled with pan sauce and sprinkled with sesame seeds."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Creamy tomato and basil pasta bake",
+      "summary": "Comforting baked pasta in a rich tomato cream sauce with melted cheese",
+      "minutes": 45,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "300g penne",
+          "name": "penne",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "400g tinned tomato",
+          "name": "tinned tomato",
+          "qty": 400,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "200ml cream",
+          "name": "cream",
+          "qty": 200,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp sugar",
+          "name": "sugar",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "handful fresh basil",
+          "name": "basil",
+          "qty": null,
+          "unit": "handful",
+          "optional": false
+        },
+        {
+          "rawText": "100g mozzarella, torn",
+          "name": "mozzarella",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "50g parmesan, grated",
+          "name": "parmesan",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C.",
+        "Cook penne in salted boiling water until al dente, drain and set aside.",
+        "Heat olive oil in a large pan and sauté onion for 5 minutes until soft.",
+        "Add garlic and cook for 1 minute.",
+        "Stir in tinned tomatoes, cream and sugar. Season with salt and black pepper.",
+        "Simmer for 10 minutes until sauce thickens slightly.",
+        "Tear basil leaves and stir into sauce.",
+        "Mix cooked pasta with sauce and transfer to an ovenproof dish.",
+        "Top with torn mozzarella and grated parmesan.",
+        "Bake for 20 minutes until cheese is golden and bubbling."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Beef rendang curry",
+      "summary": "Slow-cooked Indonesian beef curry with aromatic spices and coconut milk",
+      "minutes": 90,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "600g beef, cubed",
+          "name": "beef",
+          "qty": 600,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "400ml coconut milk",
+          "name": "coconut milk",
+          "qty": 400,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, chopped",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "4 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 4,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp ginger, grated",
+          "name": "ginger",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 stalks lemongrass, bruised",
+          "name": "lemongrass",
+          "qty": 2,
+          "unit": "stalks",
+          "optional": false
+        },
+        {
+          "rawText": "3 kaffir lime leaf",
+          "name": "kaffir lime leaf",
+          "qty": 3,
+          "unit": "leaves",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp tamarind paste",
+          "name": "tamarind paste",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp cumin",
+          "name": "cumin",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp coriander powder",
+          "name": "coriander powder",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp turmeric",
+          "name": "turmeric",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp chilli powder",
+          "name": "chilli powder",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp palm sugar",
+          "name": "palm sugar",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Heat vegetable oil in a large heavy-based pot over medium heat.",
+        "Add onion, garlic and ginger and cook for 5 minutes.",
+        "Add cumin, coriander powder, turmeric and chilli powder. Stir for 1 minute.",
+        "Add beef and brown on all sides, about 8 minutes.",
+        "Pour in coconut milk and add lemongrass, kaffir lime leaves, tamarind paste and palm sugar.",
+        "Bring to a boil, then reduce heat to low.",
+        "Cover and simmer for 75 minutes, stirring occasionally, until beef is very tender and sauce has thickened.",
+        "Season with salt to taste.",
+        "Remove lemongrass stalks before serving."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Lemon drizzle cake",
+      "summary": "Classic moist lemon sponge cake with a sweet tangy glaze",
+      "minutes": 50,
+      "serves": 8,
+      "ingredients": [
+        {
+          "rawText": "175g butter, softened",
+          "name": "butter",
+          "qty": 175,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "175g sugar",
+          "name": "sugar",
+          "qty": 175,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 eggs",
+          "name": "egg",
+          "qty": 3,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "175g self-raising flour",
+          "name": "wheat flour",
+          "qty": 175,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 lemons, zested and juiced",
+          "name": "lemon",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp baking powder",
+          "name": "baking powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "100g icing sugar",
+          "name": "icing sugar",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C and grease a 900g loaf tin.",
+        "Beat butter and sugar together until light and fluffy.",
+        "Add eggs one at a time, beating well after each addition.",
+        "Fold in flour, baking powder and lemon zest.",
+        "Pour batter into prepared tin and bake for 40 minutes until golden and a skewer comes out clean.",
+        "While cake bakes, mix icing sugar with half the lemon juice to make a glaze.",
+        "When cake is done, poke holes all over the top with a skewer while still warm.",
+        "Pour lemon glaze over the warm cake, letting it soak in.",
+        "Leave to cool completely in the tin before turning out."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Chicken katsu curry",
+      "summary": "Crispy breaded chicken with Japanese curry sauce and rice",
+      "minutes": 40,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "4 chicken breast",
+          "name": "chicken breast",
+          "qty": 4,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "100g plain flour",
+          "name": "wheat flour",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 eggs, beaten",
+          "name": "egg",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "150g breadcrumbs",
+          "name": "breadcrumbs",
+          "qty": 150,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "vegetable oil, for frying",
+          "name": "vegetable oil",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, sliced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 carrots, chopped",
+          "name": "carrot",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp curry powder",
+          "name": "curry powder",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp wheat flour",
+          "name": "wheat flour",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "500ml chicken stock",
+          "name": "chicken stock",
+          "qty": 500,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp soy sauce",
+          "name": "soy sauce",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp honey",
+          "name": "honey",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "cooked rice, to serve",
+          "name": "rice",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Season chicken breasts with salt and black pepper.",
+        "Set up three bowls: flour, beaten eggs, and breadcrumbs.",
+        "Coat each chicken breast in flour, then egg, then breadcrumbs.",
+        "Heat oil in a large frying pan and fry chicken for 6 minutes each side until golden and cooked through. Set aside.",
+        "For curry sauce, heat 2 tablespoons oil in a pan and cook onion and carrot for 8 minutes until soft.",
+        "Stir in curry powder and flour, cook for 1 minute.",
+        "Gradually add chicken stock, stirring constantly until smooth.",
+        "Add soy sauce and honey, simmer for 10 minutes until thickened.",
+        "Slice chicken and serve over rice with curry sauce poured over."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Chocolate chip cookies",
+      "summary": "Classic chewy chocolate chip cookies with a crispy edge",
+      "minutes": 25,
+      "serves": 24,
+      "ingredients": [
+        {
+          "rawText": "200g butter, softened",
+          "name": "butter",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "150g sugar",
+          "name": "sugar",
+          "qty": 150,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "150g light brown sugar",
+          "name": "light brown sugar",
+          "qty": 150,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 eggs",
+          "name": "egg",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp vanilla extract",
+          "name": "vanilla extract",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "300g plain flour",
+          "name": "wheat flour",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp baking powder",
+          "name": "baking powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp salt",
+          "name": "salt",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "200g dark chocolate chips",
+          "name": "dark chocolate chips",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C and line two baking trays with parchment.",
+        "Beat butter, sugar and brown sugar together until creamy.",
+        "Add eggs and vanilla extract, beat until combined.",
+        "In a separate bowl, mix flour, baking powder and salt.",
+        "Gradually fold dry ingredients into wet mixture.",
+        "Stir in chocolate chips.",
+        "Drop tablespoons of dough onto prepared trays, spacing 5cm apart.",
+        "Bake for 12 minutes until edges are golden but centres still soft.",
+        "Leave on tray for 5 minutes before transferring to a wire rack to cool."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Vietnamese pho with beef",
+      "summary": "Aromatic beef noodle soup with fresh herbs",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "200g rice noodles",
+          "name": "rice noodles",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "300g beef sirloin, thinly sliced",
+          "name": "beef sirloin",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1.5 litres beef stock",
+          "name": "beef stock",
+          "qty": 1.5,
+          "unit": "litres",
+          "optional": false
+        },
+        {
+          "rawText": "2 star anise",
+          "name": "star anise",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 cinnamon stick",
+          "name": "cinnamon stick",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves",
+          "name": "cloves",
+          "qty": 3,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp ginger, sliced",
+          "name": "ginger",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp fish sauce",
+          "name": "fish sauce",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, sliced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 spring onions, sliced",
+          "name": "spring onion",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "handful bean sprouts",
+          "name": "bean sprouts",
+          "qty": null,
+          "unit": "handful",
+          "optional": false
+        },
+        {
+          "rawText": "handful fresh coriander",
+          "name": "coriander",
+          "qty": null,
+          "unit": "handful",
+          "optional": false
+        },
+        {
+          "rawText": "handful thai basil",
+          "name": "thai basil",
+          "qty": null,
+          "unit": "handful",
+          "optional": false
+        },
+        {
+          "rawText": "2 limes, cut into wedges",
+          "name": "lime",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 red chilli, sliced",
+          "name": "red chilli",
+          "qty": 1,
+          "unit": null,
+          "optional": true
+        }
+      ],
+      "steps": [
+        "Heat beef stock in a large pot with star anise, cinnamon stick, cloves and ginger.",
+        "Bring to a boil, then reduce heat and simmer for 15 minutes.",
+        "Meanwhile, cook rice noodles according to packet instructions, drain and divide between bowls.",
+        "Strain the broth to remove whole spices.",
+        "Return broth to pot, add onion and fish sauce, simmer for 5 minutes.",
+        "Arrange raw beef slices over noodles in each bowl.",
+        "Ladle boiling broth over beef to cook it.",
+        "Top with spring onions, bean sprouts, coriander and thai basil.",
+        "Serve with lime wedges and sliced chilli on the side."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Cottage pie",
+      "summary": "Classic British beef mince topped with creamy mashed potato",
+      "minutes": 60,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "600g beef mince",
+          "name": "beef mince",
+          "qty": 600,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 carrots, diced",
+          "name": "carrot",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp tomato ketchup",
+          "name": "tomato ketchup",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "400ml beef stock",
+          "name": "beef stock",
+          "qty": 400,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp worcestershire sauce",
+          "name": "worcestershire sauce",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "100g peas",
+          "name": "pea",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "800g potatoes, peeled and cubed",
+          "name": "potato",
+          "qty": 800,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "50g butter",
+          "name": "butter",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100ml milk",
+          "name": "milk",
+          "qty": 100,
+          "unit": "ml",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 190°C.",
+        "Boil potatoes in salted water for 15 minutes until tender.",
+        "Meanwhile, heat oil in a large pan and brown beef mince, breaking it up. Set aside.",
+        "In same pan, cook onion and carrots for 5 minutes until soft.",
+        "Add garlic and cook for 1 minute.",
+        "Return beef to pan with tomato ketchup, beef stock and worcestershire sauce.",
+        "Simmer for 15 minutes until thickened.",
+        "Stir in peas, season with salt and black pepper.",
+        "Drain potatoes and mash with butter and milk until smooth.",
+        "Transfer beef mixture to an ovenproof dish.",
+        "Spread mashed potato evenly over the top.",
+        "Bake for 20 minutes until potato is golden."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Spinach and ricotta cannelloni",
+      "summary": "Pasta tubes filled with creamy spinach and ricotta, baked in tomato sauce",
+      "minutes": 55,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "12 cannelloni tubes",
+          "name": "cannelloni",
+          "qty": 12,
+          "unit": "tubes",
+          "optional": false
+        },
+        {
+          "rawText": "250g ricotta",
+          "name": "ricotta",
+          "qty": 250,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "200g spinach, wilted and chopped",
+          "name": "spinach",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 egg",
+          "name": "egg",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "50g parmesan, grated",
+          "name": "parmesan",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "freshly grated nutmeg",
+          "name": "nutmeg",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "500g passata",
+          "name": "passata",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp dried oregano",
+          "name": "dried oregano",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "100g mozzarella, grated",
+          "name": "mozzarella",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C.",
+        "Mix ricotta, chopped spinach, egg and half the parmesan in a bowl. Season with salt, black pepper and nutmeg.",
+        "Fill each cannelloni tube with the ricotta mixture.",
+        "Mix passata with garlic and dried oregano, season with salt and black pepper.",
+        "Spread half the tomato sauce in the base of an ovenproof dish.",
+        "Arrange filled cannelloni tubes in a single layer on top.",
+        "Pour remaining tomato sauce over the cannelloni.",
+        "Sprinkle with mozzarella and remaining parmesan.",
+        "Cover with foil and bake for 30 minutes.",
+        "Remove foil and bake for a further 10 minutes until golden and bubbling."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Tandoori chicken skewers",
+      "summary": "Spiced yoghurt-marinated chicken grilled on skewers",
+      "minutes": 35,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "600g chicken breast, cubed",
+          "name": "chicken breast",
+          "qty": 600,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "200g yoghurt",
+          "name": "yoghurt",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp lemon juice",
+          "name": "lemon juice",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp ginger, grated",
+          "name": "ginger",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp garam masala",
+          "name": "garam masala",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tsp paprika",
+          "name": "paprika",
+          "qty": 2,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cumin",
+          "name": "cumin",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp turmeric",
+          "name": "turmeric",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp chilli powder",
+          "name": "chilli powder",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp salt",
+          "name": "salt",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp vegetable oil",
+          "name": "vegetable oil",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "fresh coriander, chopped",
+          "name": "coriander",
+          "qty": null,
+          "unit": null,
+          "optional": true
+        },
+        {
+          "rawText": "lemon wedges, to serve",
+          "name": "lemon",
+          "qty": null,
+          "unit": "wedges",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Mix yoghurt, lemon juice, garlic, ginger, garam masala, paprika, cumin, turmeric, chilli powder, salt and oil in a large bowl.",
+        "Add chicken cubes and coat well in marinade.",
+        "Cover and refrigerate for at least 20 minutes.",
+        "Thread chicken onto skewers.",
+        "Heat grill or griddle pan to high.",
+        "Cook skewers for 12 minutes, turning regularly, until charred and cooked through.",
+        "Garnish with fresh coriander and serve with lemon wedges."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Garlic butter mushrooms on toast",
+      "summary": "Sautéed mushrooms in rich garlic butter served on crusty bread",
+      "minutes": 10,
+      "serves": 2,
+      "ingredients": [
+        {
+          "rawText": "300g mushrooms, sliced",
+          "name": "mushroom",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "50g butter",
+          "name": "butter",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "3 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 3,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "1 tbsp fresh thyme leaves",
+          "name": "fresh thyme",
+          "qty": 1,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 tbsp parsley, chopped",
+          "name": "parsley",
+          "qty": 2,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "4 slices crusty bread, toasted",
+          "name": "crusty bread",
+          "qty": 4,
+          "unit": "slices",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Melt butter in a large frying pan over medium-high heat.",
+        "Add mushrooms and cook for 5 minutes until golden and tender.",
+        "Add garlic and thyme, cook for 1 minute until fragrant.",
+        "Season with salt and black pepper.",
+        "Stir in chopped parsley.",
+        "Spoon mushrooms over toasted bread and serve immediately."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Prawn and vegetable tempura",
+      "summary": "Light crispy Japanese battered prawns and vegetables",
+      "minutes": 30,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "200g prawns, peeled",
+          "name": "prawn",
+          "qty": 200,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 courgette, sliced into rounds",
+          "name": "courgette",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 red pepper, cut into strips",
+          "name": "red pepper",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "8 green beans, trimmed",
+          "name": "green bean",
+          "qty": 8,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "vegetable oil, for deep frying",
+          "name": "vegetable oil",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "150g plain flour",
+          "name": "wheat flour",
+          "qty": 150,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 egg",
+          "name": "egg",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "200ml ice-cold water",
+          "name": "water",
+          "qty": 200,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "soy sauce, for dipping",
+          "name": "soy sauce",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Heat oil in a deep pan or wok to 180°C.",
+        "Make batter by lightly whisking flour, egg and ice-cold water until just combined - it should be lumpy.",
+        "Dip prawns and vegetables into batter, letting excess drip off.",
+        "Fry in batches for 2-3 minutes until light golden and crispy.",
+        "Drain on paper towels.",
+        "Serve immediately with soy sauce for dipping."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Butternut squash and sage risotto",
+      "summary": "Creamy risotto with roasted butternut squash and crispy sage",
+      "minutes": 50,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "1 butternut squash, peeled and cubed",
+          "name": "butternut squash",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "300g arborio rice",
+          "name": "arborio rice",
+          "qty": 300,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, finely diced",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 cloves garlic, minced",
+          "name": "garlic",
+          "qty": 2,
+          "unit": "cloves",
+          "optional": false
+        },
+        {
+          "rawText": "150ml white wine",
+          "name": "white wine",
+          "qty": 150,
+          "unit": "ml",
+          "optional": false
+        },
+        {
+          "rawText": "1 litre vegetable stock, hot",
+          "name": "vegetable stock",
+          "qty": 1,
+          "unit": "litre",
+          "optional": false
+        },
+        {
+          "rawText": "50g butter",
+          "name": "butter",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "50g parmesan, grated",
+          "name": "parmesan",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "12 sage leaves",
+          "name": "sage",
+          "qty": 12,
+          "unit": "leaves",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 200°C.",
+        "Toss butternut squash with 1 tablespoon olive oil, salt and black pepper. Roast for 30 minutes until tender.",
+        "Heat 1 tablespoon oil in a large pan and cook onion for 5 minutes until soft.",
+        "Add garlic and rice, stir for 2 minutes until rice is translucent.",
+        "Pour in white wine and stir until absorbed.",
+        "Add hot stock a ladleful at a time, stirring constantly and waiting until absorbed before adding more, about 20 minutes total.",
+        "Meanwhile, fry sage leaves in remaining oil until crispy, about 1 minute. Drain on paper towels.",
+        "When rice is creamy and tender, stir in roasted butternut squash, butter and parmesan.",
+        "Season with salt and black pepper.",
+        "Top with crispy sage leaves to serve."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Roast chicken with root vegetables",
+      "summary": "Classic roast chicken with crispy skin and roasted root vegetables",
+      "minutes": 90,
+      "serves": 4,
+      "ingredients": [
+        {
+          "rawText": "1.5kg whole chicken",
+          "name": "whole chicken",
+          "qty": 1.5,
+          "unit": "kg",
+          "optional": false
+        },
+        {
+          "rawText": "3 tbsp olive oil",
+          "name": "olive oil",
+          "qty": 3,
+          "unit": "tbsp",
+          "optional": false
+        },
+        {
+          "rawText": "salt, to taste",
+          "name": "salt",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "black pepper, to taste",
+          "name": "black pepper",
+          "qty": null,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 lemon, halved",
+          "name": "lemon",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "4 sprigs fresh thyme",
+          "name": "fresh thyme",
+          "qty": 4,
+          "unit": "sprigs",
+          "optional": false
+        },
+        {
+          "rawText": "4 potatoes, quartered",
+          "name": "potato",
+          "qty": 4,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "3 carrots, cut into chunks",
+          "name": "carrot",
+          "qty": 3,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "2 parsnips, cut into chunks",
+          "name": "parsnip",
+          "qty": 2,
+          "unit": null,
+          "optional": false
+        },
+        {
+          "rawText": "1 onion, quartered",
+          "name": "onion",
+          "qty": 1,
+          "unit": null,
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 200°C.",
+        "Pat chicken dry and rub all over with 1 tablespoon olive oil, salt and black pepper.",
+        "Place lemon halves and thyme sprigs inside chicken cavity.",
+        "Place chicken in a large roasting tin.",
+        "Toss potatoes, carrots, parsnips and onion with remaining olive oil, salt and black pepper.",
+        "Arrange vegetables around chicken in the roasting tin.",
+        "Roast for 75 minutes, basting occasionally, until chicken is golden and juices run clear.",
+        "Rest chicken for 10 minutes before carving.",
+        "Serve with roasted vegetables."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    },
+    {
+      "title": "Blackberry crumble",
+      "summary": "Sweet-tart blackberries topped with buttery oat crumble",
+      "minutes": 45,
+      "serves": 6,
+      "ingredients": [
+        {
+          "rawText": "500g blackberries",
+          "name": "blackberries",
+          "qty": 500,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "50g sugar",
+          "name": "sugar",
+          "qty": 50,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "1 tsp cornflour",
+          "name": "cornflour",
+          "qty": 1,
+          "unit": "tsp",
+          "optional": false
+        },
+        {
+          "rawText": "150g plain flour",
+          "name": "wheat flour",
+          "qty": 150,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "75g oats",
+          "name": "oats",
+          "qty": 75,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "100g butter, cold and cubed",
+          "name": "butter",
+          "qty": 100,
+          "unit": "g",
+          "optional": false
+        },
+        {
+          "rawText": "75g light brown sugar",
+          "name": "light brown sugar",
+          "qty": 75,
+          "unit": "g",
+          "optional": false
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C.",
+        "Mix blackberries with sugar and cornflour in an ovenproof dish.",
+        "In a bowl, rub together flour, oats, butter and brown sugar until it resembles breadcrumbs.",
+        "Sprinkle crumble mixture evenly over blackberries.",
+        "Bake for 35 minutes until golden and fruit is bubbling.",
+        "Leave to cool for 10 minutes before serving."
+      ],
+      "adversarialCase": null,
+      "duplicateOf": null
+    }
+  ]
+}

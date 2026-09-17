@@ -10,20 +10,20 @@ export const ALLERGENS = ["dairy", "gluten", "nuts", "shellfish", "egg", "soy"] 
 
 // Gate 1 matches terms exactly and the database's unique indexes are case-sensitive,
 // so the file itself must already be normalised rather than relying on either.
-const term = z
+export const term = z
   .string()
   .min(1)
   .refine((s) => s === s.trim().toLowerCase(), "must be lowercase with no surrounding spaces");
 
+export const taxonomyNodeSchema = z.object({
+  name: term,
+  parent: term.nullable(),
+  allergenTags: z.array(z.enum(ALLERGENS)),
+  aliases: z.array(term),
+});
+
 export const taxonomySchema = z.object({
-  nodes: z.array(
-    z.object({
-      name: term,
-      parent: term.nullable(),
-      allergenTags: z.array(z.enum(ALLERGENS)),
-      aliases: z.array(term),
-    }),
-  ),
+  nodes: z.array(taxonomyNodeSchema),
 });
 
 export type Taxonomy = z.infer<typeof taxonomySchema>;

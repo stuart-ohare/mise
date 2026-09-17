@@ -82,7 +82,7 @@ pnpm install                   # also installs the git hooks (skipped by --ignor
 cp .env.example .env.local     # add your ANTHROPIC_API_KEY
 docker compose up -d           # Postgres on :5432 (POSTGRES_PORT to change it)
 pnpm db:push                   # apply the Drizzle schema
-pnpm seed                      # load the allergen tree — recipes not built yet
+pnpm seed                      # load the allergen tree and 60 recipes (3 left in draft)
 pnpm dev
 ```
 
@@ -129,8 +129,8 @@ asks for confirmation; that prompt needs a real terminal and won't run from a pi
 agent's shell. The push works through Neon's pooler; if it ever doesn't, use
 `DATABASE_URL_UNPOOLED`.
 
-**4. Seed production.** Same shape. It loads the allergen tree today (recipes aren't built
-yet), is safe to rerun, and prints the host it wrote to — check it isn't `localhost`:
+**4. Seed production.** Same shape. It loads the allergen tree and the recipe catalogue, is
+safe to rerun, and prints the host it wrote to — check it isn't `localhost`:
 
 ```bash
 DATABASE_URL='<neon pooled url>' pnpm seed

@@ -10,6 +10,7 @@ Three calls, each with one narrow job:
 | `extract-constraints.ts` | 1 | fast | Free text → typed constraints. No retrieval, no catalogue in context. |
 | `extract-recipe.ts` | 2 | capable | Messy text or an image → a draft recipe with per-field confidence. Must never guess. |
 | `rank-and-explain.ts` | 3 | capable | Pre-filtered candidate rows → ordered recipe IDs with a one-line rationale each. |
+| `seed-catalogue.ts` | offline | capable | One-off catalogue generation for `scripts/seed/`. Never called by the app or `pnpm seed`. |
 
 ## Rules
 
