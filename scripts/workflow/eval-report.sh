@@ -19,13 +19,19 @@ cd "$(git rev-parse --show-toplevel)"
 is_eval_input() {
   case $1 in
     *.md | *.test.ts) return 1 ;;
+    # Coarser than today's closure on purpose: lib/ai/prompts/seed-catalogue.ts isn't
+    # loaded by a run, but a prompt is exactly what a new suite reaches for, and
+    # over-requiring a report is the cheap direction to be wrong in.
     evals/* | lib/ai/*) return 0 ;;
     lib/domain/constraints.ts | lib/domain/resolve-exclusions.ts | lib/domain/taxonomy.ts) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-changed=$(git diff --name-only --diff-filter=ACMR "$base" HEAD)
+# Deletions count: removing a fixture shrinks the suite, and the committed report would
+# go on claiming the old fixture count. Only path names are read here, so unlike
+# gate-fixtures.sh — which reads file content from HEAD — D is safe to include.
+changed=$(git diff --name-only --diff-filter=ACMRD "$base" HEAD)
 
 inputs=()
 while IFS= read -r file; do

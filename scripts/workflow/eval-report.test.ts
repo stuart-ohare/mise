@@ -99,6 +99,19 @@ describe("eval-report.sh", () => {
     expect(check(base).status).not.toBe(0);
   });
 
+  // A deleted fixture shrinks the suite, and latest.md keeps claiming the old count.
+  it("requires the report when an eval fixture was deleted", () => {
+    const fixture = "evals/fixtures/constraint-extraction/18-doomed.json";
+    write(fixture, JSON.stringify({ query: "no dairy" }));
+    const withFixture = commit("add fixture");
+    git("rm", "-q", fixture);
+    commit("delete fixture");
+
+    const result = check(withFixture);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/18-doomed\.json/);
+  });
+
   it("requires the report when the model client changed", () => {
     changing("lib/ai/client.ts");
 
@@ -128,6 +141,10 @@ describe("eval-report.sh", () => {
  * The allowlist in eval-report.sh is static, so it can drift behind an import. This walks
  * what `pnpm eval` actually loads and fails here — offline, in `pnpm test` — rather than
  * letting verify.sh wave through a change to a module the scorers depend on.
+ *
+ * It follows static specifiers only: a suite that reached a module through
+ * `await import(...)` would escape both the allowlist and this guard. Fixtures loaded at
+ * runtime are fine — they're data under `evals/`, which the allowlist covers by path.
  */
 function evalClosure(): string[] {
   const seen = new Set<string>();
