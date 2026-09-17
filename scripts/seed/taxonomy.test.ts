@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { effectiveAllergenTags, exclusionIds, type IngredientNode } from "@/lib/domain/ingredient-tree";
+import { buildResolutionIndex, resolveExclusions } from "@/lib/domain/resolve-exclusions";
 import { ALLERGENS, taxonomySchema, validateTaxonomy } from "@/lib/domain/taxonomy";
 
 // The committed allergen tree is the data gate 2 walks. A wrong parent here leaks a
@@ -111,6 +112,65 @@ describe("scripts/seed/taxonomy.json", () => {
 
   it.each(["ghee", "panko"])("leaves %s unresolvable, for the review demo", (term) => {
     expect(terms.has(term)).toBe(false);
+  });
+
+  it("'no wheat' removes every wheat product and the gluten-tagged sauces", () => {
+    // A wheat allergy is not only flour: bread and pasta are made from it.
+    const excluded = exclusionIds(nodes, "wheat");
+    for (const name of [
+      "wheat flour",
+      "bread",
+      "breadcrumbs",
+      "japanese breadcrumbs",
+      "pasta",
+      "egg pasta",
+      "couscous",
+      "soy sauce",
+      "miso",
+    ]) {
+      expect(excluded, name).toContain(name);
+    }
+  });
+
+  it("resolves 'flour' and 'wheat' to the wheat node", () => {
+    // "no flour" resolving to wheat flour alone would still offer bread and pasta.
+    const index = buildResolutionIndex(
+      taxonomy.nodes.flatMap((n) => [n.name, ...n.aliases].map((term) => ({ term, canonicalId: n.name }))),
+    );
+    const results = resolveExclusions(["flour", "wheat", "Flour "], index);
+    expect(results.map((r) => (r.kind === "resolved" ? r.canonicalId : r.kind))).toEqual(["wheat", "wheat"]);
+    const excluded = exclusionIds(nodes, "wheat");
+    expect(excluded).toContain("bread");
+    expect(excluded).toContain("pasta");
+  });
+
+  it("'no wheat' leaves the other gluten grains alone", () => {
+    const excluded = exclusionIds(nodes, "wheat");
+    for (const name of ["oats", "barley", "rye", "worcestershire sauce"]) {
+      expect(excluded, name).not.toContain(name);
+    }
+  });
+
+  it("'no gluten' removes the same ingredients as before the wheat node, plus wheat", () => {
+    expect([...exclusionIds(nodes, "gluten")].sort()).toEqual([
+      "barley",
+      "bread",
+      "breadcrumbs",
+      "couscous",
+      "egg pasta",
+      "gluten",
+      "hoisin sauce",
+      "japanese breadcrumbs",
+      "miso",
+      "oats",
+      "oyster sauce",
+      "pasta",
+      "rye",
+      "soy sauce",
+      "wheat",
+      "wheat flour",
+      "worcestershire sauce",
+    ]);
   });
 
   it("never repeats an inherited tag on a child", () => {
