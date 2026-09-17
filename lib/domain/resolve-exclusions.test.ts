@@ -71,9 +71,9 @@ describe("resolveExclusions", () => {
   });
 
   it("resolves a precomposed term against a decomposed name", () => {
-    const nfdIndex = buildResolutionIndex([
-      { term: "crème fraîche", canonicalId: "id-creme-fraiche" },
-    ]);
+    const decomposed = "crème fraîche";
+    expect(decomposed).not.toBe("crème fraîche");
+    const nfdIndex = buildResolutionIndex([{ term: decomposed, canonicalId: "id-creme-fraiche" }]);
     expect(resolveExclusions(["crème fraîche"], nfdIndex)).toEqual([
       { kind: "resolved", term: "crème fraîche", canonicalId: "id-creme-fraiche" },
     ]);
