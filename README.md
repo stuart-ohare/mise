@@ -129,10 +129,11 @@ asks for confirmation; that prompt needs a real terminal and won't run from a pi
 agent's shell. The push works through Neon's pooler; if it ever doesn't, use
 `DATABASE_URL_UNPOOLED`.
 
-**4. Seed production.** Same shape, once the seed exists:
+**4. Seed production.** Same shape. It loads the allergen tree today (recipes aren't built
+yet), is safe to rerun, and prints the host it wrote to — check it isn't `localhost`:
 
 ```bash
-DATABASE_URL='<neon pooled url>' pnpm seed   # not built yet
+DATABASE_URL='<neon pooled url>' pnpm seed
 ```
 
 **5. Deploy.** Pushing to `main` deploys production. Env vars only reach a build made
