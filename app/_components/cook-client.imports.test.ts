@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,6 +22,7 @@ const CLIENT_ENTRY = resolve(REPO_ROOT, "app/_components/cook-client.tsx");
 
 const FORBIDDEN_DIR = "lib/db/";
 const FORBIDDEN_PACKAGES = ["drizzle-orm", "postgres"];
+const LOCAL_PREFIXES = ["@/", "./", "../"];
 
 const EXTENSIONS = ["", ".ts", ".tsx", "/index.ts", "/index.tsx"];
 
@@ -35,21 +36,36 @@ function resolveLocal(specifier: string, fromFile: string): string | null {
 
   for (const extension of EXTENSIONS) {
     const candidate = `${base}${extension}`;
-    try {
-      if (readFileSync(candidate)) return candidate;
-    } catch {
-      // Try the next extension; a specifier that matches none isn't a local module.
-    }
+    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate;
   }
   return null;
 }
 
 /**
- * The specifiers that survive to runtime. `import type` and `import { type X }` are
- * erased by the compiler, so they carry no module into any bundle — a type-only edge is
- * exactly how a client component is allowed to know a server module's shape. A bare
- * `import "x"` has no clause at all and is the most real edge there is.
+ * True when the compiler erases the whole declaration. `import type` and
+ * `import { type X }` carry no module into any bundle — a type-only edge is exactly how
+ * a client component is allowed to know a server module's shape. `import "x"` has no
+ * clause at all and is the realest edge there is, and `import {} from "x"` is the same
+ * thing spelled differently, so neither counts as erased.
  */
+function isErased(clause: ts.ImportClause | undefined): boolean {
+  if (clause === undefined) return false;
+  if (clause.isTypeOnly) return true;
+  const bindings = clause.namedBindings;
+  return (
+    clause.name === undefined &&
+    bindings !== undefined &&
+    ts.isNamedImports(bindings) &&
+    bindings.elements.length > 0 &&
+    bindings.elements.every((element) => element.isTypeOnly)
+  );
+}
+
+function pushSpecifier(into: string[], node: ts.Expression): void {
+  if (ts.isStringLiteral(node)) into.push(node.text);
+}
+
+/** The specifiers that survive to runtime, static and dynamic alike. */
 function valueImports(file: string): string[] {
   const source = ts.createSourceFile(
     file,
@@ -60,29 +76,22 @@ function valueImports(file: string): string[] {
   );
 
   const specifiers: string[] = [];
-  for (const statement of source.statements) {
-    if (ts.isImportDeclaration(statement)) {
-      const clause = statement.importClause;
-      if (clause?.isTypeOnly) continue;
-      const bindings = clause?.namedBindings;
-      if (
-        bindings !== undefined &&
-        ts.isNamedImports(bindings) &&
-        clause?.name === undefined &&
-        bindings.elements.every((element) => element.isTypeOnly)
-      ) {
-        continue;
-      }
-      if (ts.isStringLiteral(statement.moduleSpecifier)) {
-        specifiers.push(statement.moduleSpecifier.text);
-      }
-    } else if (ts.isExportDeclaration(statement) && statement.moduleSpecifier !== undefined) {
-      if (statement.isTypeOnly) continue;
-      if (ts.isStringLiteral(statement.moduleSpecifier)) {
-        specifiers.push(statement.moduleSpecifier.text);
-      }
+  const visit = (node: ts.Node): void => {
+    if (ts.isImportDeclaration(node)) {
+      if (!isErased(node.importClause)) pushSpecifier(specifiers, node.moduleSpecifier);
+    } else if (ts.isExportDeclaration(node) && node.moduleSpecifier !== undefined) {
+      if (!node.isTypeOnly) pushSpecifier(specifiers, node.moduleSpecifier);
+    } else if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+      // `await import("…")` puts the module in the bundle exactly as a static import does,
+      // and it can appear anywhere, which is why this walks the tree rather than the
+      // top-level statements.
+      const [first] = node.arguments;
+      if (first !== undefined) pushSpecifier(specifiers, first);
     }
-  }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+
   return specifiers;
 }
 
@@ -110,6 +119,14 @@ function valueGraph(entry: string): { files: Set<string>; packages: Set<string> 
 describe("the Cook client's import graph", () => {
   it("reaches no database module", () => {
     const { files, packages } = valueGraph(CLIENT_ENTRY);
+
+    // A local specifier the walk couldn't resolve gets filed under `packages` and then
+    // skipped, which would leave the check below unsound rather than merely failing. An
+    // extension or a path alias this resolver doesn't know about shows up here first.
+    const unresolved = [...packages]
+      .filter((name) => LOCAL_PREFIXES.some((prefix) => name.startsWith(prefix)))
+      .sort();
+    expect(unresolved).toEqual([]);
 
     const reached = [...files]
       .map((file) => relative(REPO_ROOT, file))

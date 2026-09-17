@@ -2,6 +2,11 @@
 // import of this module a build error instead of something the optimiser happens to
 // drop; the row shape it used to declare now lives in lib/domain/candidate.ts so the
 // Cook screen can have it without having this.
+//
+// Next resolves `server-only` itself and never loads the npm package, so it isn't a
+// dependency. Nothing else supplies it: the Vitest configs alias it, and a new tsx entry
+// point (an eval, a script) that imports this module needs the same alias or it dies on
+// `Cannot find package 'server-only'`.
 import "server-only";
 
 import { sql, type SQL } from "drizzle-orm";
