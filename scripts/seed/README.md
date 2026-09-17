@@ -38,7 +38,13 @@ Decisions worth knowing:
   are commonly made with wheat or barley, and rice-only miso is over-excluded on purpose.
   A child never repeats a tag it already inherits. Excluding an allergen therefore can't
   be a subtree walk alone: `exclusionIds` in `lib/domain/ingredient-tree.ts` also removes
-  every node tagged with it, and gate 2's SQL has to match that function.
+  every node tagged with it, and gate 2's SQL has to match that function. The tag doesn't
+  say which grain, so that widening applies to any exclusion inside the allergen's tree:
+  "no wheat flour" removes soy sauce, and "no pasta" removes miso too.
+- **Pasta and bread carry no extra tags,** though fresh pasta often has egg and bread can
+  have milk. Tagging them would empty egg-free and dairy-free searches of every pasta and
+  bread dish. Egg pasta belongs in the catalogue as its own leaf under `pasta`, tagged
+  `egg` (#16).
 - **Hand aliases include common plurals** (`eggs`, `prawns`). Gate 1 matches exactly, so
   a missing plural becomes a question to the user rather than a match.
 - **An existing alias is never re-pointed.** If an alias in the database already points

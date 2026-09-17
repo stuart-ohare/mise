@@ -63,17 +63,33 @@ export function effectiveAllergenTags(
  *
  * The tree is single-parent, so an ingredient with two allergens sits under one
  * root and carries the other as its own tag: soy sauce is under soy, tagged gluten.
- * Excluding an allergen root therefore removes its subtree *and* the subtree of
- * every node tagged with that allergen. Excluding any other node removes only its
- * subtree — excluding soy sauce must not exclude all gluten.
+ * The tag says "contains gluten" but not which grain, so any exclusion inside the
+ * gluten tree — "no gluten", "no wheat flour", "no barley" — also removes the
+ * subtree of every node tagged gluten. That over-excludes ("no pasta" drops miso),
+ * which is the safe direction.
+ *
+ * Only the tag of the root the excluded node sits under widens it, never the
+ * node's own extra tag: excluding soy sauce must not exclude all gluten.
  */
 export function exclusionIds(nodes: readonly IngredientNode[], excludedId: string): Set<string> {
   const ids = subtreeIds(nodes, excludedId);
-  const excluded = nodes.find((node) => node.id === excludedId);
-  if (!excluded || excluded.parentId !== null) return ids;
+  const byId = new Map(nodes.map((node) => [node.id, node]));
 
+  let root = byId.get(excludedId);
+  const visited = new Set<string>();
+  while (root && root.parentId !== null && !visited.has(root.id)) {
+    visited.add(root.id);
+    root = byId.get(root.parentId);
+  }
+  if (!root || root.parentId !== null) return ids;
+
+  // Inside the root's own tree only the subtree walk applies; the root's tag is on
+  // the root itself, and following it there would turn "no bread" into "no gluten".
+  const rootTags = root.allergenTags;
+  const rootTree = subtreeIds(nodes, root.id);
   for (const node of nodes) {
-    if (!node.allergenTags.some((tag) => excluded.allergenTags.includes(tag))) continue;
+    if (rootTree.has(node.id)) continue;
+    if (!node.allergenTags.some((tag) => rootTags.includes(tag))) continue;
     for (const id of subtreeIds(nodes, node.id)) ids.add(id);
   }
   return ids;
