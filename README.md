@@ -91,7 +91,7 @@ pnpm dev
 | `pnpm typecheck` | `next typegen` then `tsc --noEmit` |
 | `pnpm test` | Vitest units — no network, no API calls, no database |
 | `pnpm test:db` | Gate 2's SQL against Postgres (`*.db.test.ts`). Needs `docker compose up -d`, `pnpm db:push` and `DATABASE_URL` in `.env.local`. Every write rolls back, and it doesn't need the seed. Not run in CI |
-| `pnpm eval` | Eval suite against the real model. Costs money, non-deterministic — not built yet |
+| `pnpm eval` | Eval suite against the real model. Costs money, non-deterministic. The harness is built; no suite is registered yet, so it exits non-zero ([evals/README.md](evals/README.md)) |
 
 ## Deploying
 
