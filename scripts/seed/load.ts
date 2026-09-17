@@ -39,7 +39,15 @@ async function main(): Promise<number> {
   const client = postgres(url, { max: 1, onnotice: () => {} });
   try {
     const db = drizzle(client, { schema });
-    const counts = await db.transaction((tx) => seedDatabase(tx, files));
+    const result = await db.transaction((tx) => seedDatabase(tx, files));
+    if (!result.ok) {
+      console.error("Nothing written: a term would belong to more than one ingredient.");
+      for (const { term, ingredients } of result.collisions) {
+        console.error(`  "${term}" is claimed by ${ingredients.map((i) => `"${i}"`).join(" and ")}`);
+      }
+      return 1;
+    }
+    const { counts } = result;
 
     const aliasCount = files.nodes.reduce((sum, n) => sum + n.aliases.length, 0);
     console.log(`Seeded taxonomy into ${target(url)}: ${files.nodes.length} ingredients, ${aliasCount} aliases.`);

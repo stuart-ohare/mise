@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { recipesSchema, leavesSchema, type Recipe } from "@/lib/ai/prompts/seed-catalogue";
@@ -15,6 +15,7 @@ import {
 } from "@/lib/db/schema";
 import { buildNameIndex, deriveRecipeStatus, resolveTerm } from "@/lib/domain/resolution";
 import { taxonomySchema, validateTaxonomy, type TaxonomyNode } from "@/lib/domain/taxonomy";
+import { claimsFromNodes, findTermCollisions, type TermCollision } from "@/lib/domain/term-namespace";
 
 /**
  * The body of `pnpm seed`, apart from the connection, so the database tests can run it
@@ -27,6 +28,8 @@ export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 export type SeedFiles = { nodes: TaxonomyNode[]; recipes: Recipe[] };
 
 export type SeedCounts = { draft: number; published: number; skipped: number };
+
+export type SeedResult = { ok: true; counts: SeedCounts } | { ok: false; collisions: TermCollision[] };
 
 function readJson<T>(file: string, schema: z.ZodType<T>): { ok: true; data: T } | { ok: false; errors: string[] } {
   const parsed = schema.safeParse(JSON.parse(readFileSync(resolve(__dirname, file), "utf8")));
@@ -70,8 +73,28 @@ export function readSeedFiles(): { ok: true; files: SeedFiles } | { ok: false; e
  * Safe to run repeatedly: nodes upsert by name, aliases by alias, and a recipe whose
  * title already exists is skipped, so a second run changes nothing — and never undoes a
  * draft someone has since promoted in review.
+ *
+ * Before anything is written, every name and alias in the database and the files must
+ * belong to one ingredient. Otherwise it writes nothing and returns the collisions.
  */
-export async function seedDatabase(tx: Tx, files: SeedFiles): Promise<SeedCounts> {
+export async function seedDatabase(tx: Tx, files: SeedFiles): Promise<SeedResult> {
+  // Checked against the database, not just the files: review can add names and aliases
+  // the files don't know about, and an alias moved onto another ingredient is exactly how
+  // an allergen would move.
+  const existingNames = await tx
+    .select({ term: canonicalIngredient.name, ingredient: canonicalIngredient.name })
+    .from(canonicalIngredient);
+  const existingAliases = await tx
+    .select({ term: ingredientAlias.alias, ingredient: canonicalIngredient.name })
+    .from(ingredientAlias)
+    .innerJoin(canonicalIngredient, eq(ingredientAlias.canonicalId, canonicalIngredient.id));
+  const collisions = findTermCollisions([
+    ...existingNames,
+    ...existingAliases,
+    ...claimsFromNodes(files.nodes),
+  ]);
+  if (collisions.length > 0) return { ok: false, collisions };
+
   const counts: SeedCounts = { draft: 0, published: 0, skipped: 0 };
 
   const ids = new Map<string, string>();
@@ -98,26 +121,16 @@ export async function seedDatabase(tx: Tx, files: SeedFiles): Promise<SeedCounts
     for (const alias of node.aliases) wanted.set(alias, canonicalId);
   }
   if (wanted.size > 0) {
+    // Doing nothing on conflict is safe only because of the check above: an existing
+    // alias already points at the ingredient the files give it.
     await tx
       .insert(ingredientAlias)
       .values([...wanted].map(([alias, canonicalId]) => ({ alias, canonicalId, source: "hand" })))
       .onConflictDoNothing({ target: ingredientAlias.alias });
-
-    // An alias that already points somewhere else (added in review, say) is not
-    // silently re-pointed: that is exactly how an allergen would move.
-    const existing = await tx
-      .select({ alias: ingredientAlias.alias, canonicalId: ingredientAlias.canonicalId })
-      .from(ingredientAlias)
-      .where(inArray(ingredientAlias.alias, [...wanted.keys()]));
-    const conflicts = existing.filter((row) => wanted.get(row.alias) !== row.canonicalId);
-    if (conflicts.length > 0) {
-      throw new Error(
-        `aliases already point at a different ingredient: ${conflicts.map((c) => c.alias).join(", ")}`,
-      );
-    }
   }
 
   // Resolve against the database, not the files: it also holds aliases added in review.
+  // buildNameIndex still throws on an ambiguous term, as a second line of defence.
   const names = await tx
     .select({ term: canonicalIngredient.name, id: canonicalIngredient.id })
     .from(canonicalIngredient);
@@ -161,5 +174,5 @@ export async function seedDatabase(tx: Tx, files: SeedFiles): Promise<SeedCounts
       .values(entry.steps.map((text, position) => ({ recipeId: row.id, position: position + 1, text })));
   }
 
-  return counts;
+  return { ok: true, counts };
 }
