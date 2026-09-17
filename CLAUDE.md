@@ -82,7 +82,7 @@ lib/
     client.ts         Connection
   domain/             Pure functions: constraint types, exclusion logic, validation
 scripts/seed/         One-off generation script + committed JSON catalogue
-scripts/workflow/     verify.sh (definition of done) + hook tests
+scripts/workflow/     verify.sh (definition of done), mark-done.sh (status:done on merge), tests
 .claude/              Workflow skills, invariant-reviewer agent, Claude Code guard hooks
 .githooks/            pre-commit, commit-msg, pre-push (installed by pnpm i)
 .github/              Issue and PR templates; checks workflow
@@ -125,8 +125,11 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 | Build | `/build <n>` — refuses without `status:planned`; worktree; failing test first | `status:building` | |
 | Verify | `/verify` — `scripts/workflow/verify.sh`, then the `invariant-reviewer` agent | | decides on CONCERNS |
 | Ship | `/ship` — refuses unless this commit verified; PR with evidence | `status:in-review` | merges |
+| Done | `issue-done` workflow — on merge, relabels every issue the PR closes | `status:done` | |
 
 - **Never add `status:planned` yourself.** It is the human's plan approval.
+- **Don't set `status:done` by hand.** CI sets it from the PR's `Closes #n` when the PR
+  merges, so a merged PR needs `Closes #n` in its body.
 - **Gate labels** — `gate:resolution`, `gate:query`, `gate:output` — are set at `/spec`.
   A gate-labelled issue doesn't pass `/verify` without a changed test or fixture and a
   regenerated `evals/latest.md`.

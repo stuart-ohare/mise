@@ -21,7 +21,7 @@ The loop is five project skills, each moving a `status:*` label on the issue:
 /build   worktree, failing test first, smallest change                  status:building
 /verify  scripts/workflow/verify.sh + invariant-reviewer subagent
 /ship    PR with every criterion ticked against evidence                status:in-review
-merge    human, always
+merge    human, always; CI then relabels the closed issue               status:done
 ```
 
 - **Humans approve three things:** the spec (before filing), the plan (by moving the
@@ -46,7 +46,9 @@ merge    human, always
   CLAUDE.md — never the building conversation. It runs only locally, in `/verify`, and
   its report goes in the PR body.
 - **CI is deterministic only** (#4). `checks` runs typecheck, lint and test and is
-  required on `main`. No workflow calls a model or holds an Anthropic secret.
+  required on `main`. `issue-done` (#11) moves the issues a merged PR closes to
+  `status:done`, using `scripts/workflow/mark-done.sh` and the built-in token. No
+  workflow calls a model or holds an Anthropic secret.
 - **Gate labels** (`gate:resolution|query|output`) make the fixture rule mechanical, and
   the reviewer flags gate-path changes without one.
 
