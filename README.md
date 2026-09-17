@@ -53,7 +53,7 @@ checking them.
 | Language | TypeScript, strict, no `any` | |
 | Validation | Zod, shared client and server | The same schema validates model output and the HTTP boundary. This is the load-bearing choice |
 | Database | Postgres (Docker Compose), Drizzle | Real SQL, real constraints, real migrations |
-| Model client | Anthropic SDK, direct | No LangChain, no wrapper |
+| Model client | Anthropic SDK, direct | No LangChain, no wrapper — see [ADR 0004](docs/decisions/0004-model-provider.md) |
 | UI | Tailwind, hand-rolled components | Three screens don't earn a component library |
 | Tests | Vitest for units, plus an eval suite | Aiming at the invariants, not at coverage |
 
