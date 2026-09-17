@@ -54,14 +54,14 @@ retries — that is gate 3's job, and this function is the `generate` that
   real recipe.
 - **An all-invented response is a failure.** `no_valid_ids`, never `ok: true` with an
   empty list: "nothing suits you" and "the model made this up" are different answers.
-- **The drop is counted, not silent.** `dropped` names every id gate 2 never handed the
-  model, in the model's own spelling, and rides on the `ok: true` result and on
-  `no_valid_ids` — the two outcomes where a response existed to fabricate in. An empty
-  `dropped` beside a short `ranking` means fewer candidates suited; a non-empty one means
-  the model invented rows. Only inventions are named: a duplicate, and a real id cut by
-  `MAX_RESULTS`, are dropped too and neither is a fabrication. Nothing consumes this yet
-  — there is no cook route — so it is a value on the result rather than a sink like gate
-  3's `onViolation`, which exists only because that gate destroys what it rejects.
+- **The drop is counted, not silent.** `dropped` names each invented id once, in the
+  spelling the model first used, and rides on the `ok: true` result and on `no_valid_ids`
+  — the two outcomes where a response existed to fabricate in. An empty `dropped` beside a
+  short `ranking` means fewer candidates suited; a non-empty one means the model invented
+  rows. It is a value rather than a sink like gate 3's `onViolation`, which exists only
+  because that gate destroys what it rejects. **Gate 3 scans `ranking`, not the whole
+  result** — see the `RankingResult` comment for why. Nothing consumes it yet: there is no
+  cook route.
 - **Excluded foods are named in the prompt as words never to write.** Gate 3 doesn't
   parse negation, so "a dairy-free take" is a violation — the rows are already safe, so
   there is nothing to reassure the cook about. `violatedTerms` travels in the request

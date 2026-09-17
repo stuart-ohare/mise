@@ -53,6 +53,12 @@ export type RankedRecipe = z.infer<typeof rankingSchema>["ranking"][number];
  * counted event and not a silently shorter list (CLAUDE.md §6). It appears only where
  * a response existed to fabricate in: `dropped: []` on an `api_error` would read as
  * "the model invented nothing" rather than "the model never answered".
+ *
+ * Gate 3 must scan `ranking` and not this whole result. `dropped` holds model-authored
+ * strings that by definition never render, and an invented id shaped like a slug —
+ * "butter-bean-stew" — would match an excluded term, rejecting clean prose and writing
+ * a violation whose `matched_term` appeared in no rationale. `collectStrings` reaches
+ * every field it is given, so the caller chooses what it is given.
  */
 export type RankingResult =
   | { ok: true; ranking: RankedRecipe[]; dropped: string[] }
@@ -160,10 +166,12 @@ export async function rankAndExplain(
  * a mangled id can't reach render either. Truncation happens after the drop, so invented
  * ids never push a real recipe out of the shortlist.
  *
- * `dropped` names only the invented ids, in the model's own spelling. A duplicate and a
- * real id past `MAX_RESULTS` are dropped too, and neither is a fabrication — counting
- * them would inflate the number that is the evidence. The whole response is examined for
- * the same reason: the count must not depend on where in the list the invention sat.
+ * `dropped` names only the invented ids, each once, in the spelling the model first used.
+ * A duplicate and a real id past `MAX_RESULTS` are dropped too, and neither is a
+ * fabrication — counting them would inflate the number that is the evidence, and so
+ * would counting one hallucination five times because the model repeated it. The whole
+ * response is examined for the same reason: the count must not depend on where in the
+ * list the invention sat.
  */
 function keepKnownIds(
   ranking: readonly RankedRecipe[],
@@ -176,13 +184,13 @@ function keepKnownIds(
 
   for (const entry of ranking) {
     const key = entry.id.trim().toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
     const id = known.get(key);
     if (id === undefined) {
       dropped.push(entry.id);
       continue;
     }
-    if (seen.has(key)) continue;
-    seen.add(key);
     if (kept.length < MAX_RESULTS) kept.push({ id, rationale: entry.rationale });
   }
   return { kept, dropped };

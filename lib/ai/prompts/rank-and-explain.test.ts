@@ -147,6 +147,18 @@ describe("rankAndExplain", () => {
     expect(result.ok && result.dropped).toEqual([written]);
   });
 
+  it("counts one invention once, however many times the model repeats it", async () => {
+    const { client } = stub({
+      stop_reason: "end_turn",
+      parsed_output: ranked(INVENTED, STEW, `  ${INVENTED.toUpperCase()}`, INVENTED),
+    });
+
+    const result = await rankAndExplain({ candidates, constraints }, client);
+
+    expect(result.ok && result.ranking.map((entry) => entry.id)).toEqual([STEW]);
+    expect(result.ok && result.dropped).toEqual([INVENTED]);
+  });
+
   it("records an invented id the model listed past the shortlist cut", async () => {
     const many = Array.from({ length: MAX_RESULTS }, (_, i) =>
       candidate(`5555555${i}-eeee-4555-8555-55555555abcd`, `Recipe ${i}`),
