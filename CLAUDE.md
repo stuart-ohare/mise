@@ -121,13 +121,15 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 | Step | Skill | Label after | Human |
 |---|---|---|---|
 | Specify | `/spec` — grill one question at a time, draft, file on approval | `status:spec` | approves the draft |
-| Plan | `/plan <n>` — plan as an issue comment, then stop | — | moves label to `status:planned` |
+| Plan | `/plan <n>` — plan as an issue comment, then stop | — | approves with `/approve <n>` → `status:planned` |
 | Build | `/build <n>` — refuses without `status:planned`; worktree; failing test first | `status:building` | |
 | Verify | `/verify` — `scripts/workflow/verify.sh`, then the `invariant-reviewer` agent | | decides on CONCERNS |
 | Ship | `/ship` — refuses unless this commit verified; PR with evidence | `status:in-review` | merges |
 | Done | `issue-done` workflow — on merge, relabels every issue the PR closes | `status:done` | |
 
-- **Never add `status:planned` yourself.** It is the human's plan approval.
+- **Never add `status:planned` yourself.** It is the human's plan approval. Only the
+  user-only `/approve <n>` adds it, and the Bash guard asks the human before any `gh`
+  command does.
 - **Don't set `status:done` by hand.** CI sets it from the PR's `Closes #n` when the PR
   merges, so a merged PR needs `Closes #n` in its body.
 - **Gate labels** — `gate:resolution`, `gate:query`, `gate:output` — are set at `/spec`.
@@ -141,7 +143,8 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
 - **Claude Code hooks** (`.claude/hooks/`, need `jq`):
   - They deny `--no-verify`, changes to `core.hooksPath` or `.git/config`, `chmod` on
     the git hooks, and writes to `evals/thresholds.ts` or the verified record.
-  - They put dependency changes and edits to the guards to the human.
+  - They put dependency changes, edits to the guards, and adding `status:planned` to
+    the human.
 - A hook rejection is a rule, not an obstacle. Fix what it rejected; don't route
   around it.
 - **CI runs no model.** `checks` (typecheck, lint, test) is required on `main`, which

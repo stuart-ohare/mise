@@ -44,10 +44,10 @@ gh issue comment <n> --body-file <plan>
 
 Tell the user:
 
-> Plan posted: <comment url>. To approve, change the label on #<n> from `status:spec`
-> to `status:planned` (sidebar, or `gh issue edit <n> --remove-label status:spec --add-label status:planned`).
+> Plan posted: <comment url>. To approve, run `/approve <n>` and accept the prompt
+> (or move the label yourself: `gh issue edit <n> --remove-label status:spec --add-label status:planned`).
 > Then run `/build <n>`.
 
 **Never add `status:planned` yourself**, even if the user says "approved" in chat —
-ask them to move the label. The label is the approval record (ADR 0003). If they want
+ask them to run `/approve <n>`. The label is the approval record (ADR 0003). If they want
 changes, edit the plan by posting a `## Plan amendment` comment, not by rewriting history.
