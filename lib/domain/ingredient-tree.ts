@@ -1,9 +1,9 @@
 /**
  * The canonical ingredient tree, as pure functions over an in-memory node list.
  *
- * Gate 2 does this walk in SQL. These mirror it so the rule — an exclusion covers
- * a node and every descendant, and a tag on an ancestor applies to every
- * descendant — is pinned by unit tests that need no database.
+ * Gate 2 does this in SQL. These mirror it so the rules are pinned by unit tests
+ * that need no database: a tag on an ancestor applies to every descendant, and an
+ * exclusion is exactly `exclusionIds` — not just a node and its descendants.
  */
 
 export type IngredientNode = {
@@ -56,4 +56,46 @@ export function effectiveAllergenTags(
     current = current.parentId === null ? undefined : byId.get(current.parentId);
   }
   return tags;
+}
+
+/**
+ * The ids a single exclusion removes — what gate 2's SQL must match.
+ *
+ * The tree is single-parent, so an ingredient with two allergens sits under one
+ * root and carries the other as its own tag: soy sauce is under soy, tagged gluten.
+ * The tag says "contains gluten" but not which grain, so any exclusion inside the
+ * gluten tree — "no gluten", "no wheat flour", "no barley" — also removes the
+ * subtree of every node tagged gluten. That over-excludes ("no pasta" drops miso),
+ * which is the safe direction.
+ *
+ * Only the tag of the root the excluded node sits under widens it, never the
+ * node's own extra tag: excluding soy sauce must not exclude all gluten.
+ *
+ * Every ancestor is excluded too, as a single node, because a generic ingredient
+ * may contain the specific one: "no peanuts" removes a recipe that just says "nuts".
+ */
+export function exclusionIds(nodes: readonly IngredientNode[], excludedId: string): Set<string> {
+  const ids = subtreeIds(nodes, excludedId);
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+
+  let root = byId.get(excludedId);
+  const visited = new Set<string>();
+  while (root && root.parentId !== null && !visited.has(root.id)) {
+    visited.add(root.id);
+    ids.add(root.id);
+    root = byId.get(root.parentId);
+  }
+  if (!root || root.parentId !== null) return ids;
+  ids.add(root.id);
+
+  // Inside the root's own tree only the subtree walk applies; the root's tag is on
+  // the root itself, and following it there would turn "no bread" into "no gluten".
+  const rootTags = root.allergenTags;
+  const rootTree = subtreeIds(nodes, root.id);
+  for (const node of nodes) {
+    if (rootTree.has(node.id)) continue;
+    if (!node.allergenTags.some((tag) => rootTags.includes(tag))) continue;
+    for (const id of subtreeIds(nodes, node.id)) ids.add(id);
+  }
+  return ids;
 }
