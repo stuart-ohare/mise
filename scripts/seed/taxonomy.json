@@ -16,6 +16,7 @@
     { "name": "breadcrumbs", "parent": "gluten", "allergenTags": [], "aliases": [] },
     { "name": "japanese breadcrumbs", "parent": "breadcrumbs", "allergenTags": [], "aliases": [] },
     { "name": "pasta", "parent": "gluten", "allergenTags": [], "aliases": [] },
+    { "name": "egg pasta", "parent": "pasta", "allergenTags": ["egg"], "aliases": [] },
     { "name": "couscous", "parent": "gluten", "allergenTags": [], "aliases": [] },
     { "name": "barley", "parent": "gluten", "allergenTags": [], "aliases": [] },
     { "name": "rye", "parent": "gluten", "allergenTags": [], "aliases": [] },

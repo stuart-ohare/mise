@@ -48,8 +48,9 @@ Decisions worth knowing:
   peanuts" removes one that says "nuts". Their other children are unaffected.
 - **Pasta and bread carry no extra tags,** though fresh pasta often has egg and bread can
   have milk. Tagging them would empty egg-free and dairy-free searches of every pasta and
-  bread dish. Egg pasta belongs in the catalogue as its own leaf under `pasta`, tagged
-  `egg` (#16).
+  bread dish. `egg pasta` is its own hand-authored node under `pasta`, tagged `egg`, so an
+  egg-free search can tell the two apart. It is hand-written rather than generated because
+  generated leaves never carry a tag.
 - **Hand aliases include common plurals** (`eggs`, `prawns`). Gate 1 matches exactly, so
   a missing plural becomes a question to the user rather than a match.
 - **An existing alias is never re-pointed.** If an alias in the database already points
