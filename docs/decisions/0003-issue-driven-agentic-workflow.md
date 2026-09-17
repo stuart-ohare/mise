@@ -87,14 +87,16 @@ merge    human, always
   - A worktree made from a commit without `.githooks/` has no hooks.
   - Local `main` can still move by fast-forward, cherry-pick or rebase. Only `pre-push`
     stops those changes reaching origin.
-  - Branch protection on `main` (#4) is the guarantee; the hooks make the right path
-    the easy one.
+  - Branch protection on `main` (added in #4) is the guarantee: a PR is required,
+    `checks` must pass, and admins aren't exempt. The hooks make the right path the easy one.
 - **`verify.sh` checks that `evals/latest.md` changed, not that it passes.** Any test
   file counts toward the fixture rule. Checking the eval report needs the eval runner
   to exist first (follow-up issue).
 - **Some steps are enforced by instruction only:**
   - `/ship` checks that `verify.sh` passed for the commit, not that the reviewer ran.
-  - The reviewer has Bash, so "read-only" is an instruction, not a tool restriction.
+  - Locally, the reviewer has Bash, so "read-only" is an instruction, not a tool
+    restriction. In CI (#4) it is a restriction: `claude-review` allows only read
+    tools, `git diff/log/show`, `gh … view/diff` and `gh pr comment`.
 - **`jq` is a prerequisite** for the hooks. No new package dependency.
 - Skills are prose the model follows. Where a step matters enough, it has been moved into
   a script or hook rather than trusted.

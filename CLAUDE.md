@@ -85,7 +85,7 @@ scripts/seed/         One-off generation script + committed JSON catalogue
 scripts/workflow/     verify.sh (definition of done) + hook tests
 .claude/              Workflow skills, invariant-reviewer agent, Claude Code guard hooks
 .githooks/            pre-commit, commit-msg, pre-push (installed by pnpm i)
-.github/              Issue and PR templates
+.github/              Issue and PR templates; workflows: checks, claude-review, claude
 evals/                Fixtures, runner, and latest.md (the last committed run)
 docs/decisions/       ADRs — one file per decision worth defending
 ```
@@ -140,6 +140,10 @@ in [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
   - They put dependency changes and edits to the guards to the human.
 - A hook rejection is a rule, not an obstacle. Fix what it rejected; don't route
   around it.
+- **CI** (`.github/workflows/`):
+  - `checks` (typecheck, lint, test) is required on `main`.
+  - `claude-review` runs the same `invariant-reviewer` once per PR, advisory only.
+  - `@claude` answers questions but never builds. See the README for costs and setup.
 
 - **Write the failing thing first.** For domain logic that's a Vitest case. For model
   behaviour that's an eval fixture. A change to exclusion behaviour with no fixture
