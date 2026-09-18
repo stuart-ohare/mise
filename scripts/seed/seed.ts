@@ -184,6 +184,8 @@ export async function seedDatabase(tx: Tx, files: SeedFiles, options: SeedOption
     const ingredients = entry.ingredients.map((i) => ({
       canonicalId: resolveTerm(i.name, index),
       rawText: i.rawText,
+      // Stored beside the line so an alias added in review can re-resolve it exactly.
+      name: i.name,
       qty: i.qty === null ? null : String(i.qty),
       unit: i.unit,
       optional: i.optional,
