@@ -294,8 +294,9 @@ invariant: a draft that lost the butter line has no dairy-tagged `recipe_ingredi
 so gate 2's `NOT EXISTS` finds nothing to exclude and a dairy-free search returns it. The
 only thing standing between that and a cook is a reviewer reading `raw_input` beside the
 draft. Omission sits under the negotiable bar today because the suite measures fields
-rather than recall, and a separate ingredient-recall metric pegged at 1 is the fix — its
-own issue rather than a number quietly added here.
+rather than recall, and a separate ingredient-recall metric pegged at 1 is the fix
+([#86](https://github.com/stuart-ohare/mise/issues/86)) rather than a number quietly
+added here.
 
 **Cost.** One invented quantity in 18 runs is a red build, and the permitted fixes are a
 better prompt, a narrower schema or a fixture that spelled an ingredient in a way the
