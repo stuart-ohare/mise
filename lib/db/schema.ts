@@ -146,9 +146,15 @@ export const canonicalIngredientRelations = relations(
   }),
 );
 
-export const recipeRelations = relations(recipe, ({ many }) => ({
+export const recipeRelations = relations(recipe, ({ one, many }) => ({
   ingredients: many(recipeIngredient),
   steps: many(recipeStep),
+  // Null for a seeded recipe. There is no foreign key behind it, so a recipe can outlive
+  // its job; a read has to allow for the job being missing either way.
+  extractionJob: one(extractionJob, {
+    fields: [recipe.extractionJobId],
+    references: [extractionJob.id],
+  }),
 }));
 
 export const recipeIngredientRelations = relations(recipeIngredient, ({ one }) => ({
