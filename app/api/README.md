@@ -156,5 +156,7 @@ the same request.
   reads after it only explain a refusal. They never decide one.
 - **The recipe and its job move together.** The route opens the transaction, as Intake
   does, so a published recipe never points at a job still `awaiting_review`.
-- **A human presses the button.** No confidence score publishes anything, and nothing
-  calls this route except a person on the review screen (CLAUDE.md §2).
+- **Only a person publishes.** No confidence score publishes anything, and no automated
+  path calls this route: Intake writes drafts and stops (CLAUDE.md §2). The route has no
+  auth, so anyone who can reach it can call it. That's safe because the rule above is
+  the same whoever calls.
