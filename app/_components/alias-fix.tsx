@@ -9,6 +9,9 @@ import { aliasResponseSchema } from "../api/aliases/schema";
  * The fix for an unresolved line: say what its term means, and every draft held by that
  * term re-resolves. The rules are in `POST /api/aliases`; this only asks the question.
  *
+ * The term is the line's own and isn't editable. An alias changes what Cook does with
+ * every exclusion naming it, so the form offers only the word a draft actually failed on.
+ *
  * The picker shows the allergens the choice carries through the tree, because choosing
  * an ingredient here is choosing which exclusions the recipe will fall under — the
  * reviewer should see that before pressing the button, not find out from a Cook result.
@@ -17,7 +20,7 @@ import { aliasResponseSchema } from "../api/aliases/schema";
 export type IngredientOption = { id: string; name: string; allergens: string[] };
 
 type Props = {
-  /** The term resolution missed on — the default alias, editable. */
+  /** The term resolution missed on — the alias this form writes. */
   term: string;
   ingredients: IngredientOption[];
 };
@@ -25,7 +28,6 @@ type Props = {
 export default function AliasFix({ term, ingredients }: Props) {
   const router = useRouter();
   const listId = useId();
-  const [alias, setAlias] = useState(term);
   const [choice, setChoice] = useState("");
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export default function AliasFix({ term, ingredients }: Props) {
       const res = await fetch("/api/aliases", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ alias, canonicalId: picked.id }),
+        body: JSON.stringify({ alias: term, canonicalId: picked.id }),
       });
       const parsed = aliasResponseSchema.safeParse(await res.json().catch(() => null));
       if (!parsed.success) {
@@ -54,7 +56,10 @@ export default function AliasFix({ term, ingredients }: Props) {
       if ("ok" in body) {
         router.refresh();
       } else if (body.error === "alias_exists") {
-        setMessage(`“${alias.trim()}” already means a different ingredient. Nothing was changed.`);
+        setMessage(`“${term.trim()}” already means a different ingredient. Nothing was changed.`);
+      } else if (body.error === "no_unresolved_line") {
+        // Someone else's fix got there first; the queue on screen is out of date.
+        router.refresh();
       } else {
         setMessage("That ingredient no longer exists. Nothing was changed.");
       }
@@ -73,12 +78,7 @@ export default function AliasFix({ term, ingredients }: Props) {
         void submit();
       }}
     >
-      <input
-        aria-label="Alias"
-        value={alias}
-        onChange={(event) => setAlias(event.target.value)}
-        className="w-24 rounded border border-black/20 bg-transparent px-1 py-0.5 dark:border-white/25"
-      />
+      <q className="font-mono">{term.trim()}</q>
       <span aria-hidden>→</span>
       <input
         aria-label="Canonical ingredient"
@@ -95,7 +95,7 @@ export default function AliasFix({ term, ingredients }: Props) {
       </datalist>
       <button
         type="submit"
-        disabled={pending || alias.trim() === ""}
+        disabled={pending}
         className="rounded border border-black/30 px-2 py-0.5 disabled:opacity-40 dark:border-white/30"
       >
         {pending ? "Saving…" : "Add alias"}

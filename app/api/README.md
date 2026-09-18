@@ -187,6 +187,7 @@ review screen's alias form imports.
 | `200` | `{ ok: true, reresolved: n }` | `n` draft lines named by the term now resolve. The alias is written, unless the term already meant this ingredient |
 | `409` | `{ error: "alias_exists" }` | The term already means a different ingredient, as an alias or a canonical name, or is ambiguous. Nothing changed |
 | `422` | `{ error: "unknown_ingredient" }` | `canonicalId` names no ingredient. Nothing written |
+| `422` | `{ error: "no_unresolved_line" }` | No unresolved draft line carries the term. Nothing written |
 
 ### What the route guarantees
 
@@ -207,3 +208,14 @@ review screen's alias form imports.
 - **Nothing publishes.** Only draft lines are touched and no status changes. The draft
   still goes through `POST /api/review/:id/publish`, pressed by a person.
 - **No model is called.** A person says what the ingredient is.
+- **It only binds a term a draft failed on.** Unlike publishing, this route writes to the
+  index gate 1 resolves Cook's exclusions against. Bind `groundnut` to cauliflower and
+  *no groundnuts* stops being a question and lets peanut recipes through. So the alias
+  must match at least one unresolved draft line, and the review form fixes it to that
+  line's term. It repairs the queue; it can't rewrite the index at large.
+
+  **What stays open.** The route has no auth (CLAUDE.md §2), and nor does Intake. So
+  someone who can reach both can paste a recipe using a term, then bind that term to the
+  wrong ingredient. A human choosing the wrong node through the form has the same effect.
+  The picker shows the allergens a choice carries to make that mistake visible, but it
+  doesn't prevent it, and there's no way yet to edit or delete an alias.

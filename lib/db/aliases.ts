@@ -41,19 +41,6 @@ export async function addAliasAndReresolve(
   const standing = aliasStanding(input.alias, target.id, await loadResolutionTerms(tx));
   if (standing === "conflict") return { kind: "alias_exists" };
 
-  if (standing === "new") {
-    // Stored normalised, so the raw-text unique index and the normalised index agree on
-    // what a duplicate is. DO NOTHING rather than a caught 23505: a concurrent insert of
-    // the same alias loses cleanly, without aborting the transaction it is part of.
-    const [inserted] = await tx
-      .insert(ingredientAlias)
-      .values({ alias: normaliseTerm(input.alias), canonicalId: target.id, source: "extraction" })
-      .onConflictDoNothing({ target: ingredientAlias.alias })
-      .returning({ id: ingredientAlias.id });
-    if (!inserted) return { kind: "alias_exists" };
-  }
-  const kind = standing === "new" ? "added" : "already_known";
-
   // Drafts only. A published recipe can't hold a null line, so this excludes nothing
   // today; it means the fix could never rewrite a row gate 2 is already returning.
   const unresolved = await tx
@@ -65,12 +52,29 @@ export async function addAliasAndReresolve(
   // Matched in TypeScript with the index's own normalisation, not re-implemented in SQL,
   // so gate 1 has one definition of "the same term".
   const ids = linesMatchingAlias(unresolved, input.alias);
-  if (ids.length === 0) return { kind, reresolved: 0 };
+
+  // Checked before anything is written. Every alias changes what Cook does with an
+  // exclusion, and this route has no auth, so it binds only a term some draft actually
+  // failed on: it repairs the queue, and can't be used to rewrite the index at large.
+  if (ids.length === 0) return { kind: "no_unresolved_line" };
+
+  if (standing === "new") {
+    // Stored normalised, so the raw-text unique index and the normalised index agree on
+    // what a duplicate is. DO NOTHING rather than a caught 23505: a concurrent insert of
+    // the same alias loses cleanly, without aborting the transaction it is part of.
+    const [inserted] = await tx
+      .insert(ingredientAlias)
+      .values({ alias: normaliseTerm(input.alias), canonicalId: target.id, source: "extraction" })
+      .onConflictDoNothing({ target: ingredientAlias.alias })
+      .returning({ id: ingredientAlias.id });
+    if (!inserted) return { kind: "alias_exists" };
+  }
 
   const updated = await tx
     .update(recipeIngredient)
     .set({ canonicalId: target.id })
     .where(and(inArray(recipeIngredient.id, ids), isNull(recipeIngredient.canonicalId)))
     .returning({ id: recipeIngredient.id });
+  const kind = standing === "new" ? "added" : "already_known";
   return { kind, reresolved: updated.length };
 }
