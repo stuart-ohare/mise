@@ -145,3 +145,42 @@ describe("runIntake", () => {
     expect(intakeResponseSchema.safeParse(response).success).toBe(true);
   });
 });
+
+/**
+ * The image path. What matters is not that vision works — that is the model's job and
+ * the screenshot's — but that the branch cannot skip the index on its way past. A line
+ * nobody can name is unresolved whether it was typed or photographed.
+ */
+
+// A 1×1 PNG: the smallest thing that is genuinely an image rather than a string that
+// looks like one.
+const PIXEL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+describe("runIntake, from a photograph", () => {
+  // @gate resolution
+  it("resolves an image draft through gate 1 and records the job as an image", async () => {
+    const { deps: d, writes } = deps();
+    const response = await runIntake({ sourceKind: "image", raw: PIXEL }, d);
+
+    expect(response.kind).toBe("draft");
+    if (response.kind !== "draft") return;
+
+    // Gate 1 ran on the image branch: the known line resolved, the unknown one did not,
+    // and the unknown one kept the text the model read off the card.
+    expect(response.draft.ingredients.map((line) => line.canonicalId)).toEqual([BUTTER, null]);
+    expect(response.draft.ingredients[1]).toMatchObject({
+      canonicalId: null,
+      canonicalName: null,
+      rawText: "2 tbsp ghee",
+    });
+    expect(response.draft.unresolved).toEqual(["2 tbsp ghee"]);
+    // And so the recipe stays where an unresolved line puts it (CLAUDE.md §2).
+    expect(response.draft.recipe.status).toBe("draft");
+
+    // The job says what it read, and keeps the photograph itself: raw_input is never
+    // the only casualty of a path that only stores text.
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toMatchObject({ sourceKind: "image", rawInput: PIXEL });
+  });
+});
