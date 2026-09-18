@@ -15,10 +15,10 @@ export default async function ReviewPage() {
       <div className="space-y-3">
         <h1 className="text-2xl font-semibold tracking-tight">Review</h1>
         <p className="max-w-prose text-sm opacity-80">
-          Every recipe still in draft. Each ingredient line shows what was read beside
-          what it resolved to. A line that resolved to nothing keeps its recipe out of
-          every Cook result: Mise won&rsquo;t call a recipe free of something it
-          can&rsquo;t identify.
+          Every recipe still in draft, and no draft reaches a Cook result. Each
+          ingredient line shows what was read beside what it resolved to. A line that
+          resolved to nothing is a reason to keep its recipe here: Mise won&rsquo;t call a
+          recipe free of something it can&rsquo;t identify.
         </p>
       </div>
 

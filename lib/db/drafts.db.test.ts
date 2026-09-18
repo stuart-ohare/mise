@@ -258,10 +258,12 @@ describe("listDrafts", () => {
         .returning({ id: schema.recipe.id });
       if (!row) throw new Error("no recipe row");
       await tx.insert(schema.recipeIngredient).values({ recipeId: row.id, rawText: "a knob of ghee" });
+      // A draft of its own, so the `every` below can't pass on an empty queue.
+      const { recipeId } = await write(tx, draftWith(await butterId(tx)), crypto.randomUUID());
 
       const drafts = await listDrafts(tx);
 
-      expect(drafts.length).toBeGreaterThan(0);
+      expect(drafts.map((d) => d.id)).toContain(recipeId);
       expect(drafts.map((d) => d.id)).not.toContain(row.id);
       expect(drafts.every((d) => d.status === "draft")).toBe(true);
     });
