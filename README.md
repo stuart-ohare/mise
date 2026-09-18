@@ -19,9 +19,11 @@ does not ask a model to be careful at the moment carefulness is hardest to verif
 > **Status: Cook and Intake work end to end.** `POST /api/cook` plus the Cook screen
 > run the full path — constraints out of free text, gate 2's filter, ranked prose
 > behind gate 3. `POST /api/intake` plus the Intake screen turn a pasted recipe into a
-> draft in the queue, each ingredient line resolved or explicitly not. Review — the
-> queue itself, the publish gate and the alias fix — is still a placeholder, and so is
-> Intake's photo path. Progress is tracked in [Issues](../../issues).
+> draft in the queue, each ingredient line resolved or explicitly not. The Review screen
+> lists that queue read-only: every draft, each line's raw text beside what it
+> resolved to, and the unresolved lines that hold it back. Publishing and the alias
+> fix aren't built yet, and nor is Intake's photo path. Progress is tracked in
+> [Issues](../../issues).
 
 ## Two surfaces
 

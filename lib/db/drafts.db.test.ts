@@ -1,11 +1,12 @@
-import { eq, TransactionRollbackError } from "drizzle-orm";
+import { eq, inArray, TransactionRollbackError } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, describe, expect, it } from "vitest";
 
 import type { IntakeDraft } from "@/lib/domain/intake-draft";
+import { readSeedFiles, seedDatabase } from "@/scripts/seed/seed";
 
-import { writeIntakeDraft, type Tx } from "./drafts";
+import { listDrafts, writeIntakeDraft, type Tx } from "./drafts";
 import * as schema from "./schema";
 
 /**
@@ -209,6 +210,106 @@ describe("writeIntakeDraft", () => {
         .from(schema.extractionJob)
         .where(eq(schema.extractionJob.rawInput, marker));
       expect(jobs).toEqual([]);
+    });
+  });
+});
+
+/**
+ * The seed's deliberately missing aliases (scripts/seed/README.md): each recipe is held in
+ * draft by exactly this line, and it is the line a reviewer has to see verbatim.
+ */
+const HELD_BY = {
+  "Spiced lentil dal with ghee": "2 tbsp ghee",
+  "Crispy panko fish fillets": "100g panko",
+  "Brinjal and tomato curry": "2 large brinjal, cubed",
+} as const;
+
+describe("listDrafts", () => {
+  it("returns each seeded draft held by an unresolved term, raw text intact", async () => {
+    await inRollback(async (tx) => {
+      // Removed and re-seeded rather than trusted: once review can publish (#81), a local
+      // database may hold these as published, and this is a claim about what the seed writes.
+      const titles = Object.keys(HELD_BY);
+      await tx.delete(schema.recipe).where(inArray(schema.recipe.title, titles));
+      const files = readSeedFiles();
+      if (!files.ok) throw new Error(files.errors.join("\n"));
+      const seeded = await seedDatabase(tx, files.files);
+      expect(seeded.ok).toBe(true);
+
+      const drafts = await listDrafts(tx);
+
+      for (const [title, rawText] of Object.entries(HELD_BY)) {
+        const draft = drafts.find((d) => d.title === title);
+        expect(draft, title).toMatchObject({ status: "draft", source: "seed", fieldConfidence: null });
+        const unresolved = draft?.lines.filter((line) => line.canonicalId === null) ?? [];
+        expect(unresolved.map((line) => line.rawText)).toEqual([rawText]);
+        // The blocker leads the table, whatever else the recipe lists.
+        expect(draft?.lines[0]?.rawText).toBe(rawText);
+      }
+    });
+  });
+
+  it("returns no published recipe, even one with an unresolved line", async () => {
+    await inRollback(async (tx) => {
+      // The row most likely to leak: it looks exactly like a draft apart from its status.
+      const [row] = await tx
+        .insert(schema.recipe)
+        .values({ title: `Published ${crypto.randomUUID()}`, status: "published" })
+        .returning({ id: schema.recipe.id });
+      if (!row) throw new Error("no recipe row");
+      await tx.insert(schema.recipeIngredient).values({ recipeId: row.id, rawText: "a knob of ghee" });
+      // A draft of its own, so the `every` below can't pass on an empty queue.
+      const { recipeId } = await write(tx, draftWith(await butterId(tx)), crypto.randomUUID());
+
+      const drafts = await listDrafts(tx);
+
+      expect(drafts.map((d) => d.id)).toContain(recipeId);
+      expect(drafts.map((d) => d.id)).not.toContain(row.id);
+      expect(drafts.every((d) => d.status === "draft")).toBe(true);
+    });
+  });
+
+  // @gate resolution
+  it("names a resolved line's canonical ingredient and leaves an unresolved line null", async () => {
+    await inRollback(async (tx) => {
+      const canonicalId = await butterId(tx);
+      const draft = draftWith(canonicalId);
+      const { recipeId } = await write(tx, draft, crypto.randomUUID());
+
+      const queued = (await listDrafts(tx)).find((d) => d.id === recipeId);
+
+      expect(queued).toMatchObject({
+        source: "intake",
+        title: draft.recipe.title,
+        serves: 2,
+        minutes: 25,
+        fieldConfidence: draft.fieldConfidence,
+      });
+      const [name] = await tx
+        .select({ name: schema.canonicalIngredient.name })
+        .from(schema.canonicalIngredient)
+        .where(eq(schema.canonicalIngredient.id, canonicalId));
+      expect(queued?.lines).toEqual([
+        // Unresolved first. Null, not "" and not a name read back out of the raw text.
+        {
+          rawText: "  2 tbsp ghee, melted ",
+          canonicalId: null,
+          canonicalName: null,
+          qty: "2.5",
+          unit: "tbsp",
+          optional: true,
+        },
+        // The name comes from the canonical row, not from what extraction called it.
+        {
+          rawText: "a knob of butter",
+          canonicalId,
+          canonicalName: name?.name,
+          qty: null,
+          unit: null,
+          optional: false,
+        },
+      ]);
+      expect(name?.name).not.toBe("butter");
     });
   });
 });
