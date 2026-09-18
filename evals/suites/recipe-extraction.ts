@@ -152,7 +152,9 @@ export const recipeExtraction = defineSuite({
     const runs: ScoredRecipeRun[] = [];
     for (const fixture of fixtures) {
       for (let i = 0; i < RUNS_PER_FIXTURE; i++) {
-        const result = await extractRecipe(fixture.source);
+        // #73 made call 2 take a source rather than a string. These fixtures are
+        // pasted text; the image path has no suite yet.
+        const result = await extractRecipe({ kind: "text", text: fixture.source });
         runs.push({ expected: fixture.expected, result });
         // The report holds only numbers, and "0.97 on null precision" is useless without
         // knowing which field got invented. A fixture that states everything weighs

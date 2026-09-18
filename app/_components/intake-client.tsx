@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { intakeResponseSchema, type IntakeResponse } from "../api/intake/schema";
+import { imageDataUriSchema, MAX_IMAGE_MB } from "@/lib/domain/image-input";
+
+import { intakeResponseSchema, type IntakeRequest, type IntakeResponse } from "../api/intake/schema";
 import Confidence from "./confidence";
 
 /**
@@ -13,6 +15,10 @@ import Confidence from "./confidence";
  * What it draws is the audit trail, not a finished recipe. Every line shows the text the
  * model read beside what that resolved to, and a line that resolved to nothing is the
  * loudest thing on the screen — it is the one that keeps this recipe out of Cook.
+ *
+ * Two ways in, one request. A photograph is read to a data URI here and checked against
+ * the same schema the route enforces, so an oversized card is a sentence on the screen
+ * rather than a 400 the user has to interpret.
  */
 
 const notExtracted: Record<Extract<IntakeResponse, { kind: "not_extracted" }>["reason"], string> = {
@@ -25,11 +31,12 @@ const notExtracted: Record<Extract<IntakeResponse, { kind: "not_extracted" }>["r
 
 export default function IntakeClient() {
   const [raw, setRaw] = useState("");
+  const [card, setCard] = useState<{ name: string; dataUri: string } | null>(null);
   const [response, setResponse] = useState<IntakeResponse | null>(null);
   const [pending, setPending] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
 
-  async function submit(): Promise<void> {
+  async function submit(request: IntakeRequest): Promise<void> {
     setPending(true);
     setFailure(null);
     setResponse(null);
@@ -38,7 +45,7 @@ export default function IntakeClient() {
       const res = await fetch("/api/intake", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ sourceKind: "text", raw }),
+        body: JSON.stringify(request),
       });
 
       if (!res.ok) {
@@ -65,12 +72,39 @@ export default function IntakeClient() {
     }
   }
 
+  async function chooseCard(file: File | null): Promise<void> {
+    setFailure(null);
+    setResponse(null);
+    if (file === null) {
+      setCard(null);
+      return;
+    }
+
+    const dataUri = await readDataUri(file);
+    // Checked here against the schema the route enforces, so the size and the format are
+    // one rule with one wording, not a client guess that drifts from the boundary.
+    const parsed = imageDataUriSchema.safeParse(dataUri);
+    if (!parsed.success) {
+      setCard(null);
+      setFailure(
+        `Mise can't read that file. It takes a JPEG, PNG, GIF or WebP of about ${MAX_IMAGE_MB} MB or less — ${file.name} is neither, or it's too big.`,
+      );
+      return;
+    }
+
+    setCard({ name: file.name, dataUri: parsed.data });
+  }
+
   return (
     <div className="space-y-6">
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          void submit();
+          void submit(
+            card === null
+              ? { sourceKind: "text", raw }
+              : { sourceKind: "image", raw: card.dataUri },
+          );
         }}
         className="space-y-3"
       >
@@ -85,12 +119,49 @@ export default function IntakeClient() {
           placeholder="Title, the story about someone's grandmother, the ingredient list, the method — paste the lot."
           className="w-full rounded border border-black/20 bg-transparent px-3 py-2 font-mono text-xs dark:border-white/20"
         />
+        <div className="space-y-2 border-t border-black/10 pt-3 dark:border-white/15">
+          <label htmlFor="intake-card" className="block text-sm font-medium">
+            Or photograph a recipe card
+          </label>
+          <input
+            id="intake-card"
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            onChange={(event) => {
+              void chooseCard(event.target.files?.[0] ?? null);
+            }}
+            className="block w-full text-xs file:mr-3 file:rounded file:border file:border-black/20 file:bg-transparent file:px-3 file:py-1.5 file:text-xs dark:file:border-white/20"
+          />
+          {card && (
+            <div className="flex items-center gap-3">
+              {/* The card as the model will see it. next/image wants a known host or a
+                  file on disk; this is neither, and a data URI needs no optimising. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={card.dataUri}
+                alt={`The card to read: ${card.name}`}
+                className="h-20 w-20 rounded border border-black/20 object-cover dark:border-white/20"
+              />
+              <p className="text-xs opacity-70">
+                {card.name} — this is read instead of the paste.{" "}
+                <button
+                  type="button"
+                  onClick={() => setCard(null)}
+                  className="underline underline-offset-2"
+                >
+                  Use the paste instead
+                </button>
+              </p>
+            </div>
+          )}
+        </div>
+
         <button
           type="submit"
           disabled={pending}
           className="rounded bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
         >
-          {pending ? "Reading…" : "Extract a draft"}
+          {pending ? "Reading…" : card === null ? "Extract a draft" : "Read the card"}
         </button>
       </form>
 
@@ -109,6 +180,20 @@ export default function IntakeClient() {
       {response?.kind === "draft" && <Draft response={response} />}
     </div>
   );
+}
+
+/**
+ * A File as the data URI the request carries. Resolves to "" on a read error, which the
+ * schema then rejects with the same sentence an unreadable file gets — one failure
+ * message rather than two.
+ */
+function readDataUri(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => resolve("");
+    reader.readAsDataURL(file);
+  });
 }
 
 function Draft({ response }: { response: Extract<IntakeResponse, { kind: "draft" }> }) {

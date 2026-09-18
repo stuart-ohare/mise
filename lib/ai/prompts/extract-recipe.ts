@@ -1,14 +1,19 @@
 import { AnthropicError, APIError } from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import type { MessageCreateParamsNonStreaming } from "@anthropic-ai/sdk/resources/messages";
+import type {
+  ContentBlockParam,
+  MessageCreateParamsNonStreaming,
+} from "@anthropic-ai/sdk/resources/messages";
 import { z } from "zod";
 
 import { anthropic, MODELS } from "@/lib/ai/client";
+import type { ImageMediaType } from "@/lib/domain/image-input";
 import { draftRecipeSchema, type DraftRecipe } from "@/lib/domain/intake-draft";
 
 /**
- * Call 2: a pasted wall of recipe text → a structured draft with per-field confidence.
- * Capable model per `client.ts`: long, messy input where a mistake is expensive.
+ * Call 2: a pasted wall of recipe text, or a photograph of a recipe card → a structured
+ * draft with per-field confidence. Capable model per `client.ts`: long, messy input where
+ * a mistake is expensive, and the only one of the three with vision.
  *
  * Nothing this call returns is published. It writes a draft and a score per field, and a
  * human promotes it from /review (CLAUDE.md §2). So the failure worth designing against
@@ -19,7 +24,10 @@ import { draftRecipeSchema, type DraftRecipe } from "@/lib/domain/intake-draft";
  * is gate 1's, in `buildIntakeDraft`, against the index Cook uses.
  */
 
-export const VERSION = "1";
+// 2: the prompt no longer claims its input is always text (#73). The bump is what lets
+// a job row say which wording produced it — a v1 report that read a photograph would be
+// a lie about a call that never happened (§4.6).
+export const VERSION = "2";
 
 // Structured output can't express `.min(1)`, `.positive()` or a bounded score, so the
 // model gets a plain shape and every response is then parsed with `draftRecipeSchema`.
@@ -45,7 +53,7 @@ export const modelOutputSchema = z.object({
   }),
 });
 
-export const SYSTEM = `You are given the text of one recipe, usually pasted from a blog or a cookbook and surrounded by things that are not the recipe. Return it as structured data for a human reviewer to check.
+export const SYSTEM = `You are given one recipe: either its text, usually pasted from a blog or a cookbook and surrounded by things that are not the recipe, or a photograph of a recipe card that may be handwritten. Return it as structured data for a human reviewer to check.
 
 Nothing you return is published. A person reads it next and corrects it. That makes a missing value cheap and an invented one expensive: a blank is something they will fill in, and a plausible wrong number is something they will skim past and approve.
 
@@ -60,7 +68,7 @@ serves: how many people it feeds, as a whole number, only when the text says so.
 minutes: total time in whole minutes, only when the text says so. Add stated times together when the text splits them ("15 minutes prep, 40 minutes in the oven" is 55). "Quick", "weeknight" and "ready in no time" state no time: null.
 
 ingredients: one entry per ingredient line, in the order the recipe lists them.
-- rawText: the line exactly as written, copied character for character. Do not tidy it, expand an abbreviation, fix a typo or drop a note like "or more to taste". This is what the reviewer compares against, so it must be what the text said.
+- rawText: the line exactly as written, copied character for character. Do not tidy it, expand an abbreviation, fix a typo or drop a note like "or more to taste". This is what the reviewer compares against, so it must be what the source said.
 - name: just the food from that line, lowercase, with no quantity, no unit and no preparation. "2 tbsp ghee, melted" is "ghee". "150g plain flour, sifted" is "plain flour". "1 x 400g tin chopped tomatoes" is "chopped tomatoes". Keep the words the recipe used — do not translate a regional name into one you think is more standard, and do not generalise a specific ingredient into its category.
 - qty: the number, only when stated. Convert a fraction or a range's lower bound to a number ("½" is 0.5, "2-3" is 2). Null when the line states no number.
 - unit: the unit as written ("g", "tbsp", "tin", "clove"), or null when the line has none.
@@ -70,11 +78,41 @@ steps: the method, one entry per step, in order, as written. Leave out anything 
 
 confidence: how sure you are that you read the text correctly, from 0 to 1, for title, serves and minutes, and once more on every ingredient line. Score the reading, not the value: a null you are certain about, because the text plainly never says it, is a high score. A number you had to pick between two readings is a low one. Do not give everything the same score — a flat set of scores tells the reviewer nothing about where to look.
 
-If the text is not a recipe at all, or has no ingredient list in it, return empty ingredients and steps arrays. Do not assemble a recipe out of what is there.`;
+If what you are given is not a recipe at all, or has no ingredient list in it, return empty ingredients and steps arrays. Do not assemble a recipe out of what is there.`;
+
+/**
+ * Where the recipe came from. The union is the only thing that differs between the two
+ * paths — same model, same system prompt, same schema, same failure reasons — because
+ * vision changes where the words are, not what they mean.
+ */
+export type RecipeSource =
+  | { kind: "text"; text: string }
+  | { kind: "image"; mediaType: ImageMediaType; data: string };
 
 export type RecipeExtractionResult =
   | { ok: true; draft: DraftRecipe }
   | { ok: false; reason: "empty_input" | "refused" | "parse_failed" | "api_error" };
+
+/**
+ * The user turn: a paste is one text block, a card is one image block. A card gets no
+ * accompanying text — every instruction is in SYSTEM, and a second copy in the user turn
+ * would be one more thing to keep in step with `VERSION`.
+ */
+function content(source: RecipeSource): ContentBlockParam[] {
+  return source.kind === "text"
+    ? [{ type: "text", text: source.text }]
+    : [
+        {
+          type: "image",
+          source: { type: "base64", media_type: source.mediaType, data: source.data },
+        },
+      ];
+}
+
+/** Nothing to read: no key needed, no call made, and no job row worth writing. */
+function isEmpty(source: RecipeSource): boolean {
+  return source.kind === "text" ? source.text === "" : source.data === "";
+}
 
 /**
  * The slice of the Anthropic client this call uses. `parsed_output` is `unknown` on
@@ -89,11 +127,12 @@ export interface RecipeClient {
 }
 
 export async function extractRecipe(
-  input: string,
+  input: RecipeSource,
   client?: RecipeClient,
 ): Promise<RecipeExtractionResult> {
-  const text = input.trim();
-  if (text === "") return { ok: false, reason: "empty_input" };
+  const source: RecipeSource =
+    input.kind === "text" ? { kind: "text", text: input.text.trim() } : input;
+  if (isEmpty(source)) return { ok: false, reason: "empty_input" };
   // Built only after the blank check, so an empty paste never needs an API key.
   const { messages } = client ?? anthropic();
 
@@ -104,7 +143,7 @@ export async function extractRecipe(
       // A long recipe with a line-by-line confidence is the widest output in the app.
       max_tokens: 4096,
       system: SYSTEM,
-      messages: [{ role: "user", content: text }],
+      messages: [{ role: "user", content: content(source) }],
       output_config: { format: zodOutputFormat(modelOutputSchema) },
     });
   } catch (error) {

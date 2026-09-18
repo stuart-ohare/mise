@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { MODELS } from "@/lib/ai/client";
-import { VERSION as EXTRACTION_VERSION } from "@/lib/ai/prompts/extract-recipe";
+import {
+  VERSION as EXTRACTION_VERSION,
+  type RecipeSource,
+} from "@/lib/ai/prompts/extract-recipe";
 import type { IntakeWrite } from "@/lib/db/drafts";
 import type { DraftRecipe } from "@/lib/domain/intake-draft";
 
@@ -44,8 +47,14 @@ const extracted: DraftRecipe = {
 
 function deps(over: Partial<IntakeDeps> = {}) {
   const writes: IntakeWrite[] = [];
+  // Captured, not ignored: what call 2 was handed is the only thing that differs
+  // between the two paths, so it is the one thing a stub must not throw away.
+  const sources: RecipeSource[] = [];
   const base: IntakeDeps = {
-    extract: () => Promise.resolve({ ok: true, draft: extracted }),
+    extract: (source) => {
+      sources.push(source);
+      return Promise.resolve({ ok: true, draft: extracted });
+    },
     loadTerms: () => Promise.resolve([{ term: "butter", canonicalId: BUTTER }]),
     loadTree: () =>
       Promise.resolve({
@@ -57,17 +66,21 @@ function deps(over: Partial<IntakeDeps> = {}) {
       return Promise.resolve({ jobId: "job-1", recipeId: "recipe-1" });
     },
   };
-  return { deps: { ...base, ...over }, writes };
+  return { deps: { ...base, ...over }, writes, sources };
 }
 
 const run = (over: Partial<IntakeDeps> = {}, raw = "beans on toast") => {
-  const { deps: d, writes } = deps(over);
-  return runIntake({ sourceKind: "text", raw }, d).then((response) => ({ response, writes }));
+  const { deps: d, writes, sources } = deps(over);
+  return runIntake({ sourceKind: "text", raw }, d).then((response) => ({
+    response,
+    writes,
+    sources,
+  }));
 };
 
 describe("runIntake", () => {
   it("writes a draft whose unresolved line kept its raw text, and says which line it was", async () => {
-    const { response, writes } = await run();
+    const { response, writes, sources } = await run();
 
     expect(response.kind).toBe("draft");
     if (response.kind !== "draft") return;
@@ -95,6 +108,7 @@ describe("runIntake", () => {
     expect(response.draft.unresolved).toEqual(["2 tbsp ghee"]);
     expect(response.draft.recipe.status).toBe("draft");
     expect(writes).toHaveLength(1);
+    expect(sources).toEqual([{ kind: "text", text: "beans on toast" }]);
   });
 
   it("records the paste, the model and the prompt version on the job it writes", async () => {
@@ -143,5 +157,55 @@ describe("runIntake", () => {
   it("returns a response the boundary schema accepts", async () => {
     const { response } = await run();
     expect(intakeResponseSchema.safeParse(response).success).toBe(true);
+  });
+});
+
+/**
+ * The image path. What matters is not that vision works — that is the model's job and
+ * the screenshot's — but that the branch cannot skip the index on its way past. A line
+ * nobody can name is unresolved whether it was typed or photographed.
+ */
+
+// A 1×1 PNG: the smallest thing that is genuinely an image rather than a string that
+// looks like one.
+const PIXEL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+describe("runIntake, from a photograph", () => {
+  // @gate resolution
+  it("resolves an image draft through gate 1 and records the job as an image", async () => {
+    const { deps: d, writes, sources } = deps();
+    const response = await runIntake({ sourceKind: "image", raw: PIXEL }, d);
+
+    // The branch that matters: a card must reach call 2 as an image block, not as a
+    // 4 MiB base64 string in a text block. `RecipeSource` is a union, so a collapsed
+    // branch would typecheck and cost a real, useless vision call to discover.
+    expect(sources).toEqual([
+      {
+        kind: "image",
+        mediaType: "image/png",
+        data: PIXEL.slice("data:image/png;base64,".length),
+      },
+    ]);
+
+    expect(response.kind).toBe("draft");
+    if (response.kind !== "draft") return;
+
+    // Gate 1 ran on the image branch: the known line resolved, the unknown one did not,
+    // and the unknown one kept the text the model read off the card.
+    expect(response.draft.ingredients.map((line) => line.canonicalId)).toEqual([BUTTER, null]);
+    expect(response.draft.ingredients[1]).toMatchObject({
+      canonicalId: null,
+      canonicalName: null,
+      rawText: "2 tbsp ghee",
+    });
+    expect(response.draft.unresolved).toEqual(["2 tbsp ghee"]);
+    // And so the recipe stays where an unresolved line puts it (CLAUDE.md §2).
+    expect(response.draft.recipe.status).toBe("draft");
+
+    // The job says what it read, and keeps the photograph itself: raw_input is never
+    // the only casualty of a path that only stores text.
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toMatchObject({ sourceKind: "image", rawInput: PIXEL });
   });
 });

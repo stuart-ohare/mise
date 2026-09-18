@@ -1,8 +1,13 @@
 import { MODELS } from "@/lib/ai/client";
-import { VERSION as EXTRACTION_VERSION, type RecipeExtractionResult } from "@/lib/ai/prompts/extract-recipe";
+import {
+  VERSION as EXTRACTION_VERSION,
+  type RecipeExtractionResult,
+  type RecipeSource,
+} from "@/lib/ai/prompts/extract-recipe";
 import type { IntakeWrite, IntakeWritten } from "@/lib/db/drafts";
 import type { IngredientTree } from "@/lib/db/ingredients";
 import type { ResolutionTerm } from "@/lib/db/terms";
+import { parseImageDataUri } from "@/lib/domain/image-input";
 import { buildIntakeDraft } from "@/lib/domain/intake-draft";
 import { buildResolutionIndex } from "@/lib/domain/resolve-exclusions";
 
@@ -26,14 +31,23 @@ import type { IntakeRequest, IntakeResponse } from "./schema";
  * `lib/db/client` and its required `DATABASE_URL` out of the unit test's import graph.
  */
 export type IntakeDeps = {
-  extract: (text: string) => Promise<RecipeExtractionResult>;
+  extract: (source: RecipeSource) => Promise<RecipeExtractionResult>;
   loadTerms: () => Promise<ResolutionTerm[]>;
   loadTree: () => Promise<IngredientTree>;
   writeDraft: (input: IntakeWrite) => Promise<IntakeWritten>;
 };
 
 export async function runIntake(input: IntakeRequest, deps: IntakeDeps): Promise<IntakeResponse> {
-  const extracted = await deps.extract(input.raw);
+  const source = toSource(input);
+  if (source === null) {
+    // Unreachable through the route, which parses the identical pattern before calling
+    // this. If it ever fires, the request was malformed and no model ran — so it is
+    // logged rather than passed off as a model failure by the reason it has to borrow.
+    console.error("[intake] an image request reached the pipeline without a usable data URI");
+    return { kind: "not_extracted", reason: "parse_failed" };
+  }
+
+  const extracted = await deps.extract(source);
   // Nothing is written on a failure. A row in the queue that holds no recipe is work for
   // a reviewer with nothing at the end of it.
   if (!extracted.ok) return { kind: "not_extracted", reason: extracted.reason };
@@ -46,6 +60,10 @@ export async function runIntake(input: IntakeRequest, deps: IntakeDeps): Promise
   const draft = buildIntakeDraft(extracted.draft, buildResolutionIndex(termRows), names);
 
   const { jobId, recipeId } = await deps.writeDraft({
+    // Whichever arm matched, `raw` is what arrived — the paste verbatim, or the
+    // photograph itself. A job whose raw_input only held a filename would leave the
+    // reviewer with no way to check what the model read (§2).
+    sourceKind: input.sourceKind,
     rawInput: input.raw,
     model: MODELS.capable,
     promptVersion: EXTRACTION_VERSION,
@@ -54,4 +72,15 @@ export async function runIntake(input: IntakeRequest, deps: IntakeDeps): Promise
   });
 
   return { kind: "draft", jobId, recipeId, draft };
+}
+
+/**
+ * The request's `raw` as call 2 wants it. Text goes through as text; an image is split
+ * into the media type and the base64 the content block needs.
+ */
+function toSource(input: IntakeRequest): RecipeSource | null {
+  if (input.sourceKind === "text") return { kind: "text", text: input.raw };
+
+  const image = parseImageDataUri(input.raw);
+  return image === null ? null : { kind: "image", ...image };
 }

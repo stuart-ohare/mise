@@ -1,13 +1,13 @@
 # Eval report
 
 - **Result:** pass
-- **Run at:** 2026-09-18T08:40:53.610Z
-- **Commit:** 90d257ab9380e84a961ee5a36c365227e869ecb7
+- **Run at:** 2026-09-18T09:01:27.275Z
+- **Commit:** 5a04c48a2f2244ae99178a82ab239532dbd5be84
 
 ## Prompts
 
 - `constraint-extraction`: extract-constraints v5 on claude-haiku-4-5
-- `recipe-extraction`: extract-recipe v1 on claude-sonnet-4-5
+- `recipe-extraction`: extract-recipe v2 on claude-sonnet-4-5
 
 ## constraint-extraction — pass (17 fixtures)
 
@@ -27,8 +27,8 @@
 
 ```json
 {
-  "runAt": "2026-09-18T08:40:53.610Z",
-  "gitSha": "90d257ab9380e84a961ee5a36c365227e869ecb7",
+  "runAt": "2026-09-18T09:01:27.275Z",
+  "gitSha": "5a04c48a2f2244ae99178a82ab239532dbd5be84",
   "passed": true,
   "suites": [
     {
@@ -71,7 +71,7 @@
       "name": "recipe-extraction",
       "prompt": {
         "name": "extract-recipe",
-        "version": "1"
+        "version": "2"
       },
       "model": "claude-sonnet-4-5",
       "fixtures": 6,

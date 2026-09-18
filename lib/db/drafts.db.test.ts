@@ -99,6 +99,7 @@ const paste = (marker: string) =>
 
 const write = (tx: Tx, draft: IntakeDraft, marker: string) =>
   writeIntakeDraft(tx, {
+    sourceKind: "text",
     rawInput: paste(marker),
     model: "claude-sonnet-4-5",
     promptVersion: "1",
@@ -196,6 +197,7 @@ describe("writeIntakeDraft", () => {
       await expect(
         tx.transaction((inner) =>
           writeIntakeDraft(inner, {
+            sourceKind: "text",
             rawInput: marker,
             model: "claude-sonnet-4-5",
             promptVersion: "1",
@@ -210,6 +212,56 @@ describe("writeIntakeDraft", () => {
         .from(schema.extractionJob)
         .where(eq(schema.extractionJob.rawInput, marker));
       expect(jobs).toEqual([]);
+    });
+  });
+
+  it("records a photographed card as an image, with the same draft shape", async () => {
+    await inRollback(async (tx) => {
+      const marker = crypto.randomUUID();
+      const draft = draftWith(await butterId(tx));
+      // The data URI stands in for the card. What is asserted is the column and the
+      // shape, not the pixels — the model never runs in a database test.
+      const card = `data:image/png;base64,iVBORw0KGgo=${marker}`;
+
+      const { jobId, recipeId } = await writeIntakeDraft(tx, {
+        sourceKind: "image",
+        rawInput: card,
+        model: "claude-sonnet-4-5",
+        promptVersion: "2",
+        output: { title: draft.recipe.title },
+        draft,
+      });
+
+      const jobs = await tx
+        .select()
+        .from(schema.extractionJob)
+        .where(eq(schema.extractionJob.rawInput, card));
+      expect(jobs).toHaveLength(1);
+      expect(jobs[0]).toMatchObject({
+        id: jobId,
+        sourceKind: "image",
+        status: "awaiting_review",
+        // The card itself, kept whole: /review shows a reviewer what the model read.
+        rawInput: card,
+      });
+
+      // Same shape as the text path, and the part that matters most: the ghee line is
+      // still unresolved, so this recipe is still a draft.
+      const recipes = await tx.select().from(schema.recipe).where(eq(schema.recipe.id, recipeId));
+      expect(recipes[0]).toMatchObject({ status: "draft", extractionJobId: jobId });
+
+      const lines = await tx
+        .select()
+        .from(schema.recipeIngredient)
+        .where(eq(schema.recipeIngredient.recipeId, recipeId));
+      expect(lines).toHaveLength(draft.ingredients.length);
+      // Taken from the draft rather than retyped: the claim is that the row kept what
+      // the model read, whitespace and all, not that it matches a tidied copy.
+      expect(lines.filter((line) => line.canonicalId === null)).toMatchObject(
+        draft.ingredients
+          .filter((line) => line.canonicalId === null)
+          .map((line) => ({ rawText: line.rawText })),
+      );
     });
   });
 });
