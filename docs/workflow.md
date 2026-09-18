@@ -40,7 +40,7 @@ line held by that term.
 - **The PR ticks each acceptance criterion against a named test.** One box stays
   unticked: the screenshot of the fix clearing a blocker in `/review`. `gh` can't attach
   images, so the PR says so and doesn't tick it. The screenshots were posted afterwards as
-  [a comment on the PR](TODO-94-screenshots-comment).
+  [a comment on the PR](https://github.com/stuart-ohare/mise/pull/92#issuecomment-5728913481).
 
 **Caught:** two design changes, each traceable to the review finding that forced it. And
 one criterion that couldn't be evidenced when the PR was written, left open rather than
