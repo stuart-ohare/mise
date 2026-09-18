@@ -1,0 +1,33 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "source": "Anchovy butter cabbage — serves 2\n\ncabbage\nanchovies\nbutter\nlemon\n\nQuarter the cabbage and steam it until a knife goes through the stem. Mash the anchovies into soft butter. Char the cabbage in a hot pan, then spoon the butter over and squeeze the lemon on top.",
+  "expected": {
+    "title": "Anchovy butter cabbage",
+    "serves": 2,
+    "minutes": null,
+    "ingredients": [
+      {
+        "name": "cabbage",
+        "qty": null,
+        "unit": null
+      },
+      {
+        "name": "anchovies",
+        "qty": null,
+        "unit": null
+      },
+      {
+        "name": "butter",
+        "qty": null,
+        "unit": null
+      },
+      {
+        "name": "lemon",
+        "qty": null,
+        "unit": null
+      }
+    ]
+  }
+}

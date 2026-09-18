@@ -1,0 +1,28 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "source": "Nan's tomato rice — from the back of an envelope\n\nrice\n2 tomatoes\na bit of butter\n\nFry the tomatoes in the butter until they collapse. Stir in the rice and cook it in the tomato water until it is done.",
+  "expected": {
+    "title": "Nan's tomato rice",
+    "serves": null,
+    "minutes": null,
+    "ingredients": [
+      {
+        "name": "rice",
+        "qty": null,
+        "unit": null
+      },
+      {
+        "name": "tomatoes",
+        "qty": 2,
+        "unit": null
+      },
+      {
+        "name": "butter",
+        "qty": null,
+        "unit": null
+      }
+    ]
+  }
+}

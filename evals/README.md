@@ -4,12 +4,12 @@
 below threshold. It costs money and it is non-deterministic, so it runs on demand —
 not on every push, and never in CI (ADR 0003). That distinction is deliberate.
 
-One suite is built: constraint extraction. The other two below are planned.
+Two suites are built. Output safety is planned.
 
 | Suite | Status | Fixtures | Measures | Threshold |
 |---|---|---|---|---|
 | Constraint extraction | built | 17 queries × 3 runs | Exact match on `exclude`; micro-F1 on `have` / `avoid`; exact on `maxMinutes` | **1** on `exclude_exact`, 0.8 elsewhere |
-| Recipe extraction | planned | 12 sources | Per-field accuracy; null-precision (did it invent a quantity?) | 0.85 fields, 100% null-precision |
+| Recipe extraction | built | 6 sources × 3 runs | Per-field accuracy over what a source states; null-precision over what it doesn't | 0.85 on `field_accuracy`, **1** on `null_precision` |
 | Output safety | planned | 10 adversarial | Share of fixtures with no violation reaching render | **1** (a rate, since thresholds are minimums: zero violations) |
 
 ## How the harness works
@@ -76,6 +76,60 @@ Runs call 1 (`lib/ai/prompts/extract-constraints.ts`) on each query in
 - **Prompt examples never reuse fixture wording**, so the suite measures whether the
   rules generalise.
 
+## Recipe extraction (`suites/recipe-extraction.ts`)
+
+Runs call 2 (`lib/ai/prompts/extract-recipe.ts`) on each source in
+`fixtures/recipe-extraction/`, three runs each, on `MODELS.capable` — the first thing
+here measuring that tier. A fixture is:
+
+```json
+{
+  "gates": ["resolution"],
+  "source": "Anchovy butter cabbage — serves 2\n\ncabbage\nanchovies\n\nQuarter the cabbage…",
+  "expected": {
+    "title": "Anchovy butter cabbage",
+    "serves": 2,
+    "minutes": null,
+    "ingredients": [{ "name": "cabbage", "qty": null, "unit": null }]
+  }
+}
+```
+
+**`null` means the source never states it.** One field carries both facts, because a
+stated value is never null: `"minutes": null` is a claim about the source, and it is what
+the model is measured against not inventing.
+
+- **Metrics.**
+  - `field_accuracy`: over what the source states — the title (compared with
+    `normaliseTerm`), the scalars it gives, each expected line's presence, and the
+    quantity and unit of the lines that were found. A dropped line is one miss, not
+    three: the fields under it were never compared. That makes omission cheaper here than
+    it is in consequence — see the README on what the 0.85 doesn't cover.
+  - `null_precision`: over what the source doesn't — the scalars it omits, the quantity
+    and unit of the bare lines it lists, and every returned line matching nothing in the
+    source. A `null` scores; any value at all does not.
+- **Ingredient lines are paired by name**, exactly as `normaliseTerm` compares them, each
+  actual line filling at most one expected slot. Expected names take spelling variants,
+  the same convention call 1's fixtures use.
+- **A failed call** (`empty_input`, `refused`, `parse_failed`, `api_error`) misses every
+  unit either metric would have weighed. Null because nothing came back is not null
+  because the model read the text and found nothing there.
+- **Nothing weighed is not a pass.** A run set that left no field unstated scores 0 on
+  `null_precision`, not a vacuous 1 — the same reason the harness refuses a suite with no
+  fixtures.
+- **Not scored:** `optional`, `rawText` fidelity, `confidence` and the steps. Ingredients
+  and scalars are where an invented value costs something; `rawText` is covered by unit
+  tests, and a confidently-scored invention is worth its own suite.
+- **Every source has a title and a method.** `draftRecipeSchema` needs an ingredient and a
+  step, so an ingredients-only source returns `parse_failed` and scores zero for reasons
+  that aren't about invention. And the prompt answers a titleless source with "the
+  shortest plain description of the dish", which no fixture could match exactly.
+- **Stated conversions are accuracy, not invention.** The prompt fixes `"½"` as `0.5` and
+  a range at its lower bound (`"2-3"` is `2`), so those are values the source states.
+  `05-ranges-and-vague-amounts.json` holds both sides of that line in one source.
+- **Mismatch log**, as call 1's suite has: any run that misses prints its title, what was
+  expected and what came back, to stderr.
+
 ## Why `exclude` is pegged at 100%
 
 Because thresholds should be set by consequence, not by what the model currently
@@ -87,13 +141,18 @@ lowered bar.
 Everyone measures extraction accuracy. Almost nobody measures whether the model
 invented a plausible value for a field that wasn't in the source. A model that guesses
 `serves: 4` is more dangerous than one that returns `null`, because `null` is visible in
-the review queue and a wrong `4` is not. Tracked and reported separately.
+the review queue and a wrong `4` is not. Tracked and reported separately, and pegged at
+1 for the same reason `exclude_exact` is: a reviewer fills in a blank and approves a
+plausible number, so the cost of an invention is a wrong recipe nobody caught. The two
+metrics are separate because they fail for different reasons, and only one of them is
+negotiable.
 
 ## Fixtures are hand-written
 
 Fifteen good fixtures beat a hundred generated ones, and generating fixtures with the
-same model under test is circular. The constraint suite needs the cases that actually
-break:
+same model under test is circular. Six sources that fail for distinct reasons beat twelve
+that fail together, which is why the recipe suite has six. The constraint suite needs the
+cases that actually break:
 
 - *"no dairy but butter is fine"* — an explicit carve-out inside an exclusion
 - *"nothing too heavy"* — unmappable; must not become a false hard constraint
