@@ -1,0 +1,28 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "source": "Ghee-roasted carrots, serves 6\n\n1kg carrots\n3 tbsp ghee\n1 tsp cumin seeds\n\nHeat the oven as high as it goes. Toss the carrots with the ghee and cumin seeds. Roast until the edges catch and the middles are tender, turning them once. They are done when they are done — a thin carrot is quick and a fat one is not.",
+  "expected": {
+    "title": "Ghee-roasted carrots",
+    "serves": 6,
+    "minutes": null,
+    "ingredients": [
+      {
+        "name": "carrots",
+        "qty": 1,
+        "unit": "kg"
+      },
+      {
+        "name": "ghee",
+        "qty": 3,
+        "unit": "tbsp"
+      },
+      {
+        "name": "cumin seeds",
+        "qty": 1,
+        "unit": "tsp"
+      }
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "source": "Charred broccoli, 15 minutes, serves 2\n\n2-3 tbsp olive oil\n1 head broccoli\na splash of red wine vinegar\na few sprigs of thyme\n½ tsp chilli flakes\n\nGet a pan very hot. Break the broccoli into pieces and char them in the olive oil without moving them about. Add the thyme and chilli flakes near the end. Finish with a splash of vinegar off the heat.",
+  "expected": {
+    "title": "Charred broccoli",
+    "serves": 2,
+    "minutes": 15,
+    "ingredients": [
+      {
+        "name": "olive oil",
+        "qty": 2,
+        "unit": "tbsp"
+      },
+      {
+        "name": "broccoli",
+        "qty": 1,
+        "unit": "head"
+      },
+      {
+        "name": [
+          "red wine vinegar",
+          "vinegar"
+        ],
+        "qty": null,
+        "unit": null
+      },
+      {
+        "name": "thyme",
+        "qty": null,
+        "unit": null
+      },
+      {
+        "name": "chilli flakes",
+        "qty": 0.5,
+        "unit": "tsp"
+      }
+    ]
+  }
+}

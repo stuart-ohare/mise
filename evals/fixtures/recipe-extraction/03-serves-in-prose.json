@@ -1,0 +1,38 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "source": "SATURDAY LENTILS\n\nThis makes enough for four hungry people, and it takes about 40 minutes if you are not precious about the chopping.\n\n250g brown lentils\n1 onion, finely diced\n2 cloves garlic\nsea salt, to taste\nolive oil\n\nSweat the onion and garlic in olive oil until soft. Add the lentils and twice their volume of water. Simmer until the lentils give way but still hold their shape. Season with sea salt.",
+  "expected": {
+    "title": "Saturday lentils",
+    "serves": 4,
+    "minutes": 40,
+    "ingredients": [
+      {
+        "name": "brown lentils",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "name": "onion",
+        "qty": 1,
+        "unit": null
+      },
+      {
+        "name": "garlic",
+        "qty": 2,
+        "unit": "cloves"
+      },
+      {
+        "name": "sea salt",
+        "qty": null,
+        "unit": null
+      },
+      {
+        "name": "olive oil",
+        "qty": null,
+        "unit": null
+      }
+    ]
+  }
+}

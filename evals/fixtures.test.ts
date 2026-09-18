@@ -10,6 +10,7 @@ import { taxonomySchema } from "@/lib/domain/taxonomy";
 
 import { GATES } from "./harness";
 import { constraintFixtureSchema } from "./suites/constraint-extraction";
+import { recipeFixtureSchema } from "./suites/recipe-extraction";
 
 // Offline checks on the constraint-extraction fixtures. The model isn't called: this
 // proves the fixtures are well-formed and that every exclusion they expect call 1 to
@@ -19,18 +20,22 @@ import { constraintFixtureSchema } from "./suites/constraint-extraction";
 const root = resolve(__dirname, "..");
 const dir = join(root, "evals/fixtures/constraint-extraction");
 
-const files = (() => {
-  try {
-    return readdirSync(dir).filter((f) => f.endsWith(".json")).sort();
-  } catch {
-    return [];
-  }
-})();
+const read = (from: string) => {
+  const names = (() => {
+    try {
+      return readdirSync(from).filter((f) => f.endsWith(".json")).sort();
+    } catch {
+      return [];
+    }
+  })();
+  return {
+    files: names,
+    fixtures: names.map((file) => ({ file, json: JSON.parse(readFileSync(join(from, file), "utf8")) as unknown })),
+  };
+};
 
-const fixtures = files.map((file) => ({
-  file,
-  json: JSON.parse(readFileSync(join(dir, file), "utf8")) as unknown,
-}));
+const { files, fixtures } = read(dir);
+const recipe = read(join(root, "evals/fixtures/recipe-extraction"));
 
 const taxonomy = taxonomySchema.parse(JSON.parse(readFileSync(join(root, "scripts/seed/taxonomy.json"), "utf8")));
 const leaves = leavesSchema.parse(JSON.parse(readFileSync(join(root, "scripts/seed/leaves.json"), "utf8")));
@@ -66,5 +71,40 @@ describe("constraint-extraction fixtures", () => {
       const all = field.flatMap(spellings).map(normaliseTerm);
       expect(new Set(all).size).toBe(all.length);
     }
+  });
+});
+
+// The recipe fixtures aren't checked against the seed: a source naming an ingredient the
+// catalogue doesn't know is the unresolved state working, not a broken fixture. What is
+// checked is that the set still contains the cases the suite was built to measure —
+// silence about a quantity, and silence about how many it feeds.
+
+describe("recipe-extraction fixtures", () => {
+  it("has the six hand-written fixtures", () => {
+    expect(recipe.files).toHaveLength(6);
+  });
+
+  it.each(recipe.fixtures)("$file declares gate resolution and parses", ({ json }) => {
+    expect(recipeFixtureSchema.safeParse(json).success).toBe(true);
+    expect(json).toMatchObject({ gates: ["resolution"] });
+    expect(GATES).toContain("resolution");
+  });
+
+  it.each(recipe.fixtures)("$file never lists one spelling under two ingredients", ({ json }) => {
+    const { expected } = recipeFixtureSchema.parse(json);
+    const all = expected.ingredients.flatMap((line) => spellings(line.name)).map(normaliseTerm);
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it("keeps at least two sources that state no quantity for an ingredient", () => {
+    const bare = recipe.fixtures.filter(({ json }) =>
+      recipeFixtureSchema.parse(json).expected.ingredients.some((line) => line.qty === null),
+    );
+    expect(bare.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps at least one source that never says how many it serves", () => {
+    const silent = recipe.fixtures.filter(({ json }) => recipeFixtureSchema.parse(json).expected.serves === null);
+    expect(silent.length).toBeGreaterThanOrEqual(1);
   });
 });

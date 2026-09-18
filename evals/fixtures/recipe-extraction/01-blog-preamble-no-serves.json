@@ -1,0 +1,36 @@
+{
+  "gates": [
+    "resolution"
+  ],
+  "source": "I first had this in a tiny place off the Ramblas, standing up at the bar, and I have been chasing it ever since. My grandmother made something similar but with far more garlic — she would be horrified by this version. Anyway, enough from me. Jump to the recipe if you must, though the story is the best part.\n\nBURNT LEEK AND WHITE BEAN TOAST\n\nReady in 25 minutes, start to finish.\n\n2 large leeks\n1 x 400g tin cannellini beans\n3 tbsp olive oil\n2 slices sourdough\n\nHalve the leeks lengthways and put them cut side down in a dry pan until properly blackened. Drain the beans and warm them through with the olive oil. Toast the sourdough. Pile the beans onto the toast and lay the leeks over the top.\n\nIf you liked this, my newsletter goes out on Fridays.",
+  "expected": {
+    "title": "Burnt leek and white bean toast",
+    "serves": null,
+    "minutes": 25,
+    "ingredients": [
+      {
+        "name": "leeks",
+        "qty": 2,
+        "unit": null
+      },
+      {
+        "name": [
+          "cannellini beans",
+          "tin cannellini beans"
+        ],
+        "qty": 1,
+        "unit": "tin"
+      },
+      {
+        "name": "olive oil",
+        "qty": 3,
+        "unit": "tbsp"
+      },
+      {
+        "name": "sourdough",
+        "qty": 2,
+        "unit": "slices"
+      }
+    ]
+  }
+}
