@@ -1,5 +1,56 @@
 # Mise
 
+> **TL;DR**
+>
+> - **What it is.** An AI recipe assistant that answers *what can I actually cook right
+>   now* for a household where someone has a hard dietary exclusion. It has three screens:
+>   **Cook** (free text in, ranked shortlist out), **Intake** (a pasted recipe or a
+>   photographed card becomes a draft) and **Review** (a person publishes drafts).
+> - **The core idea.** Exclusions are never left to the model. Three gates enforce them:
+>   an exclusion that doesn't resolve becomes a question, SQL applies a `NOT EXISTS` over
+>   the canonical ingredient tree, and generated prose is scanned for excluded ingredients
+>   before it renders. The model reads intent and writes prose. It never decides which
+>   recipes exist.
+> - **Technologies.** Next.js 16 (App Router), TypeScript strict, Zod at every boundary,
+>   Postgres with Drizzle, the Anthropic SDK called directly (`claude-haiku-4-5` for
+>   constraint extraction, `claude-sonnet-4-5` for recipe extraction, vision and ranking),
+>   and Tailwind.
+> - **Tests.** Vitest unit tests with no network and no database (`pnpm test`, run by CI
+>   on every PR). Separate SQL tests for gate 2 run against Postgres (`pnpm test:db`). An
+>   eval suite runs the real model (`pnpm eval`: 17 constraint fixtures and 6 recipe
+>   sources, 3 runs each). Exclusion accuracy and null-precision thresholds are pegged
+>   at 100%. The last run is committed in [`evals/latest.md`](evals/latest.md).
+> - **Deployed.** Vercel, with Postgres on Neon, live at
+>   **<https://mise-liard-eight.vercel.app>**. A push to `main` deploys production.
+>   GitHub Actions runs typecheck, lint and test, and never calls a model.
+> - **Agentic workflow.** Claude Code agents did most of the building, through a loop
+>   run as skills against GitHub issues:
+>   `/spec → /plan → human /approve → /build → /verify → /ship → human merge`. The spec
+>   is written before any code, a test fails before the change that passes it, and an
+>   independent `invariant-reviewer` agent checks each branch. Git hooks and Claude Code
+>   hooks keep the human in charge of approvals, thresholds and dependencies. See
+>   [Working on this repo](#working-on-this-repo) and
+>   [`docs/workflow.md`](docs/workflow.md).
+
+## Reading this against the brief
+
+| The brief asks for | Where it is |
+|---|---|
+| Live demo | <https://mise-liard-eight.vercel.app>. [`docs/demo.md`](docs/demo.md) walks through every outcome with the expected result of each step |
+| Project overview: problem, users, scope | [Overview](#overview), [Two surfaces](#two-surfaces), and [Status](#status) |
+| Tech stack | [Tech stack](#tech-stack) |
+| How AI is used, and *why this model* | [How AI is used](#how-ai-is-used) and [ADR 0004](docs/decisions/0004-model-provider.md) |
+| Setup instructions | [Running it](#running-it) for local, [Deploying](#deploying) for Vercel and Neon |
+| Trade-offs, and improvements with more time | [Trade-offs](#trade-offs) and [With more time](#with-more-time) |
+| Frontend: clean UI, UX considerations | [Two surfaces](#two-surfaces), with screenshots |
+| Backend: API layer, separation of concerns | [Architecture](#architecture) and [`app/api/README.md`](app/api/README.md) |
+| Optional: database, tests, deployment | All three: Postgres with Drizzle, [How it's tested](#how-its-tested), and [Deploying](#deploying) |
+| Optional: authentication | Deliberately not built. There's one household, and auth isn't what the project is testing. The cost is in [With more time](#with-more-time) |
+| Problem-solving approach, explaining decisions | [The three gates](#the-three-gates), [Trade-offs](#trade-offs), and the ADRs in [`docs/decisions/`](docs/decisions) |
+| Code quality and structure | [Architecture](#architecture). The working rules the code is held to are in [`CLAUDE.md`](CLAUDE.md) |
+
+## Overview
+
 **An exclusion is never a model decision. It is a database constraint, and generated
 text is validated against it before it renders.**
 
@@ -16,7 +67,9 @@ tree, the alias table, the allergen hierarchy — all of it is prep work done be
 single query arrives. At request time the system looks things up and explains them. It
 does not ask a model to be careful at the moment carefulness is hardest to verify.
 
-> **Status: Cook and Intake work end to end.** `POST /api/cook` plus the Cook screen
+### Status
+
+> **Cook and Intake work end to end.** `POST /api/cook` plus the Cook screen
 > run the full path — constraints out of free text, gate 2's filter, ranked prose
 > behind gate 3. `POST /api/intake` plus the Intake screen turn a pasted recipe *or a
 > photographed card* into a draft in the queue, each ingredient line resolved or
@@ -27,7 +80,7 @@ does not ask a model to be careful at the moment carefulness is hardest to verif
 > directly doesn't get around it. An unresolved line can be fixed in place: name what
 > its term means, and `POST /api/aliases` re-resolves every draft line held by that
 > term — the draft unblocks, and a person still presses publish. Progress is tracked in
-> [Issues](../../issues).
+> [Issues](https://github.com/stuart-ohare/mise/issues).
 
 ## Two surfaces
 
@@ -36,6 +89,8 @@ another curry"* — and a ranked shortlist out, each recipe with a one-line rati
 What the system understood renders as chips above the results, so a misread can be
 corrected without retyping the sentence. Hard exclusions look different from soft
 preferences, because the interface should tell the same story as the architecture.
+
+![Cook: the chips show what Mise understood — dairy as a hard exclusion with a 2px red border, cauliflower and 25 minutes as soft constraints — above a ranked shortlist, each with a one-line rationale](docs/screenshots/95/02-cook-at-rest-light.jpg)
 
 `POST /api/cook` is where the three gates meet. It answers with one of five outcomes
 rather than results-or-error: a ranked shortlist, cards without prose (gate 3 rejected
@@ -88,6 +143,11 @@ line has none — not a typical amount. If it never says how many it feeds, `ser
 null, however obvious four looks. A reviewer fills in a blank; they skim past a plausible
 number and approve it.
 
+![Review: a draft from Intake whose publish button is disabled, naming the three unresolved lines that block it, each shown as raw text beside an inline alias fix](docs/screenshots/95/10-review-at-rest-light.jpg)
+
+The screens have loading and pending states for every model wait, and a dark theme. All
+eleven screenshots are in [`docs/screenshots/95/`](docs/screenshots/95).
+
 ## The three gates
 
 | Gate | Where | What it does |
@@ -100,6 +160,37 @@ Gate 2 already guarantees the rows. Gate 3 exists because the model writes sente
 and sentences invent — *"finish with a knob of butter"* attached to a recipe that
 contains none. The filter guarantees the rows; nothing guarantees the sentences except
 checking them.
+
+## Architecture
+
+One Next.js app, with each layer in its own place. Every arrow into or out of a model
+call, and across the HTTP boundary, passes through a Zod schema.
+
+```
+Browser
+  app/page.tsx, intake/, review/     Server Components; "use client" only for interaction
+  app/_components/*-client.tsx       forms, chips and fetch calls; renders each response kind
+        │  fetch, JSON parsed by the same schema.ts the route uses
+        ▼
+  app/api/<route>/route.ts           HTTP shell: parse the request, run, parse the response
+  app/api/<route>/schema.ts          request and response unions, shared with the screen
+  app/api/<route>/run.ts             the pipeline, with the DB and model passed in as deps
+        │
+        ├── lib/ai/prompts/*         one file per model call: prompt, Zod schema, VERSION
+        ├── lib/domain/*             pure functions: resolution, the tree, the output gate
+        └── lib/db/*                 Drizzle queries; gate 2's NOT EXISTS is in candidates.ts
+```
+
+- **The pipeline has no framework or I/O in it.** `run.ts` receives its queries and
+  model calls as arguments, so the whole gate sequence is unit-tested without a database
+  or an API key.
+- **Domain rules are pure functions.** For example, "an unresolved exclusion can't be
+  demoted" lives in `lib/domain/constraint-edits.ts`, not in the button that enforces it.
+- **There's no service or repository layer, on purpose.** Route handlers call the query
+  modules directly. That boundary gets added when a second consumer appears. The Review
+  page, a Server Component, reads its queue the same way.
+- **The response is a discriminated union, not results-or-error.** The screen switches
+  on `kind`, so a new outcome is a compile error rather than a blank panel.
 
 ## Tech stack
 
@@ -133,6 +224,56 @@ live in [`lib/ai/prompts/`](lib/ai/prompts) with their schema and a version cons
 
 The model parses intent and writes prose. It never decides what exists.
 
+### Why Claude, and why two sizes
+
+The reasons are about the jobs the model does. The full argument, and the alternative
+that lost, is in [ADR 0004](docs/decisions/0004-model-provider.md).
+
+- **Output that fits a schema.** A Zod schema parses every call at the boundary, so a
+  model that drifts from the schema costs a retry on every request.
+- **Two sizes on one API.** Constraint extraction is short, frequent and cheap to get
+  wrong, so it runs on Haiku. Recipe extraction is long, messy and expensive to get wrong,
+  so it runs on Sonnet, and ranking uses the same tier. One model for both jobs would be
+  either slow or sloppy.
+- **Vision on the same API.** The handwritten-card path needed no second integration.
+- **Called directly, with no wrapper.** The SDK is imported in one file. Anything that
+  hides provider differences would also hide the structured-output and vision features
+  the schemas depend on.
+
+The choice was made by reasoning, not measurement: no other provider has been run on the
+fixtures yet. The architecture limits the damage a weaker model could do. SQL decides
+which rows an exclusion removes, and gate 3 checks the prose. A worse ranker shows up as
+more retries and more cards without prose, not as an allergen on screen. The exception is
+constraint extraction: an exclusion the model misses is one that no gate enforces. That
+is why exclusion accuracy is held at 100% in the evals.
+
+### AI in the build: an agentic SDLC
+
+AI is also how this repository was built. Claude Code agents did most of the typing,
+inside a delivery process where each step is a Claude Code skill run against a GitHub
+issue, and a human holds the approvals:
+
+| Stage | Agent does | Human does |
+|---|---|---|
+| `/spec` | Asks questions one at a time, then drafts the issue with observable acceptance criteria and gate labels | Approves the draft |
+| `/plan` | Posts an implementation plan as an issue comment, then stops | Approves it with `/approve`, a skill only the user can run |
+| `/build` | Works in its own git worktree. Writes a failing test or eval fixture first, then the smallest change that passes | |
+| `/verify` | Runs `verify.sh` (typecheck, lint, test, a gate-fixture rule, eval-report freshness). Then a separate `invariant-reviewer` agent, with fresh context, reviews the diff against the invariant | Decides on anything the reviewer raises as a concern |
+| `/ship` | Opens the PR, ticking each acceptance criterion against named evidence | Merges |
+
+Guardrails keep that split honest. Git hooks reject commits and pushes on `main`, and
+commit messages without an issue number. Claude Code hooks stop an agent from skipping
+those hooks, editing eval thresholds, changing dependencies or approving its own plan. CI
+never calls a model.
+
+The issue and PR history is the evidence: 57 issues and 41 merged PRs.
+[`docs/workflow.md`](docs/workflow.md) traces three changes through the process, with
+what it caught. One example: the reviewer found that the unauthenticated alias route could
+rebind any term, so *no groundnuts* could quietly turn into a filter on the wrong food.
+That was fixed before merge, with the failing test committed first. The mechanics are in
+[Working on this repo](#working-on-this-repo), and the reasoning is in
+[ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
+
 ## Running it
 
 Needs Node, pnpm, Docker, and [`jq`](https://jqlang.org) for the workflow guards.
@@ -153,6 +294,21 @@ pnpm dev
 | `pnpm test` | Vitest units — no network, no API calls, no database |
 | `pnpm test:db` | Gate 2's SQL and the seed's term-collision and tree-change checks against Postgres (`*.db.test.ts`). Needs `docker compose up -d`, `pnpm db:push` and `DATABASE_URL` in `.env.local`. Every write rolls back, and it doesn't need the seed. Not run in CI |
 | `pnpm eval` | Eval suite against the real model. **Costs money** — one run is 69 calls — and is non-deterministic. Runs constraint extraction (17 fixtures) and recipe extraction (6 sources), 3 runs each ([evals/README.md](evals/README.md)) |
+
+## How it's tested
+
+Testing is aimed at the invariant rather than at coverage. There are three layers, and
+only the first runs in CI.
+
+| Layer | Command | What it proves |
+|---|---|---|
+| Unit | `pnpm test` (CI, every PR) | Pure domain logic: resolution, the ingredient tree, gate 3's scan, chip edits. Each route's pipeline, with the model and database stubbed, covering all five Cook outcomes and every fail-closed path. Schemas and the seed catalogue. The workflow guards themselves: `verify.sh`, the hooks and the skills |
+| Database | `pnpm test:db` (local) | Gate 2's real SQL. A recipe with butter disappears from a dairy-free search because butter's parent is dairy. It also covers the publish gate, alias re-resolution and the seed's collision checks. Every write rolls back |
+| Eval | `pnpm eval` (local, paid) | The real model on 23 fixtures, 3 runs each. `exclude_exact` and `null_precision` must be 100%. The last run is committed as [`evals/latest.md`](evals/latest.md), with the prompt version and commit that produced it |
+
+A test that covers a gate says so: `// @gate query` in a Vitest file, or
+`"gates": ["query"]` in an eval fixture. `/verify` won't pass a gate-labelled issue unless
+a test declaring that gate was added or changed.
 
 ## Deploying
 
@@ -280,7 +436,7 @@ its report goes in the PR body.
 
 ## Trade-offs
 
-Six decisions that shaped what is here, each with what it cost and what would change it.
+Seven decisions that shaped what is here, each with what it cost and what would change it.
 The ones worth defending at length are recorded in [`docs/decisions/`](docs/decisions).
 
 ### No streaming
@@ -401,3 +557,32 @@ report is pasted evidence rather than something CI reproduced.
 **Revisit when.** `pnpm eval` is deterministic or cheap enough to run per PR, or there is
 a budget worth defending for it. Until then the honest version is a local run with its
 report committed.
+
+## With more time
+
+In rough priority order. Most are already filed as issues.
+
+- **Authentication on the write paths.** The live demo has no auth, so anyone with the URL
+  can publish a draft, bind an alias, or spend model credits through Cook and Intake. The
+  alias route is already narrowed so it can only bind a term that an unresolved draft line
+  carries ([`docs/workflow.md`](docs/workflow.md), trace 3). But publishing is the human
+  control in this design, and it should need a signed-in reviewer. Rate limiting belongs
+  with it.
+- **Decide what gate 3 means for recipe summaries**
+  ([#62](https://github.com/stuart-ohare/mise/issues/62)). A published `summary` is
+  model-written at intake and reaches Cook without gate 3 scanning it. Today the control
+  is the reviewer reading it before publishing. That should be a recorded decision, or a
+  scan.
+- **Measure ingredient recall** ([#86](https://github.com/stuart-ohare/mise/issues/86)).
+  A dropped ingredient line is the extraction failure that reaches the invariant, and
+  nothing measures it yet. See [Null-precision is pegged at 100%](#null-precision-is-pegged-at-100).
+- **Run gate 2's database tests in CI** ([#31](https://github.com/stuart-ohare/mise/issues/31),
+  [#30](https://github.com/stuart-ohare/mise/issues/30)), against a Postgres service
+  container. Today they run only locally.
+- **Evaluate ranking, and compare providers on the same fixtures.** Ranking has no suite
+  yet, and the model choice was reasoned rather than measured
+  ([ADR 0004](docs/decisions/0004-model-provider.md)).
+- **Show the safe cards before the prose.** Gate 2 has already cleared the rows, so they
+  could render while only the rationale waits on gate 3. See [No streaming](#no-streaming).
+- **A Neon branch per preview deployment**, so a schema push from a branch can't change
+  what production reads.
