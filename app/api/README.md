@@ -165,3 +165,41 @@ the same request.
   path calls this route: Intake writes drafts and stops (CLAUDE.md §2). The route has no
   auth, so anyone who can reach it can call it. That's safe because the rule above is
   the same whoever calls.
+
+## `POST /api/aliases`
+
+The alias fix: gate 1's repair path. `route.ts` is the HTTP shell. The rule is
+`addAliasAndReresolve` in `lib/db/aliases.ts`. `schema.ts` holds both shapes, which the
+review screen's alias form imports.
+
+### Request
+
+```ts
+{ alias: string; canonicalId: string }   // alias non-blank, canonicalId a uuid
+```
+
+`400 { error: "invalid_request" }` for anything else.
+
+### Response
+
+| Status | Body | Means |
+|---|---|---|
+| `200` | `{ ok: true, reresolved: n }` | The alias is written, and `n` draft lines named by it now resolve |
+| `409` | `{ error: "alias_exists" }` | The term already means something, as an alias or a canonical name. Nothing changed |
+| `422` | `{ error: "unknown_ingredient" }` | `canonicalId` names no ingredient. Nothing written |
+
+### What the route guarantees
+
+- **Re-resolution is an exact lookup, not a guess.** Every `recipe_ingredient` stores
+  `name`, the term resolution was tried on, beside `raw_text`. A line re-resolves only
+  when its `name` equals the alias after `normaliseTerm`, the index's own normalisation.
+  `raw_text` is never scanned, so "ghee butter" is not ghee.
+- **One transaction.** The alias and the lines it unblocks land together or not at all.
+- **Duplicates are compared normalised.** The alias is stored normalised and checked
+  against every name and alias first, so `Ghee` can't sit beside `ghee` and make the
+  term ambiguous. A concurrent duplicate loses on the unique index, as a 409.
+- **Provenance.** The alias is written with `source: "extraction"`, so one that turns out
+  wrong can be told from the hand-authored taxonomy.
+- **Nothing publishes.** Only draft lines are touched and no status changes. The draft
+  still goes through `POST /api/review/:id/publish`, pressed by a person.
+- **No model is called.** A person says what the ingredient is.

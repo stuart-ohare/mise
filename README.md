@@ -24,7 +24,9 @@ does not ask a model to be careful at the moment carefulness is hardest to verif
 > beside what it resolved to, and a publish button that stays disabled, with the
 > blocking lines named, while any line is unresolved, or while the draft has no lines at
 > all. `POST /api/review/:id/publish` enforces the same rule in SQL, so calling it
-> directly doesn't get around it. The alias fix isn't built yet. Progress is tracked in
+> directly doesn't get around it. An unresolved line can be fixed in place: name what
+> its term means, and `POST /api/aliases` re-resolves every draft line held by that
+> term — the draft unblocks, and a person still presses publish. Progress is tracked in
 > [Issues](../../issues).
 
 ## Two surfaces
@@ -68,7 +70,10 @@ canonical id. It returns the food in the recipe's own words, and gate 1 resolves
 against the same index a Cook exclusion goes through. A line that maps to nothing is
 stored as `canonical_id = null` with its raw text intact, and that null is what blocks
 the recipe from leaving draft: paste a recipe using ghee into a catalogue that has never
-heard of it, and the draft says so rather than filing it under butter.
+heard of it, and the draft says so rather than filing it under butter. The reviewer
+then says *ghee is clarified butter*, every draft line named `ghee` resolves through
+the tree, and once published the recipe leaves a dairy-free search because ghee rolls up
+to dairy — not because anyone tagged it.
 
 A photograph takes the identical path. The card is sent as an image block on the same
 call, with the same prompt and the same schema, and its lines go through the same
@@ -87,7 +92,7 @@ number and approve it.
 
 | Gate | Where | What it does |
 |---|---|---|
-| 1 — Resolution | Constraint extraction | An exclusion that can't be mapped to a canonical ingredient is asked about, never silently dropped. The seeded catalogue deliberately doesn't know `ghee`, so *no ghee* is a question, not a filter |
+| 1 — Resolution | Constraint extraction | An exclusion that can't be mapped to a canonical ingredient is asked about, never silently dropped. A freshly seeded catalogue deliberately doesn't know `ghee`, so *no ghee* is a question, not a filter — until a reviewer adds the alias |
 | 2 — Query | SQL | The exclusion becomes a `NOT EXISTS` over `recipe_ingredient` joined through the canonical tree. *Garlic butter mushrooms on toast* vanishes from a dairy-free search because butter's parent is dairy — not because anyone tagged the recipe |
 | 3 — Output | Pre-render | Generated prose is scanned for aliases of anything excluded. A hit is rejected, logged and retried once; a second failure returns cards without prose rather than unverified text |
 
@@ -186,6 +191,12 @@ printed statements anyway. `drizzle.config.ts` is `strict`, so drizzle-kit shows
 asks for confirmation; that prompt needs a real terminal and won't run from a pipe or an
 agent's shell. The push works through Neon's pooler; if it ever doesn't, use
 `DATABASE_URL_UNPOOLED`.
+
+A database created before `recipe_ingredient.name` existed can't take the column in
+place: it is `NOT NULL`, so drizzle-kit offers to truncate the table, which would leave
+every recipe with no lines. Recreate the database and seed it again instead — locally,
+`docker compose down -v`, then `up -d`, `pnpm db:push` and `pnpm seed`. On Neon the
+same reset discards any Intake drafts stored there, so decide that deliberately.
 
 **4. Seed production.** Same shape. It loads the allergen tree and the recipe catalogue, is
 safe to rerun, and prints the host it wrote to — check it isn't `localhost`:
