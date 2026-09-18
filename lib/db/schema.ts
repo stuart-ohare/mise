@@ -81,6 +81,10 @@ export const recipeIngredient = pgTable(
     canonicalId: uuid("canonical_id").references(() => canonicalIngredient.id),
     // Never discarded. Extraction is lossy; the original string is the audit trail.
     rawText: text("raw_text").notNull(),
+    // The term resolution was attempted on — the seed's `name`, call 2's `name` — kept
+    // so an alias added in review can re-resolve this line by exact lookup, rather than
+    // by reading a food out of `raw_text`.
+    name: text("name").notNull(),
     qty: numeric("qty"),
     unit: text("unit"),
     optional: boolean("optional").notNull().default(false),

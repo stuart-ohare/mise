@@ -113,6 +113,36 @@ describe("seedDatabase", () => {
     });
   });
 
+  // @gate resolution
+  it("stores the term each line was resolved on, so a line that missed can be found again", async () => {
+    await inRollback(async (tx) => {
+      // Removed and re-seeded, as listDrafts' test does: a local database may already
+      // hold this recipe, and this is a claim about what the seed writes.
+      const title = "Spiced lentil dal with ghee";
+      await tx.delete(schema.recipe).where(eq(schema.recipe.title, title));
+      expect((await seedDatabase(tx, files)).ok).toBe(true);
+
+      const [dal] = await tx.select({ id: schema.recipe.id }).from(schema.recipe).where(eq(schema.recipe.title, title));
+      if (!dal) throw new Error(`"${title}" was not seeded`);
+      const lines = await tx
+        .select({
+          name: schema.recipeIngredient.name,
+          rawText: schema.recipeIngredient.rawText,
+          canonicalId: schema.recipeIngredient.canonicalId,
+        })
+        .from(schema.recipeIngredient)
+        .where(eq(schema.recipeIngredient.recipeId, dal.id));
+
+      // The name, not the line: "2 tbsp ghee" is what a reviewer reads, "ghee" is what an
+      // alias has to match.
+      expect(lines.filter((l) => l.canonicalId === null)).toEqual([
+        { name: "ghee", rawText: "2 tbsp ghee", canonicalId: null },
+      ]);
+      const entry = files.recipes.find((r) => r.title === title);
+      expect(lines.map((l) => l.name).sort()).toEqual(entry?.ingredients.map((i) => i.name).sort());
+    });
+  });
+
   it("refuses an alias that is already an ingredient's name", async () => {
     await inRollback(async (tx) => {
       await addNode(tx, "shrimp");
