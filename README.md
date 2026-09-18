@@ -149,7 +149,9 @@ points to before removing it.
 
 **2. Env vars.** The integration injects `DATABASE_URL` (pooled) plus
 `DATABASE_URL_UNPOOLED` and the `PG*`/`POSTGRES_*` set. The app only reads
-`DATABASE_URL`; `ANTHROPIC_API_KEY` is added by hand. Check with:
+`DATABASE_URL`; `ANTHROPIC_API_KEY` is added by hand, and it needs a real value, not just
+an entry — `vercel env ls` lists an empty one all the same, and nothing in the CLI shows
+it, so step 6 is what catches it. Check with:
 
 ```bash
 vercel link                    # once per checkout
@@ -187,6 +189,30 @@ tags, it writes nothing and lists each one. Once every line is intended, run it 
 **5. Deploy.** Pushing to `main` deploys production. Env vars only reach a build made
 after they were set — after changing one, redeploy (`vercel redeploy <deployment-url>
 --target production`).
+
+**6. Verify.** One request through the whole pipeline — extraction, gate 1 against the
+seeded catalogue, the query, ranking. It makes two small model calls:
+
+```bash
+curl -s -X POST https://<production-url>/api/cook \
+  -H 'content-type: application/json' \
+  -d '{"kind":"query","query":"something quick, no dairy"}'
+```
+
+A healthy deploy answers `200` with `{"kind":"ranked","constraints":{"exclude":["dairy"],…},…}`.
+The recipes vary run to run; the `kind` and the exclusion shouldn't.
+
+### When production misbehaves
+
+The Cook screen shows one message for every server failure, by design — no rows is safer
+than unchecked rows. The cause is in the runtime log (`vercel logs <deployment-url>`, then
+repeat the request).
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Cook shows "Something broke on the way to the kitchen"; `/api/cook` returns 500 `{"error":"cook_failed"}`; the log shows `[cook] request failed before a response could be validated` with `ANTHROPIC_API_KEY is not set` | The key is missing or empty in that environment | `vercel env rm ANTHROPIC_API_KEY production`, `vercel env add ANTHROPIC_API_KEY production`, then redeploy (step 5). The variable may be shared with Preview, so check `vercel env ls` afterwards |
+| `200`, but `needs_resolution` for "dairy", or `no_candidates` for a common ingredient | The database has the schema but was never seeded | Step 4 |
+| `vercel env pull` gives an empty `DATABASE_URL` | The Neon values are marked sensitive | Copy it from Neon instead (step 2) |
 
 ## Working on this repo
 
