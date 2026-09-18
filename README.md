@@ -134,7 +134,7 @@ pnpm dev
 | `pnpm typecheck` | `next typegen` then `tsc --noEmit` |
 | `pnpm test` | Vitest units — no network, no API calls, no database |
 | `pnpm test:db` | Gate 2's SQL and the seed's term-collision and tree-change checks against Postgres (`*.db.test.ts`). Needs `docker compose up -d`, `pnpm db:push` and `DATABASE_URL` in `.env.local`. Every write rolls back, and it doesn't need the seed. Not run in CI |
-| `pnpm eval` | Eval suite against the real model. **Costs money** — one run is 51 calls — and is non-deterministic. Runs the constraint-extraction suite: 17 fixtures, 3 runs each ([evals/README.md](evals/README.md)) |
+| `pnpm eval` | Eval suite against the real model. **Costs money** — one run is 69 calls — and is non-deterministic. Runs constraint extraction (17 fixtures) and recipe extraction (6 sources), 3 runs each ([evals/README.md](evals/README.md)) |
 
 ## Deploying
 
@@ -249,19 +249,18 @@ streamed one, and it is the version of this idea worth building.
 
 ### Two models, not one
 
-Constraint extraction runs on `claude-haiku-4-5`. Recipe extraction and ranking are
-reserved for `claude-sonnet-4-5`, which so far only the one-off catalogue generator
-calls. Short frequent input with a small schema and long messy input where a mistake is
+Constraint extraction runs on `claude-haiku-4-5`. Recipe extraction and ranking run on
+`claude-sonnet-4-5`. Short frequent input with a small schema and long messy input where a mistake is
 expensive are different jobs, and `lib/ai/client.ts` names the two tiers separately
 ([ADR 0004](docs/decisions/0004-model-provider.md)).
 
-**Cost.** Two sets of model quirks to learn and two eval baselines to keep honest — and
-only one of those exists. The 17 committed fixtures all run against the fast model;
-nothing yet measures `MODELS.capable`, which is the tier doing the expensive work.
+**Cost.** Two sets of model quirks to learn and two eval baselines to keep honest. Both
+now exist — 17 fixtures against the fast model, 6 against the capable one — and every
+prompt change means watching two reports instead of one. Ranking is still unmeasured.
 
 **Revisit when.** One model clears both bars on the same fixtures at the cheaper price.
-That is a measurement rather than a guess, so the suite that would make it has to exist
-first.
+That is a measurement rather than a guess, and it is now a measurement that could
+actually be taken.
 
 ### `exclude` is pegged at 100%
 
@@ -275,6 +274,25 @@ that a lower number would have turned green.
 **Revisit when.** Never for the bar itself. What moves is the fixture set — 17 today, and
 every new way someone phrases an exclusion belongs in it. A failure is answered by making
 the extraction better, never by making the test weaker.
+
+### Null-precision is pegged at 100%
+
+`evals/thresholds.ts` sets `null_precision: 1` on the recipe-extraction suite, beside a
+`field_accuracy` of 0.85. The asymmetry is the point: the two metrics fail for different
+reasons and only one of them is affordable.
+
+A missing value and an invented one cost different amounts. Intake writes a draft that a
+human promotes from `/review`, so a blank is something the reviewer fills in and a
+plausible `serves: 4` is something they skim past and approve. Accuracy can be traded
+against effort; invention can't, because the whole point of the review queue is that it
+shows you what the model didn't know.
+
+**Cost.** One invented quantity in 18 runs is a red build, and the permitted fixes are a
+better prompt, a narrower schema or a fixture that spelled an ingredient in a way the
+model reasonably didn't (CLAUDE.md §4.5). Never a lower number.
+
+**Revisit when.** Never for the bar. What moves is the fixture set — six today, and
+every new way a source stays silent belongs in it.
 
 ### Hand-authored tree, generated leaves
 
