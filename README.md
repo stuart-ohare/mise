@@ -259,6 +259,7 @@ commit format. Claude Code hooks stop agents skipping those git hooks, editing t
 thresholds, or changing dependencies or approving plans without the human; they need
 [`jq`](https://jqlang.org). Why it's built this way is in
 [ADR 0003](docs/decisions/0003-issue-driven-agentic-workflow.md).
+[`docs/workflow.md`](docs/workflow.md) traces three changes through it, with what each one caught.
 
 ### CI
 
