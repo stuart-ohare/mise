@@ -18,7 +18,7 @@ import { cookResponseSchema, type CookResponse } from "../api/cook/schema";
 import { understoodFrom, type Understood } from "./understood";
 import Button from "./ui/button";
 import Callout from "./ui/callout";
-import { BanIcon, ClockIcon, XIcon } from "./ui/icons";
+import { ClockIcon, XIcon } from "./ui/icons";
 import LiveStatus from "./ui/live-status";
 import { SkeletonCards } from "./ui/skeleton";
 import Spinner from "./ui/spinner";
@@ -239,11 +239,10 @@ function Chips({ chips, onChip }: { chips: Chip[]; onChip: (chip: Chip) => void 
             <span
               className={
                 chip.hard
-                  ? "inline-flex items-center gap-1.5 rounded-full border border-danger-border bg-danger-soft py-1 pr-1.5 pl-2.5 text-sm font-semibold text-danger"
+                  ? "inline-flex items-center gap-1.5 rounded-full border border-danger-border bg-danger-soft py-1 pr-1.5 pl-3 text-sm font-semibold text-danger"
                   : "inline-flex items-center gap-1.5 rounded-full border border-border bg-surface py-1 pr-1.5 pl-3 text-sm text-foreground shadow-sm"
               }
             >
-              {chip.hard && <BanIcon className="size-3.5" />}
               {chip.label}
               <button
                 type="button"

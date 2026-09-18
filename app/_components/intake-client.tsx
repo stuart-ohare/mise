@@ -275,7 +275,7 @@ function Draft({ response }: { response: Extract<IntakeResponse, { kind: "draft"
               key={`${line.rawText}:${index}`}
               className={
                 line.canonicalName === null
-                  ? "-mx-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-lg border-l-4 border-danger bg-danger-soft px-2 py-2 text-sm"
+                  ? "-mx-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-lg border-l-4 border-l-danger bg-danger-soft px-2 py-2 text-sm"
                   : "flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2 text-sm"
               }
             >
