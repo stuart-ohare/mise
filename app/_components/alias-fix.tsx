@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useId, useState, useTransition } from "react";
 
 import { aliasResponseSchema } from "../api/aliases/schema";
+import { useCardBusy } from "./draft-card";
+import Button from "./ui/button";
 
 /**
  * The fix for an unresolved line: say what its term means, and every draft held by that
@@ -29,17 +31,20 @@ export default function AliasFix({ term, ingredients }: Props) {
   const router = useRouter();
   const listId = useId();
   const [choice, setChoice] = useState("");
-  const [pending, setPending] = useState(false);
+  // Held through the refresh, as in PublishButton: the lines re-resolve server-side and
+  // the spinner should last until they are on screen.
+  const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
 
   const picked = ingredients.find((option) => option.name === choice.trim());
+
+  useCardBusy(pending);
 
   async function submit(): Promise<void> {
     if (!picked) {
       setMessage("Pick an ingredient from the list.");
       return;
     }
-    setPending(true);
     setMessage(null);
     try {
       const res = await fetch("/api/aliases", {
@@ -54,58 +59,53 @@ export default function AliasFix({ term, ingredients }: Props) {
       }
       const body = parsed.data;
       if ("ok" in body) {
-        router.refresh();
+        startTransition(() => router.refresh());
       } else if (body.error === "alias_exists") {
         setMessage(`“${term.trim()}” already means a different ingredient. Nothing was changed.`);
       } else if (body.error === "no_unresolved_line") {
         // Someone else's fix got there first; the queue on screen is out of date.
-        router.refresh();
+        startTransition(() => router.refresh());
       } else {
         setMessage("That ingredient no longer exists. Nothing was changed.");
       }
     } catch {
       setMessage("Couldn't reach Mise. The alias wasn't saved.");
-    } finally {
-      setPending(false);
     }
   }
 
   return (
     <form
-      className="mt-1 flex flex-wrap items-center gap-1 text-xs"
+      className="mt-2 flex flex-wrap items-center gap-1.5 text-xs"
       onSubmit={(event) => {
         event.preventDefault();
-        void submit();
+        startTransition(submit);
       }}
     >
       <q className="font-mono">{term.trim()}</q>
-      <span aria-hidden>→</span>
+      <span aria-hidden className="text-muted">→</span>
       <input
         aria-label="Canonical ingredient"
         list={listId}
         value={choice}
         onChange={(event) => setChoice(event.target.value)}
         placeholder="ingredient"
-        className="w-36 rounded border border-black/20 bg-transparent px-1 py-0.5 dark:border-white/25"
+        disabled={pending}
+        className="w-40 rounded-md border border-border-strong bg-surface px-2 py-1 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none disabled:opacity-60"
       />
       <datalist id={listId}>
         {ingredients.map((option) => (
           <option key={option.id} value={option.name} />
         ))}
       </datalist>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded border border-black/30 px-2 py-0.5 disabled:opacity-40 dark:border-white/30"
-      >
+      <Button type="submit" variant="secondary" size="sm" pending={pending}>
         {pending ? "Saving…" : "Add alias"}
-      </button>
+      </Button>
       {picked && (
-        <span className="basis-full opacity-70">
+        <span className="basis-full text-muted">
           {picked.allergens.length === 0 ? "carries no allergen tag" : `carries ${picked.allergens.join(", ")}`}
         </span>
       )}
-      {message && <span className="basis-full">{message}</span>}
+      {message && <span className="basis-full font-medium text-warning">{message}</span>}
     </form>
   );
 }
