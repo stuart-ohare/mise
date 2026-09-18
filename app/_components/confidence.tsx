@@ -24,8 +24,8 @@ export default function Confidence({ score, of }: { score: number; of: string })
     <span
       className={
         band === "low"
-          ? "shrink-0 rounded border border-black/40 px-1.5 py-0.5 text-xs font-medium dark:border-white/40"
-          : "shrink-0 text-xs opacity-60"
+          ? "shrink-0 rounded-full border border-warning-border bg-warning-soft px-2 py-0.5 text-xs font-medium whitespace-nowrap text-warning"
+          : "shrink-0 text-xs whitespace-nowrap text-muted tabular-nums"
       }
       // The band alone would read as a grade; the number alone is hard to scan. Screen
       // readers get the field name too, since the bare score says nothing on its own.
