@@ -1,4 +1,3 @@
-// @gate resolution
 import { describe, expect, it } from "vitest";
 
 import {

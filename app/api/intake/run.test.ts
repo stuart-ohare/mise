@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { MODELS } from "@/lib/ai/client";
-import { VERSION as EXTRACTION_VERSION } from "@/lib/ai/prompts/extract-recipe";
+import {
+  VERSION as EXTRACTION_VERSION,
+  type RecipeSource,
+} from "@/lib/ai/prompts/extract-recipe";
 import type { IntakeWrite } from "@/lib/db/drafts";
 import type { DraftRecipe } from "@/lib/domain/intake-draft";
 
@@ -44,8 +47,14 @@ const extracted: DraftRecipe = {
 
 function deps(over: Partial<IntakeDeps> = {}) {
   const writes: IntakeWrite[] = [];
+  // Captured, not ignored: what call 2 was handed is the only thing that differs
+  // between the two paths, so it is the one thing a stub must not throw away.
+  const sources: RecipeSource[] = [];
   const base: IntakeDeps = {
-    extract: () => Promise.resolve({ ok: true, draft: extracted }),
+    extract: (source) => {
+      sources.push(source);
+      return Promise.resolve({ ok: true, draft: extracted });
+    },
     loadTerms: () => Promise.resolve([{ term: "butter", canonicalId: BUTTER }]),
     loadTree: () =>
       Promise.resolve({
@@ -57,17 +66,21 @@ function deps(over: Partial<IntakeDeps> = {}) {
       return Promise.resolve({ jobId: "job-1", recipeId: "recipe-1" });
     },
   };
-  return { deps: { ...base, ...over }, writes };
+  return { deps: { ...base, ...over }, writes, sources };
 }
 
 const run = (over: Partial<IntakeDeps> = {}, raw = "beans on toast") => {
-  const { deps: d, writes } = deps(over);
-  return runIntake({ sourceKind: "text", raw }, d).then((response) => ({ response, writes }));
+  const { deps: d, writes, sources } = deps(over);
+  return runIntake({ sourceKind: "text", raw }, d).then((response) => ({
+    response,
+    writes,
+    sources,
+  }));
 };
 
 describe("runIntake", () => {
   it("writes a draft whose unresolved line kept its raw text, and says which line it was", async () => {
-    const { response, writes } = await run();
+    const { response, writes, sources } = await run();
 
     expect(response.kind).toBe("draft");
     if (response.kind !== "draft") return;
@@ -95,6 +108,7 @@ describe("runIntake", () => {
     expect(response.draft.unresolved).toEqual(["2 tbsp ghee"]);
     expect(response.draft.recipe.status).toBe("draft");
     expect(writes).toHaveLength(1);
+    expect(sources).toEqual([{ kind: "text", text: "beans on toast" }]);
   });
 
   it("records the paste, the model and the prompt version on the job it writes", async () => {
@@ -160,8 +174,19 @@ const PIXEL =
 describe("runIntake, from a photograph", () => {
   // @gate resolution
   it("resolves an image draft through gate 1 and records the job as an image", async () => {
-    const { deps: d, writes } = deps();
+    const { deps: d, writes, sources } = deps();
     const response = await runIntake({ sourceKind: "image", raw: PIXEL }, d);
+
+    // The branch that matters: a card must reach call 2 as an image block, not as a
+    // 4 MiB base64 string in a text block. `RecipeSource` is a union, so a collapsed
+    // branch would typecheck and cost a real, useless vision call to discover.
+    expect(sources).toEqual([
+      {
+        kind: "image",
+        mediaType: "image/png",
+        data: PIXEL.slice("data:image/png;base64,".length),
+      },
+    ]);
 
     expect(response.kind).toBe("draft");
     if (response.kind !== "draft") return;

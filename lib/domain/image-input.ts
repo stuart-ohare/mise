@@ -31,6 +31,14 @@ export type ImageMediaType = (typeof IMAGE_MEDIA_TYPES)[number];
  */
 export const MAX_IMAGE_DATA_URI_LENGTH = 4 * 1024 * 1024;
 
+/**
+ * The same cap as a picture size, for anything that has to say it to a person. Base64
+ * carries three bytes in four characters, so the limit a photographer experiences is
+ * smaller than the limit the column holds — telling them "4 MB" would reject a 3.5 MB
+ * JPEG while claiming it was within the rule.
+ */
+export const MAX_IMAGE_MB = Math.floor((MAX_IMAGE_DATA_URI_LENGTH * 3) / 4 / 1_000_000);
+
 const DATA_URI = /^data:(image\/(?:jpeg|png|gif|webp));base64,([A-Za-z0-9+/]+={0,2})$/;
 
 /**

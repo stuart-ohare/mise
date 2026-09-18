@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { imageDataUriSchema } from "@/lib/domain/image-input";
+import { imageDataUriSchema, MAX_IMAGE_MB } from "@/lib/domain/image-input";
 
 import { intakeResponseSchema, type IntakeRequest, type IntakeResponse } from "../api/intake/schema";
 import Confidence from "./confidence";
@@ -87,7 +87,7 @@ export default function IntakeClient() {
     if (!parsed.success) {
       setCard(null);
       setFailure(
-        `Mise can't read that file. It takes a JPEG, PNG, GIF or WebP under 4 MB — ${file.name} is neither, or it's too big.`,
+        `Mise can't read that file. It takes a JPEG, PNG, GIF or WebP of about ${MAX_IMAGE_MB} MB or less — ${file.name} is neither, or it's too big.`,
       );
       return;
     }

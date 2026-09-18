@@ -39,10 +39,13 @@ export type IntakeDeps = {
 
 export async function runIntake(input: IntakeRequest, deps: IntakeDeps): Promise<IntakeResponse> {
   const source = toSource(input);
-  // Only reachable if a caller skipped `intakeRequestSchema`, which the route cannot:
-  // a data URI that doesn't split is not an image, and guessing at one would be the
-  // opposite of what this pipeline is for.
-  if (source === null) return { kind: "not_extracted", reason: "parse_failed" };
+  if (source === null) {
+    // Unreachable through the route, which parses the identical pattern before calling
+    // this. If it ever fires, the request was malformed and no model ran — so it is
+    // logged rather than passed off as a model failure by the reason it has to borrow.
+    console.error("[intake] an image request reached the pipeline without a usable data URI");
+    return { kind: "not_extracted", reason: "parse_failed" };
+  }
 
   const extracted = await deps.extract(source);
   // Nothing is written on a failure. A row in the queue that holds no recipe is work for
