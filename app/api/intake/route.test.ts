@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * The HTTP shell only: the branches that exist in `route.ts` rather than in `runIntake`.
@@ -18,6 +18,10 @@ vi.mock("@/lib/db/client", () => ({
 }));
 
 const { POST } = await import("./route");
+
+beforeEach(() => {
+  transactions.length = 0;
+});
 
 function post(body: unknown): Promise<Response> {
   return POST(

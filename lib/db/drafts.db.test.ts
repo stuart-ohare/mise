@@ -88,9 +88,17 @@ function draftWith(canonicalId: string): IntakeDraft {
   };
 }
 
-const write = (tx: Tx, draft: IntakeDraft) =>
+/**
+ * `rawInput` carries a unique marker so a count over it is a count of the rows this call
+ * wrote. Selecting by the id the write returned would only ever find the row it named,
+ * which is no evidence about how many rows it made.
+ */
+const paste = (marker: string) =>
+  `  Chard and beans ${marker}\n\na knob of butter\n2 tbsp ghee, melted  `;
+
+const write = (tx: Tx, draft: IntakeDraft, marker: string) =>
   writeIntakeDraft(tx, {
-    rawInput: "  Chard and beans\n\na knob of butter\n2 tbsp ghee, melted  ",
+    rawInput: paste(marker),
     model: "claude-sonnet-4-5",
     promptVersion: "1",
     output: { title: draft.recipe.title },
@@ -98,29 +106,37 @@ const write = (tx: Tx, draft: IntakeDraft) =>
   });
 
 describe("writeIntakeDraft", () => {
-  it("writes one job awaiting review and one draft recipe pointing at it", async () => {
+  it("writes exactly one job awaiting review and one draft recipe pointing at it", async () => {
     await inRollback(async (tx) => {
+      const marker = crypto.randomUUID();
       const draft = draftWith(await butterId(tx));
-      const { jobId, recipeId } = await write(tx, draft);
+      const { jobId, recipeId } = await write(tx, draft, marker);
 
+      // Counted over the marker, not over the returned id: "exactly one" is the claim,
+      // and a second job row written by the same call has to be able to fail this.
       const jobs = await tx
         .select()
         .from(schema.extractionJob)
-        .where(eq(schema.extractionJob.id, jobId));
+        .where(eq(schema.extractionJob.rawInput, paste(marker)));
       expect(jobs).toHaveLength(1);
       expect(jobs[0]).toMatchObject({
+        id: jobId,
         sourceKind: "text",
         status: "awaiting_review",
         model: "claude-sonnet-4-5",
         promptVersion: "1",
         // The paste as it arrived, whitespace and all.
-        rawInput: "  Chard and beans\n\na knob of butter\n2 tbsp ghee, melted  ",
+        rawInput: paste(marker),
         fieldConfidence: draft.fieldConfidence,
       });
 
-      const recipes = await tx.select().from(schema.recipe).where(eq(schema.recipe.id, recipeId));
+      const recipes = await tx
+        .select()
+        .from(schema.recipe)
+        .where(eq(schema.recipe.extractionJobId, jobId));
       expect(recipes).toHaveLength(1);
       expect(recipes[0]).toMatchObject({
+        id: recipeId,
         title: draft.recipe.title,
         serves: 2,
         minutes: 25,
@@ -133,7 +149,7 @@ describe("writeIntakeDraft", () => {
   it("stores an unresolved line as a null canonical id with its raw text intact", async () => {
     await inRollback(async (tx) => {
       const canonicalId = await butterId(tx);
-      const { recipeId } = await write(tx, draftWith(canonicalId));
+      const { recipeId } = await write(tx, draftWith(canonicalId), crypto.randomUUID());
 
       const lines = await tx
         .select()
@@ -154,7 +170,7 @@ describe("writeIntakeDraft", () => {
 
   it("writes the steps in order, numbered from one", async () => {
     await inRollback(async (tx) => {
-      const { recipeId } = await write(tx, draftWith(await butterId(tx)));
+      const { recipeId } = await write(tx, draftWith(await butterId(tx)), crypto.randomUUID());
 
       const steps = await tx
         .select()
