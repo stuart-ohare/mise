@@ -10,4 +10,8 @@ export const thresholds = {
     avoid_f1: 0.8,
     max_minutes_exact: 0.8,
   },
+  "recipe-extraction": {
+    field_accuracy: 0.85,
+    null_precision: 1,
+  },
 } satisfies Thresholds;
