@@ -123,3 +123,38 @@ and it never reaches the model.
   behind.
 - **`raw_input` is the paste as it arrived**, untrimmed, even though call 2 was given the
   trimmed string. The job row is the record of what the user submitted.
+
+## `POST /api/review/:id/publish`
+
+The publish gate. `route.ts` is the HTTP shell. The rule is `publishDraft` in
+`lib/db/publish.ts`. `schema.ts` holds the response union, which the review screen
+imports so the two ends parse the same shape.
+
+### Request
+
+No body. The recipe id in the path is the whole input, so nothing a page rendered or
+sends can change the answer. A request from the review screen and one from `curl` are
+the same request.
+
+### Response
+
+| Status | Body | Means |
+|---|---|---|
+| `200` | `{ ok: true }` | Published. An Intake draft's `extraction_job` is now `promoted` |
+| `409` | `{ error: "unresolved_ingredients", lines: [{ id, rawText }] }` | At least one line is at `canonical_id = null`. The recipe stays a draft |
+| `409` | `{ error: "already_published" }` | The recipe isn't a draft |
+| `404` | `{ error: "not_found" }` | No recipe has that id, including an id that isn't a uuid |
+
+### What the route guarantees
+
+- **An unresolved line blocks publication, optional lines included.** An unknown
+  ingredient is exactly where an allergen hides, and a published recipe is a row gate 2
+  can return. `unresolved_ingredients` names every blocking line by id and `raw_text`,
+  so the refusal always carries its reason.
+- **The check and the write are one statement.** One conditional `UPDATE` sets the
+  status only where the recipe is still a draft and no line of it is unresolved. The
+  reads after it only explain a refusal. They never decide one.
+- **The recipe and its job move together.** The route opens the transaction, as Intake
+  does, so a published recipe never points at a job still `awaiting_review`.
+- **A human presses the button.** No confidence score publishes anything, and nothing
+  calls this route except a person on the review screen (CLAUDE.md §2).
