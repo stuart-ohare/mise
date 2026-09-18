@@ -13,6 +13,7 @@ export const publishResponseSchema = z.union([
     // At least one: a refusal that names no line gives the reviewer nothing to fix.
     lines: z.array(z.object({ id: z.string().min(1), rawText: z.string().min(1) })).min(1),
   }),
+  z.object({ error: z.literal("no_ingredients") }),
   z.object({ error: z.literal("already_published") }),
   z.object({ error: z.literal("not_found") }),
 ]);

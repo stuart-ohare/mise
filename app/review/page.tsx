@@ -51,7 +51,7 @@ function Draft({ draft }: { draft: QueuedDraft }) {
       </div>
 
       {/* The reason shown here is a preview. The route runs the same check again. */}
-      <PublishButton recipeId={draft.id} unresolved={unresolved} />
+      <PublishButton recipeId={draft.id} unresolved={unresolved} hasLines={draft.lines.length > 0} />
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left text-sm">

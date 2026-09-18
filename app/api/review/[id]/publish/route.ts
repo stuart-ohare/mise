@@ -26,6 +26,8 @@ function toResponse(result: PublishResult): { status: number; body: PublishRespo
       return { status: 200, body: { ok: true } };
     case "unresolved":
       return { status: 409, body: { error: "unresolved_ingredients", lines: result.lines } };
+    case "no_ingredients":
+      return { status: 409, body: { error: "no_ingredients" } };
     case "already_published":
       return { status: 409, body: { error: "already_published" } };
     case "not_found":

@@ -2,15 +2,16 @@
 // client import graph for the same reason candidates.ts does.
 import "server-only";
 
-import { and, asc, eq, isNull, notExists, sql } from "drizzle-orm";
+import { and, asc, eq, exists, isNull, notExists, sql } from "drizzle-orm";
 
 import type { Tx } from "./drafts";
 import { extractionJob, recipe, recipeIngredient } from "./schema";
 
 /**
- * The publish gate. A draft leaves draft only when none of its lines is unresolved,
- * optional lines included: an unknown ingredient is exactly where an allergen hides, and
- * once published a recipe is a row gate 2 can return (CLAUDE.md §2).
+ * The publish gate. A draft leaves draft only when it has at least one line and none of
+ * them is unresolved, optional lines included: an unknown ingredient is exactly where an
+ * allergen hides, and once published a recipe is a row gate 2 can return (CLAUDE.md §2).
+ * A recipe with no lines is the extreme case, and it would pass every exclusion.
  *
  * It takes only the recipe id. What the review screen happened to render is not an
  * input, so a request from the page and one from curl get the same answer.
@@ -22,6 +23,7 @@ export type PublishResult =
   | { kind: "published" }
   | { kind: "not_found" }
   | { kind: "already_published" }
+  | { kind: "no_ingredients" }
   | { kind: "unresolved"; lines: UnresolvedLine[] };
 
 export async function publishDraft(tx: Tx, recipeId: string): Promise<PublishResult> {
@@ -34,6 +36,12 @@ export async function publishDraft(tx: Tx, recipeId: string): Promise<PublishRes
       and(
         eq(recipe.id, recipeId),
         eq(recipe.status, "draft"),
+        exists(
+          tx
+            .select({ one: sql`1` })
+            .from(recipeIngredient)
+            .where(eq(recipeIngredient.recipeId, recipe.id)),
+        ),
         notExists(
           tx
             .select({ one: sql`1` })
@@ -63,14 +71,21 @@ export async function publishDraft(tx: Tx, recipeId: string): Promise<PublishRes
   if (!current) return { kind: "not_found" };
   if (current.status === "published") return { kind: "already_published" };
 
+  const [anyLine] = await tx
+    .select({ id: recipeIngredient.id })
+    .from(recipeIngredient)
+    .where(eq(recipeIngredient.recipeId, recipeId))
+    .limit(1);
+  if (!anyLine) return { kind: "no_ingredients" };
+
   const lines = await tx
     .select({ id: recipeIngredient.id, rawText: recipeIngredient.rawText })
     .from(recipeIngredient)
     .where(and(eq(recipeIngredient.recipeId, recipeId), isNull(recipeIngredient.canonicalId)))
     .orderBy(asc(recipeIngredient.id));
 
-  // A draft the update refused with no unresolved line would be a refusal that names no
-  // reason. That is a bug in the predicate above, not an outcome to report.
+  // A draft the update refused with lines, none unresolved, would be a refusal that names
+  // no reason. That is a bug in the predicate above, not an outcome to report.
   if (lines.length === 0) {
     throw new Error(`publish of draft ${recipeId} was refused with no unresolved line`);
   }

@@ -55,6 +55,15 @@ describe("POST /api/review/:id/publish", () => {
     expect(calls).toEqual([RECIPE_ID]);
   });
 
+  it("refuses a draft with no ingredient lines with 409", async () => {
+    outcome = { kind: "no_ingredients" };
+
+    const response = await publish(RECIPE_ID);
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({ error: "no_ingredients" });
+  });
+
   it("answers a publish with 200 ok", async () => {
     outcome = { kind: "published" };
 
