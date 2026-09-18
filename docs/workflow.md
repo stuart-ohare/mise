@@ -13,13 +13,14 @@ each trace names what the process caught. The rules themselves are in
 /plan     plan posted as an issue comment
 /approve  human-only skill moves the label          human approves plan    status:planned
 /build    own worktree, failing test first                                 status:building
-/verify   verify.sh + fresh-context invariant-reviewer
+/verify   verify.sh + fresh-context invariant-reviewer  human decides CONCERNS
 /ship     PR ticks every criterion against evidence                         status:in-review
 merge     human, always; CI relabels closed issues  human merges           status:done
 ```
 
-A human approves three things: the spec, the plan and the merge. Everything between is
-agent work, and it leaves a record on the issue and the PR.
+A human approves three things: the spec, the plan and the merge. The human also decides
+on anything the reviewer raises as a concern, and on dependency changes and edits to the
+guards. The rest is agent work, and it leaves a record on the issue and the PR.
 
 ## Trace 1: one issue, end to end
 
@@ -39,12 +40,15 @@ line held by that term.
   and [amendment two](https://github.com/stuart-ohare/mise/issues/82#issuecomment-5727995841).
 - **The PR ticks each acceptance criterion against a named test.** One box stays
   unticked: the screenshot of the fix clearing a blocker in `/review`. `gh` can't attach
-  images, so the PR says so and doesn't tick it. The screenshots were posted afterwards as
+  images, so the PR said the screenshots would follow as a comment, and didn't tick the
+  box. The PR merged without that comment. Planning this page found the gap, and the
+  screenshots went up about 75 minutes after merge, as
   [a comment on the PR](https://github.com/stuart-ohare/mise/pull/92#issuecomment-5728913481).
 
 **Caught:** two design changes, each traceable to the review finding that forced it. And
 one criterion that couldn't be evidenced when the PR was written, left open rather than
-claimed. An honest unchecked box is what makes the other boxes believable.
+claimed. An honest unchecked box is what makes the other boxes believable. The same box
+also shows a gap: nothing checked that its promise was kept before the human merged.
 
 ## Trace 2: the process noticing it rewarded the wrong thing
 
