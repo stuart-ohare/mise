@@ -210,7 +210,7 @@ repeat the request).
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Cook shows "Something broke on the way to the kitchen"; `/api/cook` returns 500 `{"error":"cook_failed"}`; the log shows `[cook] request failed before a response could be validated` with `ANTHROPIC_API_KEY is not set` | The key is missing or empty in that environment | `vercel env rm ANTHROPIC_API_KEY production`, `vercel env add ANTHROPIC_API_KEY production`, then redeploy (step 5). The variable may be shared with Preview, so check `vercel env ls` afterwards |
+| Cook shows "Something broke on the way to the kitchen"; `/api/cook` returns 500 `{"error":"cook_failed"}`; the log shows `[cook] request failed before a response could be validated` with `ANTHROPIC_API_KEY is not set` | The key is missing or empty in that environment | `vercel env rm ANTHROPIC_API_KEY production`, `vercel env add ANTHROPIC_API_KEY production`, then redeploy (step 5). If the variable was shared with Preview, the `rm` can leave Preview without it and the `add` only restores Production — check `vercel env ls` and add it for `preview` too |
 | `200`, but `needs_resolution` for "dairy", or `no_candidates` for a common ingredient | The database has the schema but was never seeded | Step 4 |
 | `vercel env pull` gives an empty `DATABASE_URL` | The Neon values are marked sensitive | Copy it from Neon instead (step 2) |
 
