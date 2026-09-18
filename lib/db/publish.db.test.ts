@@ -71,6 +71,8 @@ async function addRecipe(
     .values({ title: `fixture ${randomUUID()}`, status, extractionJobId })
     .returning({ id: schema.recipe.id });
   if (!row) throw new Error("no recipe row");
+  // Drizzle refuses an empty `values()`, and a recipe with no lines is a case under test.
+  if (lines.length === 0) return { recipeId: row.id, lineIds: [] };
   const inserted = await tx
     .insert(schema.recipeIngredient)
     .values(
@@ -155,6 +157,19 @@ describe("publishDraft", () => {
         lines: [{ id: lineIds[1], rawText: "ghee, to finish" }],
       });
       expect(await statusOf(tx, recipeId)).toBe("draft");
+    });
+  });
+
+  it("refuses a draft with no ingredient lines and leaves it a draft", async () => {
+    // No line is unresolved because there is no line: the contents are wholly unknown, and
+    // published, the recipe would pass every exclusion gate 2 can express.
+    await inRollback(async (tx) => {
+      const jobId = await addJob(tx);
+      const { recipeId } = await addRecipe(tx, "draft", [], jobId);
+
+      await expect(publishDraft(tx, recipeId)).resolves.toEqual({ kind: "no_ingredients" });
+      expect(await statusOf(tx, recipeId)).toBe("draft");
+      expect(await jobStatusOf(tx, jobId)).toBe("awaiting_review");
     });
   });
 
