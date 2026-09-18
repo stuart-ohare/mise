@@ -65,6 +65,8 @@ describe("buildIntakeDraft", () => {
         canonicalName: null,
         // Byte-identical, surrounding spaces included: the reviewer sees what the model saw.
         rawText: "  2 tbsp ghee, melted ",
+        // The term the index was asked about, kept so an alias added later can find it.
+        name: "ghee",
         qty: 2,
         unit: "tbsp",
         optional: false,

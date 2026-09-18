@@ -53,6 +53,8 @@ export type IntakeIngredient = {
   canonicalId: string | null;
   canonicalName: string | null;
   rawText: string;
+  /** The term resolution was attempted on, kept so a later alias can find this line. */
+  name: string;
   qty: number | null;
   unit: string | null;
   optional: boolean;
@@ -88,6 +90,7 @@ export function buildIntakeDraft(
       canonicalId,
       canonicalName: canonicalId === null ? null : (names.get(canonicalId) ?? null),
       rawText: line.rawText,
+      name: line.name,
       qty: line.qty,
       unit: line.unit,
       optional: line.optional,

@@ -43,6 +43,7 @@ const intakeIngredientSchema = z.object({
   canonicalId: z.string().nullable(),
   canonicalName: z.string().nullable(),
   rawText: z.string().min(1),
+  name: z.string().min(1),
   qty: z.number().positive().nullable(),
   unit: z.string().min(1).nullable(),
   optional: z.boolean(),

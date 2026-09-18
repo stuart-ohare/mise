@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
 
-import { count, eq, TransactionRollbackError } from "drizzle-orm";
+import { count, eq, inArray, TransactionRollbackError } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { DELIBERATELY_UNRESOLVED } from "@/lib/ai/prompts/seed-catalogue";
 import * as schema from "@/lib/db/schema";
 
 import { readSeedFiles, seedDatabase, type SeedFiles, type Tx } from "./seed";
@@ -110,6 +111,40 @@ describe("seedDatabase", () => {
     await inRollback(async (tx) => {
       const result = await seedDatabase(tx, files);
       expect(result.ok).toBe(true);
+    });
+  });
+
+  // @gate resolution
+  it("stores the term each line was resolved on, so a line that missed can be found again", async () => {
+    await inRollback(async (tx) => {
+      // Removed and re-seeded, as listDrafts' test does: a local database may already
+      // hold this recipe, and this is a claim about what the seed writes.
+      const title = "Spiced lentil dal with ghee";
+      await tx.delete(schema.recipe).where(eq(schema.recipe.title, title));
+      // And any alias review added for ghee, which the seed would resolve it through.
+      await tx
+        .delete(schema.ingredientAlias)
+        .where(inArray(schema.ingredientAlias.alias, [...DELIBERATELY_UNRESOLVED]));
+      expect((await seedDatabase(tx, files)).ok).toBe(true);
+
+      const [dal] = await tx.select({ id: schema.recipe.id }).from(schema.recipe).where(eq(schema.recipe.title, title));
+      if (!dal) throw new Error(`"${title}" was not seeded`);
+      const lines = await tx
+        .select({
+          name: schema.recipeIngredient.name,
+          rawText: schema.recipeIngredient.rawText,
+          canonicalId: schema.recipeIngredient.canonicalId,
+        })
+        .from(schema.recipeIngredient)
+        .where(eq(schema.recipeIngredient.recipeId, dal.id));
+
+      // The name, not the line: "2 tbsp ghee" is what a reviewer reads, "ghee" is what an
+      // alias has to match.
+      expect(lines.filter((l) => l.canonicalId === null)).toEqual([
+        { name: "ghee", rawText: "2 tbsp ghee", canonicalId: null },
+      ]);
+      const entry = files.recipes.find((r) => r.title === title);
+      expect(lines.map((l) => l.name).sort()).toEqual(entry?.ingredients.map((i) => i.name).sort());
     });
   });
 

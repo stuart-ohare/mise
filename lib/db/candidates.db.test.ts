@@ -97,6 +97,7 @@ async function addRecipe(
       recipeId: row.id,
       canonicalId: line.id,
       rawText: "fixture line",
+      name: "fixture",
       optional: line.optional ?? false,
     })),
   );

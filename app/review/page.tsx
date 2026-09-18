@@ -1,15 +1,25 @@
 import { connection } from "next/server";
 
+import AliasFix, { type IngredientOption } from "../_components/alias-fix";
 import Confidence from "../_components/confidence";
 import PublishButton from "../_components/publish-button";
 import { db } from "@/lib/db/client";
 import { listDrafts, type QueuedDraft, type QueueLine } from "@/lib/db/drafts";
+import { loadIngredientTree } from "@/lib/db/ingredients";
+import { effectiveAllergenTags } from "@/lib/domain/ingredient-tree";
 
 export default async function ReviewPage() {
   // Without this the build would prerender the queue from whatever database the build
   // machine can reach, and serve that snapshot as the queue from then on.
   await connection();
-  const drafts = await listDrafts(db);
+  const [drafts, tree] = await Promise.all([listDrafts(db), loadIngredientTree(db)]);
+  const ingredients: IngredientOption[] = tree.nodes
+    .map((node) => ({
+      id: node.id,
+      name: node.name,
+      allergens: [...effectiveAllergenTags(tree.nodes, node.id)].sort(),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <section className="space-y-8">
@@ -28,13 +38,13 @@ export default async function ReviewPage() {
           Nothing in the queue.
         </p>
       ) : (
-        drafts.map((draft) => <Draft key={draft.id} draft={draft} />)
+        drafts.map((draft) => <Draft key={draft.id} draft={draft} ingredients={ingredients} />)
       )}
     </section>
   );
 }
 
-function Draft({ draft }: { draft: QueuedDraft }) {
+function Draft({ draft, ingredients }: { draft: QueuedDraft; ingredients: IngredientOption[] }) {
   const unresolved = draft.lines.filter((line) => line.canonicalId === null).map((line) => line.rawText);
   const confidence = draft.fieldConfidence;
 
@@ -71,6 +81,7 @@ function Draft({ draft }: { draft: QueuedDraft }) {
               <Line
                 key={`${line.rawText}:${index}`}
                 line={line}
+                ingredients={ingredients}
                 score={confidence?.ingredients.find((c) => c.rawText === line.rawText)?.confidence}
               />
             ))}
@@ -81,7 +92,15 @@ function Draft({ draft }: { draft: QueuedDraft }) {
   );
 }
 
-function Line({ line, score }: { line: QueueLine; score: number | undefined }) {
+function Line({
+  line,
+  ingredients,
+  score,
+}: {
+  line: QueueLine;
+  ingredients: IngredientOption[];
+  score: number | undefined;
+}) {
   const unresolved = line.canonicalId === null;
   return (
     <tr
@@ -94,7 +113,14 @@ function Line({ line, score }: { line: QueueLine; score: number | undefined }) {
       {/* whitespace-pre-wrap: the raw text is shown as stored, leading spaces and all. */}
       <td className="py-1.5 pr-3 pl-2 font-mono text-xs whitespace-pre-wrap">{line.rawText}</td>
       <td className="py-1.5 pr-3">
-        {unresolved ? <strong>unresolved</strong> : <span className="opacity-80">{line.canonicalName}</span>}
+        {unresolved ? (
+          <>
+            <strong>unresolved</strong>
+            <AliasFix term={line.name} ingredients={ingredients} />
+          </>
+        ) : (
+          <span className="opacity-80">{line.canonicalName}</span>
+        )}
       </td>
       <td className="py-1.5 pr-3">{line.qty ?? "—"}</td>
       <td className="py-1.5 pr-3">{line.unit ?? "—"}</td>

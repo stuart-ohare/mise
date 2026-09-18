@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, describe, expect, it } from "vitest";
 
+import { DELIBERATELY_UNRESOLVED } from "@/lib/ai/prompts/seed-catalogue";
 import type { IntakeDraft } from "@/lib/domain/intake-draft";
 import { readSeedFiles, seedDatabase } from "@/scripts/seed/seed";
 
@@ -57,6 +58,7 @@ function draftWith(canonicalId: string): IntakeDraft {
         canonicalId,
         canonicalName: "butter",
         rawText: "a knob of butter",
+        name: "butter",
         qty: null,
         unit: null,
         optional: false,
@@ -66,6 +68,7 @@ function draftWith(canonicalId: string): IntakeDraft {
         canonicalId: null,
         canonicalName: null,
         rawText: "  2 tbsp ghee, melted ",
+        name: "ghee",
         qty: 2.5,
         unit: "tbsp",
         optional: true,
@@ -159,12 +162,13 @@ describe("writeIntakeDraft", () => {
         .where(eq(schema.recipeIngredient.recipeId, recipeId));
 
       expect(lines).toHaveLength(2);
-      expect(lines.map((l) => [l.rawText, l.canonicalId, l.qty, l.unit, l.optional])).toEqual(
+      expect(lines.map((l) => [l.rawText, l.name, l.canonicalId, l.qty, l.unit, l.optional])).toEqual(
         expect.arrayContaining([
           // An unstated quantity is null in the column, not zero.
-          ["a knob of butter", canonicalId, null, null, false],
-          // Ghee resolves to nothing, and every character of the line survives.
-          ["  2 tbsp ghee, melted ", null, "2.5", "tbsp", true],
+          ["a knob of butter", "butter", canonicalId, null, null, false],
+          // Ghee resolves to nothing, and every character of the line survives — as does
+          // the term it failed on, so an alias added in review can find it again.
+          ["  2 tbsp ghee, melted ", "ghee", null, "2.5", "tbsp", true],
         ]),
       );
     });
@@ -283,6 +287,11 @@ describe("listDrafts", () => {
       // database may hold these as published, and this is a claim about what the seed writes.
       const titles = Object.keys(HELD_BY);
       await tx.delete(schema.recipe).where(inArray(schema.recipe.title, titles));
+      // Likewise an alias a reviewer added for one of these terms (#82), which the seed
+      // resolves against and which would publish the very draft this test is about.
+      await tx
+        .delete(schema.ingredientAlias)
+        .where(inArray(schema.ingredientAlias.alias, [...DELIBERATELY_UNRESOLVED]));
       const files = readSeedFiles();
       if (!files.ok) throw new Error(files.errors.join("\n"));
       const seeded = await seedDatabase(tx, files.files);
@@ -309,7 +318,7 @@ describe("listDrafts", () => {
         .values({ title: `Published ${crypto.randomUUID()}`, status: "published" })
         .returning({ id: schema.recipe.id });
       if (!row) throw new Error("no recipe row");
-      await tx.insert(schema.recipeIngredient).values({ recipeId: row.id, rawText: "a knob of ghee" });
+      await tx.insert(schema.recipeIngredient).values({ recipeId: row.id, rawText: "a knob of ghee", name: "ghee" });
       // A draft of its own, so the `every` below can't pass on an empty queue.
       const { recipeId } = await write(tx, draftWith(await butterId(tx)), crypto.randomUUID());
 
@@ -345,6 +354,7 @@ describe("listDrafts", () => {
         // Unresolved first. Null, not "" and not a name read back out of the raw text.
         {
           rawText: "  2 tbsp ghee, melted ",
+          name: "ghee",
           canonicalId: null,
           canonicalName: null,
           qty: "2.5",
@@ -354,6 +364,7 @@ describe("listDrafts", () => {
         // The name comes from the canonical row, not from what extraction called it.
         {
           rawText: "a knob of butter",
+          name: "butter",
           canonicalId,
           canonicalName: name?.name,
           qty: null,

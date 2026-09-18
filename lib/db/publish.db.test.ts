@@ -80,6 +80,7 @@ async function addRecipe(
         recipeId: row.id,
         canonicalId: line.canonicalId,
         rawText: line.rawText,
+        name: line.rawText,
         optional: line.optional ?? false,
       })),
     )

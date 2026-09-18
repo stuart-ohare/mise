@@ -62,6 +62,7 @@ export async function writeIntakeDraft(tx: Tx, input: IntakeWrite): Promise<Inta
       recipeId: row.id,
       canonicalId: line.canonicalId,
       rawText: line.rawText,
+      name: line.name,
       // `numeric` is written as text so a decimal quantity survives the round trip
       // intact; null stays null, because an unstated amount is not a zero.
       qty: line.qty === null ? null : String(line.qty),
@@ -97,6 +98,7 @@ const draftRowSchema = z.object({
   ingredients: z.array(
     z.object({
       rawText: z.string(),
+      name: z.string(),
       canonicalId: z.string().nullable(),
       // `numeric` arrives as text. It stays text: the screen only shows it, and a
       // string keeps the decimal exactly as written.
@@ -110,6 +112,8 @@ const draftRowSchema = z.object({
 
 export type QueueLine = {
   rawText: string;
+  /** The term resolution was tried on. What the alias fix offers to map. */
+  name: string;
   canonicalId: string | null;
   /** The canonical row's name, never extraction's word for it. Null when unresolved. */
   canonicalName: string | null;
@@ -145,7 +149,7 @@ export async function listDrafts(db: Db | Tx): Promise<QueuedDraft[]> {
     with: {
       extractionJob: { columns: { fieldConfidence: true } },
       ingredients: {
-        columns: { rawText: true, canonicalId: true, qty: true, unit: true, optional: true },
+        columns: { rawText: true, name: true, canonicalId: true, qty: true, unit: true, optional: true },
         with: { canonical: { columns: { name: true } } },
       },
     },

@@ -165,3 +165,57 @@ the same request.
   path calls this route: Intake writes drafts and stops (CLAUDE.md §2). The route has no
   auth, so anyone who can reach it can call it. That's safe because the rule above is
   the same whoever calls.
+
+## `POST /api/aliases`
+
+The alias fix: gate 1's repair path. `route.ts` is the HTTP shell. The rule is
+`addAliasAndReresolve` in `lib/db/aliases.ts`. `schema.ts` holds both shapes, which the
+review screen's alias form imports.
+
+### Request
+
+```ts
+{ alias: string; canonicalId: string }   // alias non-blank, canonicalId a uuid
+```
+
+`400 { error: "invalid_request" }` for anything else.
+
+### Response
+
+| Status | Body | Means |
+|---|---|---|
+| `200` | `{ ok: true, reresolved: n }` | `n` draft lines named by the term now resolve. The alias is written, unless the term already meant this ingredient |
+| `409` | `{ error: "alias_exists" }` | The term already means a different ingredient, as an alias or a canonical name, or is ambiguous. Nothing changed |
+| `422` | `{ error: "unknown_ingredient" }` | `canonicalId` names no ingredient. Nothing written |
+| `422` | `{ error: "no_unresolved_line" }` | No unresolved draft line carries the term. Nothing written |
+
+### What the route guarantees
+
+- **Re-resolution is an exact lookup, not a guess.** Every `recipe_ingredient` stores
+  `name`, the term resolution was tried on, beside `raw_text`. A line re-resolves only
+  when its `name` equals the alias after `normaliseTerm`, the index's own normalisation.
+  `raw_text` is never scanned, so "ghee butter" is not ghee.
+- **One transaction.** The alias and the lines it unblocks land together or not at all.
+- **Duplicates are compared normalised.** The alias is stored normalised and checked
+  against every name and alias first, so `Ghee` can't sit beside `ghee` and make the
+  term ambiguous. A concurrent duplicate loses on the unique index, as a 409.
+- **A term that already means this ingredient still re-resolves.** A line can be null
+  under a known term — Intake built its index just before the alias landed, or a re-seed
+  added it. Nothing is written to `ingredient_alias`, but the lines resolve, because
+  otherwise that draft could never leave the queue.
+- **Provenance.** The alias is written with `source: "extraction"`, so one that turns out
+  wrong can be told from the hand-authored taxonomy.
+- **Nothing publishes.** Only draft lines are touched and no status changes. The draft
+  still goes through `POST /api/review/:id/publish`, pressed by a person.
+- **No model is called.** A person says what the ingredient is.
+- **It only binds a term a draft failed on.** Unlike publishing, this route writes to the
+  index gate 1 resolves Cook's exclusions against. Bind `groundnut` to cauliflower and
+  *no groundnuts* stops being a question and lets peanut recipes through. So the alias
+  must match at least one unresolved draft line, and the review form fixes it to that
+  line's term. It repairs the queue; it can't rewrite the index at large.
+
+  **What stays open.** The route has no auth (CLAUDE.md §2), and nor does Intake. So
+  someone who can reach both can paste a recipe using a term, then bind that term to the
+  wrong ingredient. A human choosing the wrong node through the form has the same effect.
+  The picker shows the allergens a choice carries to make that mistake visible, but it
+  doesn't prevent it, and there's no way yet to edit or delete an alias.
