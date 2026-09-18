@@ -19,6 +19,7 @@ export const deps: AliasDeps = {
 function toResponse(result: AddAliasResult): { status: number; body: AliasResponse } {
   switch (result.kind) {
     case "added":
+    case "already_known":
       return { status: 200, body: { ok: true, reresolved: result.reresolved } };
     case "alias_exists":
       return { status: 409, body: { error: "alias_exists" } };

@@ -1,7 +1,7 @@
 // @gate resolution
 import { describe, expect, it } from "vitest";
 
-import { aliasConflict, linesMatchingAlias } from "./reresolve";
+import { aliasStanding, linesMatchingAlias } from "./reresolve";
 
 /**
  * The repair path for gate 1. A human names what an unresolved term means, and every
@@ -31,21 +31,33 @@ describe("linesMatchingAlias", () => {
   });
 });
 
-describe("aliasConflict", () => {
+describe("aliasStanding", () => {
   const terms = [
     { term: "clarified butter", canonicalId: "cb" },
     { term: "yogurt", canonicalId: "y" },
   ];
 
-  it("is a conflict when the alias is already an alias, however it is spelled", () => {
-    expect(aliasConflict(" Yogurt", terms)).toBe(true);
+  it("is a conflict when the alias is already an alias of something else, however it is spelled", () => {
+    expect(aliasStanding(" Yogurt", "cb", terms)).toBe("conflict");
   });
 
-  it("is a conflict when the alias is already a canonical name", () => {
-    expect(aliasConflict("Clarified Butter", terms)).toBe(true);
+  it("is a conflict when the alias is already another ingredient's canonical name", () => {
+    expect(aliasStanding("Clarified Butter", "y", terms)).toBe("conflict");
   });
 
-  it("is not a conflict for a term nothing claims", () => {
-    expect(aliasConflict("ghee", terms)).toBe(false);
+  it("is new for a term nothing claims", () => {
+    expect(aliasStanding("ghee", "cb", terms)).toBe("new");
+  });
+
+  // A line can still be null under a term that already means this ingredient: Intake
+  // built its index before the alias landed, or a re-seed added it. Re-resolving is the
+  // only way that line's draft ever unblocks.
+  it("is known when the term already means the same ingredient, as an alias or a name", () => {
+    expect(aliasStanding("YOGURT", "y", terms)).toBe("known");
+    expect(aliasStanding("clarified butter", "cb", terms)).toBe("known");
+  });
+
+  it("is a conflict when the term is ambiguous, even if one meaning is this ingredient", () => {
+    expect(aliasStanding("yogurt", "y", [...terms, { term: "yogurt", canonicalId: "cb" }])).toBe("conflict");
   });
 });

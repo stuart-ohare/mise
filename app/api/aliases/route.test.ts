@@ -53,7 +53,16 @@ describe("POST /api/aliases", () => {
     expect(calls).toEqual([{ alias: "ghee", canonicalId: CLARIFIED_BUTTER }]);
   });
 
-  it("answers an alias that already means something with 409", async () => {
+  it("answers a term that already means this ingredient with 200 and the lines it re-resolved", async () => {
+    outcome = { kind: "already_known", reresolved: 1 };
+
+    const response = await post({ alias: "ghee", canonicalId: CLARIFIED_BUTTER });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ ok: true, reresolved: 1 });
+  });
+
+  it("answers an alias that already means something else with 409", async () => {
     outcome = { kind: "alias_exists" };
 
     const response = await post({ alias: "ghee", canonicalId: CLARIFIED_BUTTER });

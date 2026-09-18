@@ -23,6 +23,7 @@ import { loadResolutionTerms } from "./terms";
 
 export type AddAliasResult =
   | { kind: "added"; reresolved: number }
+  | { kind: "already_known"; reresolved: number }
   | { kind: "alias_exists" }
   | { kind: "unknown_ingredient" };
 

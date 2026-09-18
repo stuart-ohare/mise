@@ -185,6 +185,48 @@ describe("addAliasAndReresolve", () => {
     });
   });
 
+  // Intake built its index before the alias landed, so its line was written null under
+  // a term that already means clarified butter. Answering "already means something"
+  // would leave that draft blocked with nothing on the screen able to clear it.
+  it("re-resolves lines held by a term that already means the same ingredient, writing no alias", async () => {
+    await inRollback(async (tx) => {
+      const t = await fixture(tx);
+      await tx
+        .insert(schema.ingredientAlias)
+        .values({ alias: t.ghee, canonicalId: t.clarifiedButter, source: "hand" });
+      const late = await addRecipe(tx, "draft", [{ name: t.ghee, rawText: "2 tbsp ghee" }]);
+
+      await expect(
+        addAliasAndReresolve(tx, { alias: t.ghee.toUpperCase(), canonicalId: t.clarifiedButter }),
+      ).resolves.toEqual({ kind: "already_known", reresolved: 1 });
+
+      expect(await canonicalIdsOf(tx, late.lineIds)).toEqual([t.clarifiedButter]);
+      // Untouched: still one row, still hand-authored.
+      expect(await aliasRowsOf(tx, t.ghee)).toEqual([
+        { alias: t.ghee, canonicalId: t.clarifiedButter, source: "hand" },
+      ]);
+      expect(await aliasRowsOf(tx, t.ghee.toUpperCase())).toEqual([]);
+    });
+  });
+
+  it("re-resolves lines named by an ingredient's own canonical name", async () => {
+    await inRollback(async (tx) => {
+      const t = await fixture(tx);
+      const [row] = await tx
+        .select({ name: schema.canonicalIngredient.name })
+        .from(schema.canonicalIngredient)
+        .where(eq(schema.canonicalIngredient.id, t.clarifiedButter));
+      if (!row) throw new Error("no clarified butter");
+      const late = await addRecipe(tx, "draft", [{ name: row.name }]);
+
+      await expect(
+        addAliasAndReresolve(tx, { alias: row.name, canonicalId: t.clarifiedButter }),
+      ).resolves.toEqual({ kind: "already_known", reresolved: 1 });
+      expect(await canonicalIdsOf(tx, late.lineIds)).toEqual([t.clarifiedButter]);
+      expect(await aliasRowsOf(tx, row.name)).toEqual([]);
+    });
+  });
+
   it("leaves every re-resolved recipe a draft, even one it fully resolved", async () => {
     await inRollback(async (tx) => {
       const t = await fixture(tx);

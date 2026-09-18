@@ -25,3 +25,11 @@ export function aliasConflict(alias: string, terms: readonly { term: string }[])
   const key = normaliseTerm(alias);
   return terms.some((t) => normaliseTerm(t.term) === key);
 }
+
+export function aliasStanding(
+  _alias: string,
+  _canonicalId: string,
+  _terms: readonly { term: string; canonicalId: string }[],
+): "new" | "known" | "conflict" {
+  return "new";
+}
