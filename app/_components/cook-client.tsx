@@ -237,9 +237,12 @@ function Chips({ chips, onChip }: { chips: Chip[]; onChip: (chip: Chip) => void 
           // legitimately appear twice in one list.
           <li key={`${chip.field}:${chip.term}:${index}`}>
             <span
+              // Hard is told apart by weight as well as colour: a 2px border and bold text,
+              // the non-colour cue the monochrome chip had. The domain label already leads
+              // with ✗, so no icon is added beside it.
               className={
                 chip.hard
-                  ? "inline-flex items-center gap-1.5 rounded-full border border-danger-border bg-danger-soft py-1 pr-1.5 pl-3 text-sm font-semibold text-danger"
+                  ? "inline-flex items-center gap-1.5 rounded-full border-2 border-danger bg-danger-soft py-[3px] pr-[5px] pl-[11px] text-sm font-semibold text-danger"
                   : "inline-flex items-center gap-1.5 rounded-full border border-border bg-surface py-1 pr-1.5 pl-3 text-sm text-foreground shadow-sm"
               }
             >
