@@ -18,13 +18,13 @@ does not ask a model to be careful at the moment carefulness is hardest to verif
 
 > **Status: Cook and Intake work end to end.** `POST /api/cook` plus the Cook screen
 > run the full path — constraints out of free text, gate 2's filter, ranked prose
-> behind gate 3. `POST /api/intake` plus the Intake screen turn a pasted recipe into a
-> draft in the queue, each ingredient line resolved or explicitly not. The Review screen
-> lists that queue: every draft, each line's raw text beside what it resolved to, and a
-> publish button that stays disabled, with the blocking lines named, while any line is
-> unresolved, or while the draft has no lines at all. `POST /api/review/:id/publish`
-> enforces the same rule in SQL, so calling it directly doesn't get around it. The alias
-> fix isn't built yet, and nor is Intake's photo path. Progress is tracked in
+> behind gate 3. `POST /api/intake` plus the Intake screen turn a pasted recipe *or a
+> photographed card* into a draft in the queue, each ingredient line resolved or
+> explicitly not. The Review screen lists that queue: every draft, each line's raw text
+> beside what it resolved to, and a publish button that stays disabled, with the
+> blocking lines named, while any line is unresolved, or while the draft has no lines at
+> all. `POST /api/review/:id/publish` enforces the same rule in SQL, so calling it
+> directly doesn't get around it. The alias fix isn't built yet. Progress is tracked in
 > [Issues](../../issues).
 
 ## Two surfaces
@@ -58,18 +58,25 @@ shortlist that was never filtered on the food the cook named. That rule lives in
 [`lib/domain/constraint-edits.ts`](lib/domain/constraint-edits.ts) as a pure function
 with tests, not in the component that draws the button.
 
-**Intake.** Paste a recipe blog's wall of text. Out comes a structured draft with
-per-field confidence, landing in a review queue — never straight into the database. The
-screen shows each ingredient line as the model read it beside what it resolved to, so
-the extraction is legible rather than assumed.
+**Intake.** Paste a recipe blog's wall of text, or photograph a handwritten card. Out
+comes a structured draft with per-field confidence, landing in a review queue — never
+straight into the database. The screen shows each ingredient line as the model read it
+beside what it resolved to, so the extraction is legible rather than assumed.
 
 The model reading the paste is never shown the ingredient catalogue and never picks a
 canonical id. It returns the food in the recipe's own words, and gate 1 resolves that
 against the same index a Cook exclusion goes through. A line that maps to nothing is
 stored as `canonical_id = null` with its raw text intact, and that null is what blocks
 the recipe from leaving draft: paste a recipe using ghee into a catalogue that has never
-heard of it, and the draft says so rather than filing it under butter. The photo path is
-specified but not built ([#73](../../issues/73)).
+heard of it, and the draft says so rather than filing it under butter.
+
+A photograph takes the identical path. The card is sent as an image block on the same
+call, with the same prompt and the same schema, and its lines go through the same
+resolution index — so a ghee line photographed off a card is exactly as unresolved as
+one pasted from a blog. The image arrives as a data URI and is stored whole in
+`extraction_job.raw_input`, capped at 4 MiB and rejected at the schema boundary above
+that: object storage is a dependency this project does not carry, and a bucket key would
+leave a reviewer looking at a dead link where the card should be.
 
 **What the extraction will not do is guess.** If the text doesn't state a quantity, the
 line has none — not a typical amount. If it never says how many it feeds, `serves` is
@@ -113,8 +120,9 @@ live in [`lib/ai/prompts/`](lib/ai/prompts) with their schema and a version cons
    one score for `title`, `serves` and `minutes` and one on every ingredient line. Its
    central instruction is that an unstated value returns `null`; a plausible invented
    quantity is worse than a missing one, because a reviewer skims past it. It scores its
-   own reading, not the value — a null it is certain about is a high score. The image
-   half of this call is specified but not built.
+   own reading, not the value — a null it is certain about is a high score. The same
+   call takes a photograph of a recipe card as an image block, on the vision-capable
+   model, with one prompt covering both.
 3. **Ranking and explanation** — takes the already-filtered candidate rows and returns
    an ordered list of IDs with a rationale each, constrained to the IDs it was given.
 
