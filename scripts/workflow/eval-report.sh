@@ -24,6 +24,8 @@ is_eval_input() {
     # over-requiring a report is the cheap direction to be wrong in.
     evals/* | lib/ai/*) return 0 ;;
     lib/domain/constraints.ts | lib/domain/resolve-exclusions.ts | lib/domain/taxonomy.ts) return 0 ;;
+    # Reached from extract-recipe.ts, which call 2's suite loads (#73).
+    lib/domain/image-input.ts) return 0 ;;
     lib/domain/intake-draft.ts) return 0 ;;
     *) return 1 ;;
   esac
