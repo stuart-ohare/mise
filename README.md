@@ -170,7 +170,7 @@ call, and across the HTTP boundary, passes through a Zod schema.
 ```
 Browser
   app/page.tsx, intake/, review/     Server Components; "use client" only for interaction
-  app/_components/*-client.tsx       forms, chips and fetch calls; renders each response kind
+  app/_components/*.tsx              client components: forms, chips, publish, alias fix
         │  fetch, JSON parsed by the same schema.ts the route uses
         ▼
   app/api/<route>/route.ts           HTTP shell: parse the request, run, parse the response
@@ -273,7 +273,8 @@ commit messages without an issue number. Claude Code hooks stop an agent from sk
 those hooks, editing eval thresholds, changing dependencies or approving its own plan. CI
 never calls a model.
 
-The issue and PR history is the evidence: 57 issues and 41 merged PRs.
+The evidence is in the [issue](https://github.com/stuart-ohare/mise/issues?q=is%3Aissue) and
+[PR](https://github.com/stuart-ohare/mise/pulls?q=is%3Apr) history.
 [`docs/workflow.md`](docs/workflow.md) traces three changes through the process, with
 what it caught. One example: the reviewer found that the unauthenticated alias route could
 rebind any term, so *no groundnuts* could quietly turn into a filter on the wrong food.
