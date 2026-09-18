@@ -1,4 +1,4 @@
-import type { IntakeDraft } from "@/lib/domain/intake-draft";
+import type { FieldConfidence, IntakeDraft } from "@/lib/domain/intake-draft";
 
 import type { Db } from "./client";
 import { extractionJob, recipe, recipeIngredient, recipeStep } from "./schema";
@@ -69,4 +69,28 @@ export async function writeIntakeDraft(tx: Tx, input: IntakeWrite): Promise<Inta
   }
 
   return { jobId: job.id, recipeId: row.id };
+}
+
+export type QueueLine = {
+  rawText: string;
+  canonicalId: string | null;
+  canonicalName: string | null;
+  qty: string | null;
+  unit: string | null;
+  optional: boolean;
+};
+
+export type QueuedDraft = {
+  id: string;
+  title: string;
+  minutes: number | null;
+  serves: number | null;
+  status: "draft";
+  source: "intake" | "seed";
+  fieldConfidence: FieldConfidence | null;
+  lines: QueueLine[];
+};
+
+export async function listDrafts(_db: Db | Tx): Promise<QueuedDraft[]> {
+  return [];
 }
