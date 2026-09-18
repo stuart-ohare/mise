@@ -25,7 +25,8 @@ export type AddAliasResult =
   | { kind: "added"; reresolved: number }
   | { kind: "already_known"; reresolved: number }
   | { kind: "alias_exists" }
-  | { kind: "unknown_ingredient" };
+  | { kind: "unknown_ingredient" }
+  | { kind: "no_unresolved_line" };
 
 export async function addAliasAndReresolve(
   tx: Tx,

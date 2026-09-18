@@ -145,6 +145,7 @@ describe("addAliasAndReresolve", () => {
   it("writes the alias with extraction provenance", async () => {
     await inRollback(async (tx) => {
       const t = await fixture(tx);
+      await addRecipe(tx, "draft", [{ name: t.ghee }]);
 
       await addAliasAndReresolve(tx, { alias: t.ghee, canonicalId: t.clarifiedButter });
 
@@ -157,7 +158,11 @@ describe("addAliasAndReresolve", () => {
   it("refuses a duplicate alias, however it is spelled, without altering the existing row", async () => {
     await inRollback(async (tx) => {
       const t = await fixture(tx);
+      await addRecipe(tx, "draft", [{ name: t.ghee }]);
       await addAliasAndReresolve(tx, { alias: t.ghee, canonicalId: t.clarifiedButter });
+      // Another draft still holding the term, so the refusal is about the meaning, not
+      // about there being nothing left to fix.
+      await addRecipe(tx, "draft", [{ name: t.ghee }]);
 
       await expect(
         addAliasAndReresolve(tx, { alias: ` ${t.ghee.toUpperCase()}`, canonicalId: t.cauliflower }),
@@ -248,11 +253,31 @@ describe("addAliasAndReresolve", () => {
       const t = await fixture(tx);
       // Unreachable through the publish gate; written directly to prove the update is scoped.
       const published = await addRecipe(tx, "published", [{ name: t.ghee }]);
+      const draft = await addRecipe(tx, "draft", [{ name: t.ghee }]);
 
       await expect(
         addAliasAndReresolve(tx, { alias: t.ghee, canonicalId: t.clarifiedButter }),
-      ).resolves.toEqual({ kind: "added", reresolved: 0 });
+      ).resolves.toEqual({ kind: "added", reresolved: 1 });
       expect(await canonicalIdsOf(tx, published.lineIds)).toEqual([null]);
+      expect(await canonicalIdsOf(tx, draft.lineIds)).toEqual([t.clarifiedButter]);
+    });
+  });
+
+  // The route has no auth, and every alias changes what Cook's gate 1 does with an
+  // exclusion: bind "groundnut" to cauliflower and "no groundnuts" stops being a question
+  // and quietly lets peanut recipes through. Only a term some draft actually failed on
+  // can be bound here, so the fix repairs the queue and can't be used to rewrite the index.
+  it("refuses a term no unresolved draft line carries, and writes nothing", async () => {
+    await inRollback(async (tx) => {
+      const t = await fixture(tx);
+      const groundnut = `groundnut ${randomUUID().slice(0, 8)}`;
+      // Only a published line carries it, and published lines are not the fix's business.
+      await addRecipe(tx, "published", [{ name: groundnut }]);
+
+      await expect(
+        addAliasAndReresolve(tx, { alias: groundnut, canonicalId: t.cauliflower }),
+      ).resolves.toEqual({ kind: "no_unresolved_line" });
+      expect(await aliasRowsOf(tx, groundnut)).toEqual([]);
     });
   });
 

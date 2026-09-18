@@ -26,6 +26,8 @@ function toResponse(result: AddAliasResult): { status: number; body: AliasRespon
     // 422, not 404: the URL names nothing missing; the body names an ingredient that isn't.
     case "unknown_ingredient":
       return { status: 422, body: { error: "unknown_ingredient" } };
+    case "no_unresolved_line":
+      return { status: 422, body: { error: "no_unresolved_line" } };
   }
 }
 

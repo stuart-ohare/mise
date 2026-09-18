@@ -80,6 +80,15 @@ describe("POST /api/aliases", () => {
     await expect(response.json()).resolves.toEqual({ error: "unknown_ingredient" });
   });
 
+  it("answers a term no unresolved draft line carries with 422", async () => {
+    outcome = { kind: "no_unresolved_line" };
+
+    const response = await post({ alias: "groundnut", canonicalId: CLARIFIED_BUTTER });
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toEqual({ error: "no_unresolved_line" });
+  });
+
   it.each([
     ["a blank alias", { alias: "   ", canonicalId: CLARIFIED_BUTTER }],
     ["an id that isn't a uuid", { alias: "ghee", canonicalId: "clarified butter" }],
