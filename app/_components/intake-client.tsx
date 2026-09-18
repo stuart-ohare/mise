@@ -7,6 +7,11 @@ import { imageDataUriSchema, MAX_IMAGE_MB } from "@/lib/domain/image-input";
 
 import { intakeResponseSchema, type IntakeRequest, type IntakeResponse } from "../api/intake/schema";
 import Confidence from "./confidence";
+import Button from "./ui/button";
+import Callout from "./ui/callout";
+import { AlertIcon } from "./ui/icons";
+import LiveStatus from "./ui/live-status";
+import { SkeletonDraft } from "./ui/skeleton";
 
 /**
  * The Intake interaction. One POST per submit, no streaming: the response is parsed and
@@ -95,8 +100,10 @@ export default function IntakeClient() {
     setCard({ name: file.name, dataUri: parsed.data });
   }
 
+  const readingCard = card !== null;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -106,48 +113,60 @@ export default function IntakeClient() {
               : { sourceKind: "image", raw: card.dataUri },
           );
         }}
-        className="space-y-3"
+        className="space-y-4 rounded-2xl border border-border bg-surface p-5 shadow-sm"
       >
-        <label htmlFor="intake-raw" className="block text-sm font-medium">
-          Paste the recipe
-        </label>
-        <textarea
-          id="intake-raw"
-          value={raw}
-          onChange={(event) => setRaw(event.target.value)}
-          rows={12}
-          placeholder="Title, the story about someone's grandmother, the ingredient list, the method — paste the lot."
-          className="w-full rounded border border-black/20 bg-transparent px-3 py-2 font-mono text-xs dark:border-white/20"
-        />
-        <div className="space-y-2 border-t border-black/10 pt-3 dark:border-white/15">
+        <div className="space-y-2">
+          <label htmlFor="intake-raw" className="block text-sm font-medium">
+            Paste the recipe
+          </label>
+          <textarea
+            id="intake-raw"
+            value={raw}
+            onChange={(event) => setRaw(event.target.value)}
+            disabled={pending}
+            rows={12}
+            placeholder="Title, the story about someone's grandmother, the ingredient list, the method — paste the lot."
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed placeholder:text-muted/70 focus:border-accent focus:ring-4 focus:ring-accent/15 focus:outline-none disabled:opacity-60"
+          />
+        </div>
+
+        <div className="flex items-center gap-3 text-xs text-muted">
+          <span className="h-px flex-1 bg-border" />
+          or
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <div className="space-y-2">
           <label htmlFor="intake-card" className="block text-sm font-medium">
-            Or photograph a recipe card
+            Photograph a recipe card
           </label>
           <input
             id="intake-card"
             type="file"
             accept="image/jpeg,image/png,image/gif,image/webp"
+            disabled={pending}
             onChange={(event) => {
               void chooseCard(event.target.files?.[0] ?? null);
             }}
-            className="block w-full text-xs file:mr-3 file:rounded file:border file:border-black/20 file:bg-transparent file:px-3 file:py-1.5 file:text-xs dark:file:border-white/20"
+            className="block w-full text-xs text-muted file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-border-strong file:bg-surface file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground file:shadow-sm hover:file:bg-surface-muted disabled:opacity-60"
           />
           {card && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-muted p-2">
               {/* The card as the model will see it. next/image wants a known host or a
                   file on disk; this is neither, and a data URI needs no optimising. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={card.dataUri}
                 alt={`The card to read: ${card.name}`}
-                className="h-20 w-20 rounded border border-black/20 object-cover dark:border-white/20"
+                className="size-16 rounded-md border border-border object-cover"
               />
-              <p className="text-xs opacity-70">
-                {card.name} — this is read instead of the paste.{" "}
+              <p className="text-xs text-muted">
+                <span className="font-medium text-foreground">{card.name}</span> — this is
+                read instead of the paste.{" "}
                 <button
                   type="button"
                   onClick={() => setCard(null)}
-                  className="underline underline-offset-2"
+                  className="font-medium text-accent underline-offset-2 hover:underline"
                 >
                   Use the paste instead
                 </button>
@@ -156,31 +175,42 @@ export default function IntakeClient() {
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-        >
-          {pending ? "Reading…" : card === null ? "Extract a draft" : "Read the card"}
-        </button>
+        <div className="flex justify-end">
+          <Button type="submit" pending={pending}>
+            {pending
+              ? readingCard
+                ? "Reading the card…"
+                : "Reading…"
+              : readingCard
+                ? "Read the card"
+                : "Extract a draft"}
+          </Button>
+        </div>
       </form>
 
-      {failure && (
-        <p className="rounded border border-black/20 px-4 py-3 text-sm dark:border-white/20">
-          {failure}
-        </p>
-      )}
+      <LiveStatus
+        message={
+          pending
+            ? "Reading the recipe"
+            : response?.kind === "draft"
+              ? "Draft ready"
+              : ""
+        }
+      />
+
+      {failure && <Callout tone="warning">{failure}</Callout>}
+
+      {pending && <SkeletonDraft />}
 
       {response?.kind === "not_extracted" && (
-        <p className="rounded border border-black/20 px-4 py-3 text-sm dark:border-white/20">
-          {notExtracted[response.reason]}
-        </p>
+        <Callout tone="warning">{notExtracted[response.reason]}</Callout>
       )}
 
       {response?.kind === "draft" && <Draft response={response} />}
     </div>
   );
 }
+
 
 /**
  * A File as the data URI the request carries. Resolves to "" on a read error, which the
@@ -196,60 +226,68 @@ function readDataUri(file: File): Promise<string> {
   });
 }
 
+
 function Draft({ response }: { response: Extract<IntakeResponse, { kind: "draft" }> }) {
   const { draft } = response;
   const { recipe, fieldConfidence } = draft;
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3 rounded border border-black/10 px-4 py-4 dark:border-white/15">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-medium">{recipe.title}</h2>
+      <div className="space-y-4 rounded-xl border border-border bg-surface p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="text-lg font-semibold tracking-tight">{recipe.title}</h2>
           <Confidence score={fieldConfidence.title} of="Title" />
         </div>
-        <dl className="grid grid-cols-2 gap-3 text-sm">
+        <dl className="grid grid-cols-2 gap-4 text-sm">
           <Scalar label="Serves" value={recipe.serves} score={fieldConfidence.serves} />
           <Scalar label="Minutes" value={recipe.minutes} score={fieldConfidence.minutes} />
         </dl>
       </div>
 
       {draft.unresolved.length > 0 && (
-        <div className="space-y-2 rounded border-2 border-black px-4 py-4 text-sm dark:border-white">
-          <p className="font-medium">
+        <Callout tone="danger">
+          <p className="font-semibold">
             {draft.unresolved.length === 1
               ? "1 ingredient didn't resolve."
               : `${draft.unresolved.length} ingredients didn't resolve.`}{" "}
             This recipe stays in draft.
           </p>
-          <p className="opacity-80">
+          <p className="text-muted">
             Mise won&rsquo;t claim a recipe is free of something it can&rsquo;t identify, so
             an unknown ingredient blocks publishing rather than being filed under a near
             match. Give it a name in{" "}
-            <Link href="/review" className="underline">
+            <Link href="/review" className="font-medium text-accent underline-offset-2 hover:underline">
               Review
             </Link>{" "}
             to clear it.
           </p>
-        </div>
+        </Callout>
       )}
 
-      <div className="space-y-2">
-        <h3 className="text-xs font-medium tracking-wide uppercase opacity-60">
+      <div className="space-y-3 rounded-xl border border-border bg-surface p-5 shadow-sm">
+        <h3 className="text-xs font-medium tracking-wide text-muted uppercase">
           Ingredients — what was read, and what it resolved to
         </h3>
-        <ul className="divide-y divide-black/10 border-y border-black/10 dark:divide-white/15 dark:border-white/15">
+        <ul className="divide-y divide-border">
           {draft.ingredients.map((line, index) => (
             // Index included: a recipe can legitimately list the same line twice.
             <li
               key={`${line.rawText}:${index}`}
-              className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2 text-sm"
+              className={
+                line.canonicalName === null
+                  ? "-mx-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-lg border-l-4 border-danger bg-danger-soft px-2 py-2 text-sm"
+                  : "flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2 text-sm"
+              }
             >
               <span className="font-mono text-xs">{line.rawText}</span>
-              <span className="flex items-baseline gap-3">
+              <span className="flex items-center gap-3">
                 {line.canonicalName === null ? (
-                  <span className="font-medium">unresolved</span>
+                  <span className="inline-flex items-center gap-1 font-semibold text-danger">
+                    <AlertIcon className="size-3.5" />
+                    unresolved
+                  </span>
                 ) : (
-                  <span className="opacity-70">→ {line.canonicalName}</span>
+                  <span className="text-muted">→ {line.canonicalName}</span>
                 )}
                 <Confidence score={line.confidence} of={line.rawText.trim()} />
               </span>
@@ -258,22 +296,24 @@ function Draft({ response }: { response: Extract<IntakeResponse, { kind: "draft"
         </ul>
       </div>
 
-      <div className="space-y-2">
-        <h3 className="text-xs font-medium tracking-wide uppercase opacity-60">Method</h3>
-        <ol className="list-decimal space-y-1 pl-5 text-sm">
+      <div className="space-y-3 rounded-xl border border-border bg-surface p-5 shadow-sm">
+        <h3 className="text-xs font-medium tracking-wide text-muted uppercase">Method</h3>
+        <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed marker:text-muted">
           {draft.steps.map((step) => (
             <li key={step.position}>{step.text}</li>
           ))}
         </ol>
       </div>
 
-      <p className="text-sm opacity-80">
-        Saved as a draft, awaiting review — nothing is published. It&rsquo;s in the{" "}
-        <Link href="/review" className="underline">
-          review queue
-        </Link>{" "}
-        as job <code className="font-mono text-xs">{response.jobId}</code>.
-      </p>
+      <Callout>
+        <p>
+          Saved as a draft, awaiting review — nothing is published. It&rsquo;s in the{" "}
+          <Link href="/review" className="font-medium text-accent underline-offset-2 hover:underline">
+            review queue
+          </Link>{" "}
+          as job <code className="rounded bg-surface-muted px-1 font-mono text-xs">{response.jobId}</code>.
+        </p>
+      </Callout>
     </section>
   );
 }
@@ -288,12 +328,14 @@ function Scalar({
   score: number;
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-2">
-      <dt className="opacity-60">{label}</dt>
-      <dd className="flex items-baseline gap-3">
+    <div className="flex items-center justify-between gap-2 rounded-lg bg-surface-muted px-3 py-2">
+      <dt className="text-muted">{label}</dt>
+      <dd className="flex items-center gap-3">
         {/* The source said nothing, and nothing is what's shown. A plausible default here
             is the exact mistake the null rule exists to prevent. */}
-        <span>{value === null ? <em className="opacity-70">not stated</em> : value}</span>
+        <span className="font-medium">
+          {value === null ? <em className="font-normal text-muted">not stated</em> : value}
+        </span>
         <Confidence score={score} of={label} />
       </dd>
     </div>
