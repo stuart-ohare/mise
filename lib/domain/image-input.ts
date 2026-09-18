@@ -25,11 +25,16 @@ export const IMAGE_MEDIA_TYPES = ["image/jpeg", "image/png", "image/gif", "image
 export type ImageMediaType = (typeof IMAGE_MEDIA_TYPES)[number];
 
 /**
- * 4 MiB of data URI, roughly 3 MB of image once the base64 is decoded. Comfortably under
- * the API's 5 MB per-image limit, so a payload that passes this boundary is one the model
- * will accept: an oversized card is rejected in one place, with one reason.
+ * 6 MiB of data URI, roughly 4.7 MB of image once the base64 is decoded — still under the
+ * API's 5 MB per-image limit, so a payload that passes this boundary is one the model will
+ * accept: an oversized card is rejected in one place, with one reason.
+ *
+ * The first cut was 4 MiB. Three real photographed cards put that right: one was 3.2 MB
+ * and bounced, and the one that passed had 22% to spare. A cap that rejects an ordinary
+ * phone photo of a recipe card is not protecting anything — resizing is out of scope
+ * (#73), so the number moves instead.
  */
-export const MAX_IMAGE_DATA_URI_LENGTH = 4 * 1024 * 1024;
+export const MAX_IMAGE_DATA_URI_LENGTH = 6 * 1024 * 1024;
 
 /**
  * The same cap as a picture size, for anything that has to say it to a person. Base64

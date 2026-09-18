@@ -74,7 +74,7 @@ A photograph takes the identical path. The card is sent as an image block on the
 call, with the same prompt and the same schema, and its lines go through the same
 resolution index — so a ghee line photographed off a card is exactly as unresolved as
 one pasted from a blog. The image arrives as a data URI and is stored whole in
-`extraction_job.raw_input`, capped at 4 MiB and rejected at the schema boundary above
+`extraction_job.raw_input`, capped at 6 MiB and rejected at the schema boundary above
 that: object storage is a dependency this project does not carry, and a bucket key would
 leave a reviewer looking at a dead link where the card should be.
 
