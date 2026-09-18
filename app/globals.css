@@ -1,23 +1,73 @@
 @import "tailwindcss";
 
+/*
+ * Semantic tokens. Components use these names (bg-surface, text-danger, …), never raw
+ * palette classes, so the safety colours are defined once and can't drift between
+ * screens. Each value is a Tailwind palette variable, swapped wholesale for dark mode.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--color-zinc-50);
+  --foreground: var(--color-zinc-900);
+  --surface: var(--color-white);
+  --surface-muted: var(--color-zinc-100);
+  --muted: var(--color-zinc-500);
+  --border: var(--color-zinc-200);
+  --border-strong: var(--color-zinc-300);
+  --accent: var(--color-indigo-600);
+  --accent-hover: var(--color-indigo-500);
+  --accent-fg: var(--color-white);
+  --accent-soft: var(--color-indigo-50);
+  --danger: var(--color-red-700);
+  --danger-soft: var(--color-red-50);
+  --danger-border: var(--color-red-300);
+  --warning: var(--color-amber-800);
+  --warning-soft: var(--color-amber-50);
+  --warning-border: var(--color-amber-300);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--color-zinc-950);
+    --foreground: var(--color-zinc-100);
+    --surface: var(--color-zinc-900);
+    --surface-muted: var(--color-zinc-800);
+    --muted: var(--color-zinc-400);
+    --border: var(--color-zinc-800);
+    --border-strong: var(--color-zinc-700);
+    --accent: var(--color-indigo-500);
+    --accent-hover: var(--color-indigo-400);
+    --accent-fg: var(--color-white);
+    --accent-soft: color-mix(in oklab, var(--color-indigo-500) 15%, transparent);
+    --danger: var(--color-red-300);
+    --danger-soft: color-mix(in oklab, var(--color-red-500) 15%, transparent);
+    --danger-border: color-mix(in oklab, var(--color-red-400) 50%, transparent);
+    --warning: var(--color-amber-300);
+    --warning-soft: color-mix(in oklab, var(--color-amber-500) 12%, transparent);
+    --warning-border: color-mix(in oklab, var(--color-amber-400) 45%, transparent);
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-border: var(--danger-border);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-border: var(--warning-border);
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
     sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
