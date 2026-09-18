@@ -78,3 +78,48 @@ is a logged, counted event, never a swallowed one (§6).
 the rows already carry `minutes`, so partitioning here costs no query and leaves gate 2
 — whose SQL is pinned against `exclusionIds` by a parity test — untouched. A recipe with
 no stated time counts as over the limit, because an unknown time is not a promise.
+
+## `POST /api/intake`
+
+The same trio as Cook: `route.ts` is the HTTP shell, `run.ts` is the pipeline, and
+`schema.ts` holds both shapes, which the Intake screen imports so the two ends parse the
+same thing. Text only — the image path is #73.
+
+### Request
+
+```ts
+{ sourceKind: "text"; raw: string }
+```
+
+`sourceKind` is a literal rather than the `extraction_source` enum, so adding `image`
+later is a compile error at every branch instead of a value that quietly falls through
+the text one.
+
+`400` is only for a body that isn't that shape. A blank `raw` is not a 400 — it is
+`not_extracted` / `empty_input`, the rule `POST /api/cook` already set for a blank query,
+and it never reaches the model.
+
+### Response
+
+| `kind` | Means |
+|---|---|
+| `draft` | Written and awaiting review. Carries `jobId`, `recipeId` and the draft, including `unresolved` — the raw text of every line that mapped to nothing |
+| `not_extracted` | Call 2 failed (`empty_input`, `refused`, `parse_failed`, `api_error`). Nothing was written, so there is no job to show |
+
+### What the route guarantees
+
+- **The model never decides what an ingredient is.** Call 2 returns a name in the
+  recipe's own words; `buildIntakeDraft` resolves it against the index built by
+  `loadResolutionTerms` → `buildResolutionIndex`, the one gate 1 resolves exclusions
+  against. A miss is `canonical_id = null`, never a near match.
+- **Nothing published.** `status` is the literal `"draft"` in the domain type, in the
+  response schema and in the row. `deriveRecipeStatus` — which publishes a recipe whose
+  lines all resolved — is deliberately not used here: no score and no clean draft
+  promotes itself (§2).
+- **An extraction failure writes nothing.** A job row holding no recipe is work for a
+  reviewer with nothing at the end of it.
+- **Four tables or none.** The route opens the transaction and `writeIntakeDraft` runs
+  inside it, so a job with no recipe, or a recipe with no audit trail, can't be left
+  behind.
+- **`raw_input` is the paste as it arrived**, untrimmed, even though call 2 was given the
+  trimmed string. The job row is the record of what the user submitted.

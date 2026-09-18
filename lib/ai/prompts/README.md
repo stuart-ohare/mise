@@ -38,6 +38,39 @@ Three calls, each with one narrow job:
   result. A truncated response (`max_tokens`) is `parse_failed` even if it parses,
   because it may have lost an exclusion.
 
+## Call 2 — `extract-recipe.ts`
+
+`extractRecipe(text, client?)` returns `{ ok: true, draft }` or `{ ok: false, reason }`,
+where the reason is `empty_input`, `refused`, `parse_failed` or `api_error`. It never
+retries. Nothing it returns is published: Intake writes a draft plus a score per field
+and a human promotes it from `/review` (CLAUDE.md §2).
+
+- **An unstated value is null.** The one rule the prompt is built around. A reviewer
+  fills in a blank and skims past a plausible number, so a missing quantity is cheap and
+  an invented one is expensive: "a knob of butter" has `qty: null`, and a recipe that
+  never says how many it feeds has `serves: null` however obvious four looks.
+- **`rawText` is copied character for character**, untidied, and the schema refuses a
+  blank one. It is what the reviewer compares the extraction against.
+- **`name` is the food alone, in the recipe's own words.** No quantity, no preparation,
+  no translating a regional name into a more standard one — "brinjal" stays "brinjal", and
+  whether it resolves is gate 1's question, not the model's. The catalogue is never in
+  context and the model never picks a canonical id.
+- **Confidence scores the reading, not the value.** A null the model is certain about,
+  because the text plainly never says it, is a high score. The prompt asks for a spread
+  rather than a flat set, because a uniform column tells a reviewer nothing about where to
+  look. Scores stay uniform in weight, though — they are not consequence-weighted, which
+  the README owns as the first thing to build next.
+- **Output is parsed twice**, as call 1 is. The SDK checks a plain model schema, then
+  `draftRecipeSchema` — which lives in `lib/domain/intake-draft.ts` beside gate 1, for the
+  same reason `constraintsSchema` lives in `lib/domain/constraints.ts`. A truncated
+  response (`max_tokens`) is `parse_failed` even if it parses, because the line it lost is
+  the one nobody reviews.
+- **A non-recipe is `parse_failed`.** The prompt asks for empty arrays rather than a
+  recipe assembled out of an article; `draftRecipeSchema` requires at least one ingredient
+  and one step, so those empty arrays become a failure and no `extraction_job` row is
+  written for them.
+- **The image path is not here yet** (#73). `source_kind` is `'text'` only.
+
 ## Call 3 — `rank-and-explain.ts`
 
 `rankAndExplain({ candidates, constraints }, client?, violatedTerms?)` returns
