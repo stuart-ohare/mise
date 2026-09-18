@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { imageDataUriSchema } from "@/lib/domain/image-input";
+
 /**
  * The Intake boundary, both directions, as the schemas the handler and the screen share
  * (CLAUDE.md §6). The response is parsed on the way out for the same reason Cook's is:
@@ -8,18 +10,25 @@ import { z } from "zod";
  */
 
 /**
- * `sourceKind` is a literal rather than the `extraction_source` enum. The image path is
- * a separate issue (#73), and a literal makes adding it a compile error at every branch
- * instead of a value that quietly falls through the text one.
+ * Two ways in, one field. `raw` is the string that lands in `extraction_job.raw_input`
+ * whichever arm matched — the paste verbatim, or the photograph as a data URI — so
+ * nothing downstream needs a second branch to know what to store.
  *
- * `raw` is deliberately not `.min(1)`: an empty paste is a pipeline outcome
- * (`empty_input`), not a malformed request, and 400 is reserved for a body that is
- * neither shape — the rule `POST /api/cook` already set for a blank query.
+ * The discriminated union is what #71 left this as a literal for: adding the image arm
+ * is a compile error at every branch that assumed text, rather than a value that quietly
+ * falls through the text one.
+ *
+ * The two arms validate differently on purpose. A text `raw` is deliberately not
+ * `.min(1)`: an empty paste is a pipeline outcome (`empty_input`), not a malformed
+ * request, and 400 is reserved for a body that is neither shape — the rule
+ * `POST /api/cook` already set for a blank query. An image `raw` is checked hard, because
+ * an oversized or non-image payload is not an outcome anyone wants to spend a vision call
+ * discovering.
  */
-export const intakeRequestSchema = z.object({
-  sourceKind: z.literal("text"),
-  raw: z.string(),
-});
+export const intakeRequestSchema = z.discriminatedUnion("sourceKind", [
+  z.object({ sourceKind: z.literal("text"), raw: z.string() }),
+  z.object({ sourceKind: z.literal("image"), raw: imageDataUriSchema }),
+]);
 
 export type IntakeRequest = z.infer<typeof intakeRequestSchema>;
 

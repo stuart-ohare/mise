@@ -17,7 +17,11 @@ import { extractionJob, recipe, recipeIngredient, recipeStep } from "./schema";
 export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 
 export type IntakeWrite = {
-  /** The paste, verbatim. `raw_text` is never the only record of what was read. */
+  sourceKind: "text" | "image";
+  /**
+   * What arrived, verbatim — the paste, or the photograph as a data URI. `raw_text` is
+   * never the only record of what was read.
+   */
   rawInput: string;
   model: string;
   promptVersion: string;
@@ -34,7 +38,7 @@ export async function writeIntakeDraft(tx: Tx, input: IntakeWrite): Promise<Inta
   const [job] = await tx
     .insert(extractionJob)
     .values({
-      sourceKind: "text",
+      sourceKind: input.sourceKind,
       rawInput: input.rawInput,
       model: input.model,
       promptVersion: input.promptVersion,
