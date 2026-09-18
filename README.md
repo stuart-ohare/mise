@@ -16,11 +16,12 @@ tree, the alias table, the allergen hierarchy — all of it is prep work done be
 single query arrives. At request time the system looks things up and explains them. It
 does not ask a model to be careful at the moment carefulness is hardest to verify.
 
-> **Status: Cook works end to end.** The structure, domain model and working
-> agreements are in place, and `POST /api/cook` plus the Cook screen run the full
-> path — constraints out of free text, gate 2's filter, ranked prose behind gate 3.
-> Intake and Review are still placeholders. Progress is tracked in
-> [Issues](../../issues).
+> **Status: Cook and Intake work end to end.** `POST /api/cook` plus the Cook screen
+> run the full path — constraints out of free text, gate 2's filter, ranked prose
+> behind gate 3. `POST /api/intake` plus the Intake screen turn a pasted recipe into a
+> draft in the queue, each ingredient line resolved or explicitly not. Review — the
+> queue itself, the publish gate and the alias fix — is still a placeholder, and so is
+> Intake's photo path. Progress is tracked in [Issues](../../issues).
 
 ## Two surfaces
 
@@ -53,9 +54,23 @@ shortlist that was never filtered on the food the cook named. That rule lives in
 [`lib/domain/constraint-edits.ts`](lib/domain/constraint-edits.ts) as a pure function
 with tests, not in the component that draws the button.
 
-**Intake.** Paste a recipe blog's wall of text or a photo of a handwritten card. Out
-comes a structured recipe with per-field confidence, landing in a review queue — never
-straight into the database.
+**Intake.** Paste a recipe blog's wall of text. Out comes a structured draft with
+per-field confidence, landing in a review queue — never straight into the database. The
+screen shows each ingredient line as the model read it beside what it resolved to, so
+the extraction is legible rather than assumed.
+
+The model reading the paste is never shown the ingredient catalogue and never picks a
+canonical id. It returns the food in the recipe's own words, and gate 1 resolves that
+against the same index a Cook exclusion goes through. A line that maps to nothing is
+stored as `canonical_id = null` with its raw text intact, and that null is what blocks
+the recipe from leaving draft: paste a recipe using ghee into a catalogue that has never
+heard of it, and the draft says so rather than filing it under butter. The photo path is
+specified but not built ([#73](../../issues/73)).
+
+**What the extraction will not do is guess.** If the text doesn't state a quantity, the
+line has none — not a typical amount. If it never says how many it feeds, `serves` is
+null, however obvious four looks. A reviewer fills in a blank; they skim past a plausible
+number and approve it.
 
 ## The three gates
 
@@ -90,9 +105,12 @@ live in [`lib/ai/prompts/`](lib/ai/prompts) with their schema and a version cons
 1. **Constraint extraction** — free text to typed constraints. The `exclude` / `avoid`
    split is the most important line in the codebase: one is a `WHERE` clause, the other
    is a ranking weight.
-2. **Recipe extraction** — messy text or an image to a draft with per-field confidence.
-   Its central instruction is that an unstated quantity returns `null`; a plausible
-   invented quantity is worse than a missing one, because a reviewer skims past it.
+2. **Recipe extraction** — a pasted wall of text to a draft with per-field confidence,
+   one score for `title`, `serves` and `minutes` and one on every ingredient line. Its
+   central instruction is that an unstated value returns `null`; a plausible invented
+   quantity is worse than a missing one, because a reviewer skims past it. It scores its
+   own reading, not the value — a null it is certain about is a high score. The image
+   half of this call is specified but not built.
 3. **Ranking and explanation** — takes the already-filtered candidate rows and returns
    an ordered list of IDs with a rationale each, constrained to the IDs it was given.
 
