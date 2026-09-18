@@ -283,16 +283,28 @@ reasons and only one of them is affordable.
 
 A missing value and an invented one cost different amounts. Intake writes a draft that a
 human promotes from `/review`, so a blank is something the reviewer fills in and a
-plausible `serves: 4` is something they skim past and approve. Accuracy can be traded
-against effort; invention can't, because the whole point of the review queue is that it
-shows you what the model didn't know.
+plausible `serves: 4` is something they skim past and approve. Invention can't be traded
+against effort, because the whole point of the review queue is that it shows you what the
+model didn't know.
+
+**What the 0.85 does not cover.** `field_accuracy` mixes two unlike failures. Reading
+`serves: 6` as `serves: 4` is a wrong value a reviewer can see. Dropping an ingredient
+line is not — nothing marks the absence, and it is the direction that reaches the
+invariant: a draft that lost the butter line has no dairy-tagged `recipe_ingredient` row,
+so gate 2's `NOT EXISTS` finds nothing to exclude and a dairy-free search returns it. The
+only thing standing between that and a cook is a reviewer reading `raw_input` beside the
+draft. Omission sits under the negotiable bar today because the suite measures fields
+rather than recall, and a separate ingredient-recall metric pegged at 1 is the fix — its
+own issue rather than a number quietly added here.
 
 **Cost.** One invented quantity in 18 runs is a red build, and the permitted fixes are a
 better prompt, a narrower schema or a fixture that spelled an ingredient in a way the
-model reasonably didn't (CLAUDE.md §4.5). Never a lower number.
+model reasonably didn't (CLAUDE.md §4.5). Never a lower number. Meanwhile a dropped line
+in one source of ten would keep `field_accuracy` above 0.85 and pass.
 
 **Revisit when.** Never for the bar. What moves is the fixture set — six today, and
-every new way a source stays silent belongs in it.
+every new way a source stays silent belongs in it — and the recall metric that closes the
+gap above.
 
 ### Hand-authored tree, generated leaves
 

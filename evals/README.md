@@ -103,7 +103,8 @@ the model is measured against not inventing.
   - `field_accuracy`: over what the source states — the title (compared with
     `normaliseTerm`), the scalars it gives, each expected line's presence, and the
     quantity and unit of the lines that were found. A dropped line is one miss, not
-    three: the fields under it were never compared.
+    three: the fields under it were never compared. That makes omission cheaper here than
+    it is in consequence — see the README on what the 0.85 doesn't cover.
   - `null_precision`: over what the source doesn't — the scalars it omits, the quantity
     and unit of the bare lines it lists, and every returned line matching nothing in the
     source. A `null` scores; any value at all does not.
