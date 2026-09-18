@@ -165,8 +165,9 @@ export default function IntakeClient() {
                 read instead of the paste.{" "}
                 <button
                   type="button"
+                  disabled={pending}
                   onClick={() => setCard(null)}
-                  className="font-medium text-accent underline-offset-2 hover:underline"
+                  className="font-medium text-accent underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Use the paste instead
                 </button>
@@ -211,7 +212,6 @@ export default function IntakeClient() {
   );
 }
 
-
 /**
  * A File as the data URI the request carries. Resolves to "" on a read error, which the
  * schema then rejects with the same sentence an unreadable file gets — one failure
@@ -225,7 +225,6 @@ function readDataUri(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
-
 
 function Draft({ response }: { response: Extract<IntakeResponse, { kind: "draft" }> }) {
   const { draft } = response;
