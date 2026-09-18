@@ -54,7 +54,7 @@ export default function AliasFix({ term, ingredients }: Props) {
       if ("ok" in body) {
         router.refresh();
       } else if (body.error === "alias_exists") {
-        setMessage(`“${alias.trim()}” already means something. Nothing was changed.`);
+        setMessage(`“${alias.trim()}” already means a different ingredient. Nothing was changed.`);
       } else {
         setMessage("That ingredient no longer exists. Nothing was changed.");
       }

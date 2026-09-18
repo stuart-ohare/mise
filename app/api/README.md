@@ -184,8 +184,8 @@ review screen's alias form imports.
 
 | Status | Body | Means |
 |---|---|---|
-| `200` | `{ ok: true, reresolved: n }` | The alias is written, and `n` draft lines named by it now resolve |
-| `409` | `{ error: "alias_exists" }` | The term already means something, as an alias or a canonical name. Nothing changed |
+| `200` | `{ ok: true, reresolved: n }` | `n` draft lines named by the term now resolve. The alias is written, unless the term already meant this ingredient |
+| `409` | `{ error: "alias_exists" }` | The term already means a different ingredient, as an alias or a canonical name, or is ambiguous. Nothing changed |
 | `422` | `{ error: "unknown_ingredient" }` | `canonicalId` names no ingredient. Nothing written |
 
 ### What the route guarantees
@@ -198,6 +198,10 @@ review screen's alias form imports.
 - **Duplicates are compared normalised.** The alias is stored normalised and checked
   against every name and alias first, so `Ghee` can't sit beside `ghee` and make the
   term ambiguous. A concurrent duplicate loses on the unique index, as a 409.
+- **A term that already means this ingredient still re-resolves.** A line can be null
+  under a known term — Intake built its index just before the alias landed, or a re-seed
+  added it. Nothing is written to `ingredient_alias`, but the lines resolve, because
+  otherwise that draft could never leave the queue.
 - **Provenance.** The alias is written with `source: "extraction"`, so one that turns out
   wrong can be told from the hand-authored taxonomy.
 - **Nothing publishes.** Only draft lines are touched and no status changes. The draft

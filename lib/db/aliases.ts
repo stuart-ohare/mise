@@ -5,7 +5,7 @@ import "server-only";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import { normaliseTerm } from "@/lib/domain/resolve-exclusions";
-import { aliasConflict, linesMatchingAlias } from "@/lib/domain/reresolve";
+import { aliasStanding, linesMatchingAlias } from "@/lib/domain/reresolve";
 
 import type { Tx } from "./drafts";
 import { canonicalIngredient, ingredientAlias, recipe, recipeIngredient } from "./schema";
@@ -37,17 +37,21 @@ export async function addAliasAndReresolve(
     .where(eq(canonicalIngredient.id, input.canonicalId));
   if (!target) return { kind: "unknown_ingredient" };
 
-  if (aliasConflict(input.alias, await loadResolutionTerms(tx))) return { kind: "alias_exists" };
+  const standing = aliasStanding(input.alias, target.id, await loadResolutionTerms(tx));
+  if (standing === "conflict") return { kind: "alias_exists" };
 
-  // Stored normalised, so the raw-text unique index and the normalised index agree on
-  // what a duplicate is. DO NOTHING rather than a caught 23505: a concurrent insert of
-  // the same alias loses cleanly, without aborting the transaction it is part of.
-  const [inserted] = await tx
-    .insert(ingredientAlias)
-    .values({ alias: normaliseTerm(input.alias), canonicalId: target.id, source: "extraction" })
-    .onConflictDoNothing({ target: ingredientAlias.alias })
-    .returning({ id: ingredientAlias.id });
-  if (!inserted) return { kind: "alias_exists" };
+  if (standing === "new") {
+    // Stored normalised, so the raw-text unique index and the normalised index agree on
+    // what a duplicate is. DO NOTHING rather than a caught 23505: a concurrent insert of
+    // the same alias loses cleanly, without aborting the transaction it is part of.
+    const [inserted] = await tx
+      .insert(ingredientAlias)
+      .values({ alias: normaliseTerm(input.alias), canonicalId: target.id, source: "extraction" })
+      .onConflictDoNothing({ target: ingredientAlias.alias })
+      .returning({ id: ingredientAlias.id });
+    if (!inserted) return { kind: "alias_exists" };
+  }
+  const kind = standing === "new" ? "added" : "already_known";
 
   // Drafts only. A published recipe can't hold a null line, so this excludes nothing
   // today; it means the fix could never rewrite a row gate 2 is already returning.
@@ -60,12 +64,12 @@ export async function addAliasAndReresolve(
   // Matched in TypeScript with the index's own normalisation, not re-implemented in SQL,
   // so gate 1 has one definition of "the same term".
   const ids = linesMatchingAlias(unresolved, input.alias);
-  if (ids.length === 0) return { kind: "added", reresolved: 0 };
+  if (ids.length === 0) return { kind, reresolved: 0 };
 
   const updated = await tx
     .update(recipeIngredient)
     .set({ canonicalId: target.id })
     .where(and(inArray(recipeIngredient.id, ids), isNull(recipeIngredient.canonicalId)))
     .returning({ id: recipeIngredient.id });
-  return { kind: "added", reresolved: updated.length };
+  return { kind, reresolved: updated.length };
 }
