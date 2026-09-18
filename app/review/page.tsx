@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 
 import Confidence from "../_components/confidence";
+import PublishButton from "../_components/publish-button";
 import { db } from "@/lib/db/client";
 import { listDrafts, type QueuedDraft, type QueueLine } from "@/lib/db/drafts";
 
@@ -34,7 +35,7 @@ export default async function ReviewPage() {
 }
 
 function Draft({ draft }: { draft: QueuedDraft }) {
-  const blocking = draft.lines.filter((line) => line.canonicalId === null).length;
+  const unresolved = draft.lines.filter((line) => line.canonicalId === null).map((line) => line.rawText);
   const confidence = draft.fieldConfidence;
 
   return (
@@ -47,13 +48,10 @@ function Draft({ draft }: { draft: QueuedDraft }) {
           <span>{draft.source === "seed" ? "from the seed" : "from Intake"}</span>
           {confidence && <Confidence score={confidence.title} of="Title" />}
         </p>
-        {/* A statement, not a control: publishing is #81. */}
-        <p className={blocking > 0 ? "text-sm font-medium" : "text-sm opacity-70"}>
-          {blocking === 0
-            ? "Nothing unresolved."
-            : `Blocked: ${blocking} unresolved ${blocking === 1 ? "line" : "lines"}, so this can't publish.`}
-        </p>
       </div>
+
+      {/* The reason shown here is a preview. The route runs the same check again. */}
+      <PublishButton recipeId={draft.id} unresolved={unresolved} />
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left text-sm">

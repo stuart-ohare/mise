@@ -20,10 +20,11 @@ does not ask a model to be careful at the moment carefulness is hardest to verif
 > run the full path — constraints out of free text, gate 2's filter, ranked prose
 > behind gate 3. `POST /api/intake` plus the Intake screen turn a pasted recipe into a
 > draft in the queue, each ingredient line resolved or explicitly not. The Review screen
-> lists that queue read-only: every draft, each line's raw text beside what it
-> resolved to, and the unresolved lines that hold it back. Publishing and the alias
-> fix aren't built yet, and nor is Intake's photo path. Progress is tracked in
-> [Issues](../../issues).
+> lists that queue: every draft, each line's raw text beside what it resolved to, and a
+> publish button that stays disabled, with the blocking lines named, while any line is
+> unresolved. `POST /api/review/:id/publish` enforces the same rule in SQL, so calling
+> it directly doesn't get around it. The alias fix isn't built yet, and nor is Intake's
+> photo path. Progress is tracked in [Issues](../../issues).
 
 ## Two surfaces
 
