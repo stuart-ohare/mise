@@ -142,6 +142,7 @@ the same request.
 |---|---|---|
 | `200` | `{ ok: true }` | Published. An Intake draft's `extraction_job` is now `promoted` |
 | `409` | `{ error: "unresolved_ingredients", lines: [{ id, rawText }] }` | At least one line is at `canonical_id = null`. The recipe stays a draft |
+| `409` | `{ error: "no_ingredients" }` | The draft has no ingredient lines at all. The recipe stays a draft |
 | `409` | `{ error: "already_published" }` | The recipe isn't a draft |
 | `404` | `{ error: "not_found" }` | No recipe has that id, including an id that isn't a uuid |
 
@@ -151,9 +152,13 @@ the same request.
   ingredient is exactly where an allergen hides, and a published recipe is a row gate 2
   can return. `unresolved_ingredients` names every blocking line by id and `raw_text`,
   so the refusal always carries its reason.
+- **A draft with no lines is refused too.** "No line is unresolved" is vacuously true
+  of a recipe with none, and published, such a recipe would pass every exclusion,
+  because none of its lines matches anything. It's the extreme case of unknown
+  contents, and `deriveRecipeStatus` already keeps it in draft. The SQL agrees with it.
 - **The check and the write are one statement.** One conditional `UPDATE` sets the
-  status only where the recipe is still a draft and no line of it is unresolved. The
-  reads after it only explain a refusal. They never decide one.
+  status only where the recipe is still a draft, has at least one line, and no line of
+  it is unresolved. The reads after it only explain a refusal. They never decide one.
 - **The recipe and its job move together.** The route opens the transaction, as Intake
   does, so a published recipe never points at a job still `awaiting_review`.
 - **Only a person publishes.** No confidence score publishes anything, and no automated

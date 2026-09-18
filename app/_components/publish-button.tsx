@@ -7,7 +7,8 @@ import { publishResponseSchema } from "../api/review/[id]/publish/schema";
 
 /**
  * The review screen's publish control. The rule is not here: `POST
- * /api/review/:id/publish` refuses a draft with an unresolved line however it is called.
+ * /api/review/:id/publish` refuses a draft with no lines, or with an unresolved one,
+ * however it is called.
  * This button only shows that refusal before the click, and it stays visible when
  * disabled, so a reviewer who can't publish can read why without opening a console.
  */
@@ -16,19 +17,27 @@ type Props = {
   recipeId: string;
   /** Raw text of each line at `canonical_id = null`, as the queue read them. */
   unresolved: string[];
+  hasLines: boolean;
 };
 
-export default function PublishButton({ recipeId, unresolved }: Props) {
+type Blocker = { kind: "unresolved"; lines: string[] } | { kind: "no_ingredients" };
+
+export default function PublishButton({ recipeId, unresolved, hasLines }: Props) {
   const router = useRouter();
   const reasonId = useId();
   const [pending, setPending] = useState(false);
   // Set from the API's answer. It wins over the props, because the rows may have changed
   // since this page rendered.
-  const [refused, setRefused] = useState<string[] | null>(null);
+  const [refused, setRefused] = useState<Blocker | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
 
-  const blocking = refused ?? unresolved;
-  const blocked = blocking.length > 0;
+  const fromProps: Blocker | null = !hasLines
+    ? { kind: "no_ingredients" }
+    : unresolved.length > 0
+      ? { kind: "unresolved", lines: unresolved }
+      : null;
+  const blocker = refused ?? fromProps;
+  const blocked = blocker !== null;
 
   async function publish(): Promise<void> {
     setPending(true);
@@ -44,7 +53,9 @@ export default function PublishButton({ recipeId, unresolved }: Props) {
       if ("ok" in body) {
         router.refresh();
       } else if (body.error === "unresolved_ingredients") {
-        setRefused(body.lines.map((line) => line.rawText));
+        setRefused({ kind: "unresolved", lines: body.lines.map((line) => line.rawText) });
+      } else if (body.error === "no_ingredients") {
+        setRefused({ kind: "no_ingredients" });
       } else if (body.error === "already_published") {
         // Someone got there first. The queue is out of date, not wrong about safety.
         router.refresh();
@@ -69,10 +80,17 @@ export default function PublishButton({ recipeId, unresolved }: Props) {
       >
         {pending ? "Publishing…" : "Publish"}
       </button>
-      {blocked && (
+      {blocker?.kind === "no_ingredients" && (
         <p id={reasonId} className="text-sm font-medium">
-          Can&rsquo;t publish: {blocking.length} unresolved {blocking.length === 1 ? "line" : "lines"} —{" "}
-          {blocking.map((raw, index) => (
+          Can&rsquo;t publish: this draft has no ingredient lines. Mise won&rsquo;t call a
+          recipe free of anything until it knows what&rsquo;s in it.
+        </p>
+      )}
+      {blocker?.kind === "unresolved" && (
+        <p id={reasonId} className="text-sm font-medium">
+          Can&rsquo;t publish: {blocker.lines.length} unresolved{" "}
+          {blocker.lines.length === 1 ? "line" : "lines"} —{" "}
+          {blocker.lines.map((raw, index) => (
             <span key={`${raw}:${index}`}>
               {index > 0 && ", "}
               <q className="font-mono text-xs">{raw.trim()}</q>

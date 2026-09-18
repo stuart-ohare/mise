@@ -22,7 +22,7 @@ does not ask a model to be careful at the moment carefulness is hardest to verif
 > draft in the queue, each ingredient line resolved or explicitly not. The Review screen
 > lists that queue: every draft, each line's raw text beside what it resolved to, and a
 > publish button that stays disabled, with the blocking lines named, while any line is
-> unresolved. `POST /api/review/:id/publish` enforces the same rule in SQL, so calling
+> unresolved, or while the draft has no lines at all. `POST /api/review/:id/publish` enforces the same rule in SQL, so calling
 > it directly doesn't get around it. The alias fix isn't built yet, and nor is Intake's
 > photo path. Progress is tracked in [Issues](../../issues).
 
