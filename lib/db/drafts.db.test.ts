@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, describe, expect, it } from "vitest";
 
+import { DELIBERATELY_UNRESOLVED } from "@/lib/ai/prompts/seed-catalogue";
 import type { IntakeDraft } from "@/lib/domain/intake-draft";
 import { readSeedFiles, seedDatabase } from "@/scripts/seed/seed";
 
@@ -286,6 +287,11 @@ describe("listDrafts", () => {
       // database may hold these as published, and this is a claim about what the seed writes.
       const titles = Object.keys(HELD_BY);
       await tx.delete(schema.recipe).where(inArray(schema.recipe.title, titles));
+      // Likewise an alias a reviewer added for one of these terms (#82), which the seed
+      // resolves against and which would publish the very draft this test is about.
+      await tx
+        .delete(schema.ingredientAlias)
+        .where(inArray(schema.ingredientAlias.alias, [...DELIBERATELY_UNRESOLVED]));
       const files = readSeedFiles();
       if (!files.ok) throw new Error(files.errors.join("\n"));
       const seeded = await seedDatabase(tx, files.files);

@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
 
-import { count, eq, TransactionRollbackError } from "drizzle-orm";
+import { count, eq, inArray, TransactionRollbackError } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { DELIBERATELY_UNRESOLVED } from "@/lib/ai/prompts/seed-catalogue";
 import * as schema from "@/lib/db/schema";
 
 import { readSeedFiles, seedDatabase, type SeedFiles, type Tx } from "./seed";
@@ -120,6 +121,10 @@ describe("seedDatabase", () => {
       // hold this recipe, and this is a claim about what the seed writes.
       const title = "Spiced lentil dal with ghee";
       await tx.delete(schema.recipe).where(eq(schema.recipe.title, title));
+      // And any alias review added for ghee, which the seed would resolve it through.
+      await tx
+        .delete(schema.ingredientAlias)
+        .where(inArray(schema.ingredientAlias.alias, [...DELIBERATELY_UNRESOLVED]));
       expect((await seedDatabase(tx, files)).ok).toBe(true);
 
       const [dal] = await tx.select({ id: schema.recipe.id }).from(schema.recipe).where(eq(schema.recipe.title, title));
