@@ -5,7 +5,11 @@ argument. Each step says what to run, what should happen, and what did happen on
 recorded run. A step whose **Observed** no longer matches its **Expected** is a failure,
 not stale prose — open an issue for it.
 
-**Recorded run:** 2026-09-18, commit `d915f39`, one pass from `docker compose down -v`.
+**Recorded run:** 2026-09-18, commit `d915f39`. It ran from a git worktree, not a
+directory called `mise`, so the reset was `docker compose -p mise down -v` and
+`pnpm db:push`'s confirmation was answered through a pseudo-terminal. Step 1 explains
+both. From the seed onwards, every step ran once, in order, against that fresh database.
+The seed's `0 already present` line is the evidence it was fresh.
 Model output is non-deterministic, so *Observed* records the shape of each answer — its
 `kind`, counts, which recipes — rather than the wording.
 
