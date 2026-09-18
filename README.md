@@ -28,7 +28,8 @@
 >   `/spec → /plan → human /approve → /build → /verify → /ship → human merge`. The spec
 >   is written before any code, a test fails before the change that passes it, and an
 >   independent `invariant-reviewer` agent checks each branch. Git hooks and Claude Code
->   hooks keep the human in charge of approvals, thresholds and dependencies. See
+>   hooks keep the human in charge of approvals, thresholds and dependencies. I added it
+>   to move faster, and the guardrails are what make that speed trustworthy. See
 >   [Working on this repo](#working-on-this-repo) and
 >   [`docs/workflow.md`](docs/workflow.md).
 
@@ -251,7 +252,13 @@ is why exclusion accuracy is held at 100% in the evals.
 
 AI is also how this repository was built. Claude Code agents did most of the typing,
 inside a delivery process where each step is a Claude Code skill run against a GitHub
-issue, and a human holds the approvals:
+issue, and a human holds the approvals.
+
+I added this workflow deliberately, to move faster. With a tight time box, agents could
+do the typing in parallel worktrees while I spent my time on the decisions: approving
+specs and plans, ruling on review concerns, merging. The steps around them are what kept
+that speed from costing correctness in an app where a wrong answer is an allergen: the
+spec first, a failing test first, and an independent reviewer.
 
 | Stage | Agent does | Human does |
 |---|---|---|
